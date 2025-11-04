@@ -50,12 +50,11 @@ repos:
       - id: mypy
         files: ^backend/app/
         exclude: ^backend/alembic/|^backend/tests/
-        additional_dependencies: [
-          types-redis,
-          types-requests,
-          sqlalchemy[mypy],
-          pydantic
-        ]
+        additional_dependencies:
+          - types-redis
+          - types-requests
+          - sqlalchemy
+          - pydantic
 
   # JavaScript/TypeScript - Prettier
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -76,8 +75,8 @@ repos:
         types: [file]
         additional_dependencies:
           - eslint@8.56.0
-          - '@typescript-eslint/eslint-plugin@6.19.0'
-          - '@typescript-eslint/parser@6.19.0'
+          - "@typescript-eslint/eslint-plugin@6.19.0"
+          - "@typescript-eslint/parser@6.19.0"
           - eslint-plugin-react@7.33.2
           - eslint-plugin-react-hooks@4.6.0
           - eslint-plugin-jsx-a11y@6.8.0
