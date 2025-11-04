@@ -1,0 +1,69 @@
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: 
+      - 'build'
+      - '--build-arg'
+      - 'VITE_API_URL=${_API_URL}'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/kronos-eam-frontend:$BUILD_ID'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/kronos-eam-frontend:latest'
+      - '.'
+    timeout: '1200s'
+
+  # Push the Docker image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'gcr.io/$PROJECT_ID/kronos-eam-frontend'
+    timeout: '600s'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'kronos-eam-frontend'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/kronos-eam-frontend:$BUILD_ID'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '80'
+      - '--memory'
+      - '512Mi'
+      - '--cpu'
+      - '1'
+      - '--max-instances'
+      - '10'
+      - '--min-instances'
+      - '0'
+      - '--timeout'
+      - '60'
+      - '--concurrency'
+      - '80'
+    timeout: '600s'
+
+# Store images in Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/kronos-eam-frontend:$BUILD_ID'
+  - 'gcr.io/$PROJECT_ID/kronos-eam-frontend:latest'
+
+# Build timeout
+timeout: '1800s'
+
+options:
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+# Substitutions (to be provided at build time)
+substitutions:
+  _REGION: 'europe-west1'
+  _API_URL: 'https://kronos-eam-api-xxxxx.a.run.app/api/v1'
+

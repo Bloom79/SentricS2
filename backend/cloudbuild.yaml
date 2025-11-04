@@ -1,0 +1,125 @@
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: 
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/kronos-eam-backend:$BUILD_ID'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/kronos-eam-backend:latest'
+      - '.'
+    timeout: '1200s'
+
+  # Push the Docker image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'gcr.io/$PROJECT_ID/kronos-eam-backend'
+    timeout: '600s'
+
+  # Initialize database from dumps (if available) or run migrations
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -e
+        BUCKET="${PROJECT_ID}-db-init"
+        
+        # Enable PostGIS extension
+        echo "Enabling PostGIS extension..."
+        gcloud sql databases execute-sql ${_CLOUD_SQL_INSTANCE} \
+          --database=kronos_eam \
+          --sql="CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS postgis_topology;" \
+          --quiet || echo "PostGIS may already be enabled"
+        
+        # Check if dump files exist in GCS
+        if gsutil ls gs://$$BUCKET/schema.sql &>/dev/null; then
+          echo "Found schema dump in GCS, importing..."
+          gcloud sql import sql ${_CLOUD_SQL_INSTANCE} \
+            gs://$$BUCKET/schema.sql \
+            --database=kronos_eam \
+            --quiet || echo "Schema import failed or already exists"
+        else
+          echo "No schema dump found. Database structure will be created by migrations."
+        fi
+        
+        if gsutil ls gs://$$BUCKET/seed_data.sql &>/dev/null; then
+          echo "Found seed data dump in GCS, importing..."
+          gcloud sql import sql ${_CLOUD_SQL_INSTANCE} \
+            gs://$$BUCKET/seed_data.sql \
+            --database=kronos_eam \
+            --quiet || echo "Seed data import failed or already exists"
+        else
+          echo "No seed data dump found. Seed data can be added after deployment."
+        fi
+        
+        # Run migrations to ensure schema is up to date
+        echo "Running Alembic migrations..."
+        # Get database password from Secret Manager
+        DB_PASSWORD=$(gcloud secrets versions access latest --secret="jwt-secret" | head -c 20 || echo "defaultpass")
+        DATABASE_URL="postgresql://kronos:$$DB_PASSWORD@/kronos_eam?host=/cloudsql/${_CLOUD_SQL_INSTANCE}"
+        
+        docker run --rm \
+          -e DATABASE_URL="$$DATABASE_URL" \
+          gcr.io/$PROJECT_ID/kronos-eam-backend:$BUILD_ID \
+          alembic upgrade head || echo "Migrations may have failed or already applied"
+    timeout: '600s'
+    waitFor: ['-']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'kronos-eam-api'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/kronos-eam-backend:$BUILD_ID'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8000'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--max-instances'
+      - '10'
+      - '--min-instances'
+      - '1'
+      - '--timeout'
+      - '300'
+      - '--concurrency'
+      - '80'
+      - '--set-env-vars'
+      - 'ENVIRONMENT=production,LOG_LEVEL=INFO,BACKEND_CORS_ORIGINS=["https://kronos-eam-frontend-dnid5ntfaq-ew.a.run.app"]'
+      - '--set-secrets'
+      - 'DATABASE_URL=database-url:latest,JWT_SECRET_KEY=jwt-secret:latest,REDIS_URL=redis-url:latest'
+      - '--add-cloudsql-instances'
+      - '${_CLOUD_SQL_INSTANCE}'
+      - '--service-account'
+      - 'kronos-backend@${PROJECT_ID}.iam.gserviceaccount.com'
+    timeout: '600s'
+
+# Store images in Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/kronos-eam-backend:$BUILD_ID'
+  - 'gcr.io/$PROJECT_ID/kronos-eam-backend:latest'
+
+# Build timeout
+timeout: '1800s'
+
+options:
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+# Substitutions (to be provided at build time)
+substitutions:
+  _REGION: 'europe-west1'
+  _CLOUD_SQL_INSTANCE: '${PROJECT_ID}:${_REGION}:kronos-db'
+
