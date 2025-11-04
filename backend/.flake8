@@ -1,0 +1,40 @@
+[flake8]
+max-line-length = 100
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    env,
+    .env,
+    alembic/versions,
+    build,
+    dist,
+    *.egg-info
+
+# Ignore specific rules
+ignore =
+    E203,  # Whitespace before ':'
+    E501,  # Line too long (handled by Black)
+    W503,  # Line break before binary operator
+    E402,  # Module level import not at top of file
+
+# Per-file ignores
+per-file-ignores =
+    __init__.py:F401,F403
+    alembic/env.py:E402
+
+# Complexity
+max-complexity = 10
+
+# Enable specific checks
+select = C,E,F,W,B,B950
+
+# Show source code for each error
+show-source = True
+
+# Count errors
+count = True
+
+# Statistics
+statistics = True

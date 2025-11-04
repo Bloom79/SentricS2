@@ -60,7 +60,9 @@ class Settings(BaseSettings):
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = []
-    
+    CORS_ORIGINS: str = ""  # Comma-separated list for easy GCP Secret Manager
+    ALLOWED_HOSTS: str = "*"  # Comma-separated list
+
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: str | List[str] | None) -> List[str]:
@@ -82,6 +84,16 @@ class Settings(BaseSettings):
             # Single value
             return [v.strip()] if v.strip() else []
         return []
+
+    # GCP Specific
+    GCP_PROJECT_ID: Optional[str] = None
+    GCP_REGION: str = "us-central1"
+    GCP_SERVICE_NAME: Optional[str] = None
+    FRONTEND_URL: Optional[str] = None
+
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_PER_MINUTE: int = 200
     
     # API Configuration
     API_V1_PREFIX: str = "/api/v1"

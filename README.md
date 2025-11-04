@@ -1,13 +1,14 @@
-# Kronos EAM - Consolidated Enterprise Platform
+# SentricS2 - Enterprise Asset Management for Renewable Energy
 
 <div align="center">
 
-**Complete Enterprise Asset Management for Italian Renewable Energy**
+**Complete Enterprise Asset Management Platform for Italian Renewable Energy Sector**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.0-green.svg)](https://github.com/Bloom79/kronos-eam/releases)
+[![Version](https://img.shields.io/badge/version-2.0.0-green.svg)](https://github.com/Bloom79/SentricS2/releases)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![Deployment](https://img.shields.io/badge/deployment-GCP-4285F4.svg)](https://cloud.google.com/)
 
 </div>
 
@@ -15,48 +16,48 @@
 
 ## 🌟 Overview
 
-**Kronos EAM** is a comprehensive, enterprise-grade SaaS platform for managing renewable energy assets in Italy. This consolidated version combines:
+**SentricS2** (formerly Kronos EAM) is a comprehensive, production-grade SaaS platform designed specifically for managing renewable energy assets in Italy. Built with modern technologies and cloud-native architecture, it provides complete lifecycle management from planning to compliance.
 
-- ✅ **Complete Compliance Management** (from Kronos EAM)
-- ✅ **CER (Renewable Energy Communities)** support (from Sentrics)
-- ✅ **Advanced Asset Management** (from Sentrics)
-- ✅ **Workflow Automation** (from Kronos EAM)
-- ✅ **Government Portal Integration** (from Kronos EAM)
-- ✅ **Geographic Intelligence** (PostGIS from Sentrics)
+### What We Solve
 
-### Key Features
+- ✅ **Regulatory Compliance** - Navigate complex Italian energy regulations (GSE, Terna, DSO, ADM)
+- ✅ **Asset Management** - Track and monitor renewable energy equipment with real-time insights
+- ✅ **Community Energy (CER)** - Manage Renewable Energy Communities with PNRR funding support
+- ✅ **Workflow Automation** - Streamline multi-phase regulatory processes
+- ✅ **Financial Tracking** - Complete billing and cost management
+- ✅ **Document Management** - Centralized repository with version control
 
-#### 🏭 Plant & Asset Management
-- **Complete Plant Registry**: Multi-tenant plant database with full lifecycle management
-- **Advanced Asset Tracking**: Detailed equipment management (panels, inverters, batteries)
-- **Asset Monitoring**: Real-time performance tracking
-- **Maintenance Management**: Preventive and corrective maintenance scheduling
+---
 
-#### 🔄 Workflow & Compliance
-- **Automated Workflows**: Pre-built templates for all regulatory processes
-- **Annual Compliance Automation**: Never miss critical deadlines
-- **Smart Deadline Calculator**: Intelligent deadline prediction
-- **Penalty Prevention**: Cost analysis and risk mitigation
-- **Document Management**: Centralized repository with versioning
+## 🚀 Key Features
 
-#### 👥 CER (Renewable Energy Communities)
-- **CER Setup & Management**: Complete lifecycle management
-- **Member Management**: POD tracking, load profiles, billing
-- **PNRR Funding Support**: 40% grant application workflows
-- **Energy Sharing**: Production allocation and billing
-- **Geographic Boundaries**: PostGIS-powered boundary management
+### 🏭 Plant & Asset Management
+- Multi-tenant plant registry with complete lifecycle tracking
+- Visual plant designer with drag-and-drop interface (React Flow)
+- Detailed asset tracking (panels, inverters, batteries, transformers)
+- Real-time performance monitoring and alerts
+- Predictive maintenance scheduling
 
-#### 🔗 Government Portal Integration
-- **GSE Integration**: RID activation, Fuel Mix, Anti-Mafia declarations
-- **Terna GAUDÌ**: Plant registration and technical data
-- **DSO Integration**: Connection management, TICA workflows
-- **Agenzia Dogane**: UTF license management, EDI file generation
+### 👥 CER (Community Energy Resources)
+- Complete CER lifecycle management
+- Member onboarding and POD tracking
+- PNRR funding application (40% grant support)
+- Energy sharing optimization and billing
+- Geographic boundary management (PostGIS)
 
-#### 📊 Analytics & Reporting
-- **Compliance Scoring**: Real-time compliance percentage
-- **Portfolio Analytics**: Multi-plant dashboard
-- **Cost Tracking**: Fees, penalties, and administrative costs
-- **Performance Monitoring**: Energy production/consumption tracking
+### 🔄 Workflow & Compliance
+- Pre-built templates for all regulatory processes
+- 8-phase activation workflow automation
+- Annual compliance deadline tracking
+- Smart penalty prevention system
+- Multi-portal integration (GSE, Terna, DSO, ADM)
+
+### 📊 Analytics & Reporting
+- Real-time compliance scoring
+- Portfolio-wide analytics dashboard
+- Custom report generation
+- Cost tracking and optimization
+- Energy production/consumption analysis
 
 ---
 
@@ -64,254 +65,199 @@
 
 ### Technology Stack
 
-**Backend**:
-- **Framework**: FastAPI (Python 3.11+)
-- **Database**: PostgreSQL 15 with PostGIS extension
-- **ORM**: SQLAlchemy 2.0
-- **Migrations**: Alembic
-- **Authentication**: JWT with OAuth2
-- **Caching**: Redis
-- **Task Queue**: Celery
+**Backend:**
+- **Framework:** FastAPI (Python 3.11+)
+- **Database:** PostgreSQL 15 with PostGIS extension
+- **ORM:** SQLAlchemy 2.0
+- **Authentication:** JWT with OAuth2
+- **Caching:** Redis
+- **Task Queue:** Celery
+- **AI/ML:** LangChain + Google Gemini
 
-**Frontend**:
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **State Management**: React Query + Zustand
-- **UI Library**: Tailwind CSS + shadcn/ui
-- **Maps**: Leaflet + React Leaflet
-- **Forms**: React Hook Form + Zod
+**Frontend:**
+- **Framework:** React 18 with TypeScript 5
+- **Build Tool:** Vite
+- **State Management:** React Query + Zustand
+- **UI Components:** Tailwind CSS + shadcn/ui
+- **Maps:** Leaflet + React Leaflet
+- **Visual Designer:** React Flow
+- **Forms:** React Hook Form + Zod
 
-**Infrastructure**:
-- **Cloud**: Google Cloud Platform
-- **Containers**: Docker + Kubernetes
-- **CI/CD**: GitHub Actions
-- **Monitoring**: Prometheus + Grafana
+**Infrastructure (GCP):**
+- **Compute:** Cloud Run / GKE
+- **Database:** Cloud SQL (PostgreSQL + PostGIS)
+- **Storage:** Cloud Storage
+- **Caching:** Memorystore (Redis)
+- **Monitoring:** Cloud Monitoring + Cloud Logging
+- **CI/CD:** Cloud Build + GitHub Actions
 
-### Multi-Tenant Architecture
+### Architecture Principles
 
-- **Database**: Row-level security with `tenant_id`
-- **API**: Automatic tenant filtering
-- **Frontend**: Tenant-aware routing
-- **Isolation**: Complete data segregation
+- **Multi-tenant:** Complete data isolation per tenant
+- **API-First:** RESTful APIs with OpenAPI documentation
+- **Event-Driven:** Async processing with Celery
+- **Cloud-Native:** Designed for GCP deployment
+- **Security-First:** JWT auth, RBAC, rate limiting
 
 ---
 
-## 🚀 Quick Start
+## 📦 Quick Start
 
 ### Prerequisites
 
-- Python 3.11+
-- Node.js 18+
-- PostgreSQL 15+ with PostGIS extension
-- **Container Runtime**: Docker or Podman (see [Container Setup](#container-setup))
-- Redis (optional, for caching)
+- **Python 3.11+**
+- **Node.js 18+**
+- **PostgreSQL 15+** with PostGIS extension
+- **Docker** (for local development)
+- **Redis** (optional, for caching)
 
-### Container Setup
-
-The project supports both **Docker** and **Podman**. Choose your preferred runtime:
-
-#### Option 1: Podman (Recommended for rootless containers)
-```bash
-# Install Podman and Podman Compose
-# Ubuntu/Debian:
-sudo apt-get install podman podman-compose
-
-# Fedora/RHEL:
-sudo dnf install podman podman-compose
-
-# macOS:
-brew install podman podman-compose
-```
-
-#### Option 2: Docker
-```bash
-# Install Docker and Docker Compose
-# See: https://docs.docker.com/get-docker/
-```
-
-### Installation
+### Local Development Setup
 
 ```bash
 # Clone repository
-git clone https://github.com/Bloom79/kronos-eam.git
-cd kronos-eam
+git clone https://github.com/Bloom79/SentricS2.git
+cd SentricS2
 
-# Start PostgreSQL with PostGIS
+# Backend setup
 cd backend
-
-# Option 1: Auto-detect (uses Podman if available, otherwise Docker)
-./compose.sh up -d
-
-# Option 2: Explicitly use Podman
-./compose-podman.sh up -d
-
-# Option 3: Explicitly use Docker
-./compose-docker.sh up -d
-
-# Option 4: Traditional Docker Compose (still works)
-docker-compose up -d
-
-# Setup backend
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+
+# Start PostgreSQL with PostGIS
+./compose.sh up -d
+
+# Run database migrations
 alembic upgrade head
 
-# Setup frontend
-cd ../frontend
-npm install
+# Create test user
+python scripts/create_test_user.py
 
-# Start development servers
-# Terminal 1 (Backend)
-cd backend
+# Start backend server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-# Terminal 2 (Frontend)
+# Frontend setup (new terminal)
 cd frontend
+npm install
 npm run dev
 ```
 
-**Access**:
+**Access the application:**
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+- API Documentation: http://localhost:8000/docs
 
-**Default Credentials**:
+**Default Credentials:**
 - Email: `admin@kronos-eam.local`
 - Password: `Demo2024!`
+
+For detailed setup instructions, see [Local Development Guide](docs/setup/local-development.md).
 
 ---
 
 ## 📁 Project Structure
 
 ```
-kronos-eam/
-├── backend/                    # FastAPI backend
+SentricS2/
+├── backend/                        # FastAPI backend
 │   ├── app/
-│   │   ├── api/               # API endpoints
-│   │   │   └── v1/
-│   │   │       ├── endpoints/
-│   │   │       │   ├── plants.py
-│   │   │       │   ├── cer.py          # NEW: CER endpoints
-│   │   │       │   ├── assets.py       # NEW: Asset endpoints
-│   │   │       │   ├── workflows.py
-│   │   │       │   ├── documents.py
-│   │   │       │   └── compliance.py
-│   │   ├── models/            # SQLAlchemy models
-│   │   │   ├── plant.py
-│   │   │   ├── cer.py         # NEW: CER model
-│   │   │   ├── cer_member.py  # NEW: Member model
-│   │   │   ├── asset.py        # NEW: Asset model
-│   │   │   ├── workflow.py
-│   │   │   └── document.py
-│   │   ├── services/          # Business logic
-│   │   │   ├── plant_service.py
-│   │   │   ├── cer_service.py # NEW: CER service
-│   │   │   ├── asset_service.py # NEW: Asset service
-│   │   │   ├── workflow_service.py
-│   │   │   └── compliance_service.py
-│   │   ├── core/              # Core functionality
-│   │   │   ├── database.py
-│   │   │   ├── security.py
-│   │   │   ├── geography.py   # NEW: PostGIS helpers
-│   │   │   └── config.py
-│   │   └── schemas/           # Pydantic schemas
-│   ├── alembic/               # Database migrations
-│   ├── tests/                 # Test suite
+│   │   ├── api/v1/endpoints/      # API endpoints
+│   │   ├── models/                # SQLAlchemy models
+│   │   ├── schemas/               # Pydantic schemas
+│   │   ├── services/              # Business logic
+│   │   └── core/                  # Core utilities
+│   ├── alembic/                   # Database migrations
+│   ├── tests/                     # Test suite
 │   └── requirements.txt
 │
-├── frontend/                  # React frontend
+├── frontend/                       # React frontend
 │   ├── src/
-│   │   ├── pages/
-│   │   │   ├── Plants/        # Plant management
-│   │   │   ├── CER/          # NEW: CER management
-│   │   │   ├── Workflows/    # Workflow management
-│   │   │   ├── Compliance/   # Compliance tracking
-│   │   │   └── Dashboard/   # Analytics dashboard
-│   │   ├── components/
-│   │   │   ├── plants/       # Plant components
-│   │   │   ├── cer/         # NEW: CER components
-│   │   │   ├── assets/      # NEW: Asset components
-│   │   │   └── common/      # Shared components
-│   │   ├── services/         # API clients
-│   │   ├── hooks/           # React hooks
-│   │   └── utils/           # Utilities
+│   │   ├── pages/                 # Page components
+│   │   ├── components/            # Reusable components
+│   │   ├── services/              # API clients
+│   │   ├── hooks/                 # Custom React hooks
+│   │   └── utils/                 # Utility functions
 │   └── package.json
 │
-├── docs/                      # Documentation
-│   ├── architecture.md
-│   ├── api-reference.md
-│   └── deployment.md
+├── deploy/                         # Deployment configurations
+│   └── gcp/                       # GCP-specific configs
 │
-├── deploy/                    # Deployment scripts
-│   └── gcp/                  # GCP deployment configs
+├── docs/                          # Documentation
+│   ├── setup/                     # Setup guides
+│   ├── architecture/              # Architecture docs
+│   ├── features/                  # Feature documentation
+│   ├── deployment/                # Deployment guides
+│   └── api/                       # API documentation
 │
-└── scripts/                   # Utility scripts
-    └── setup.sh
+└── README.md                      # This file
 ```
-
----
-
-## 🔑 Key Modules
-
-### 1. Plant Management
-Complete lifecycle management for renewable energy plants:
-- Plant registry with technical specifications
-- Multi-dimensional organization (type, power, location, status)
-- Integration status tracking (DSO, Terna, GSE, ADM)
-- Compliance scoring
-- Deadline management
-
-### 2. CER (Renewable Energy Communities)
-Full support for Italian energy communities:
-- CER constitution and legal setup
-- Member management with POD tracking
-- PNRR funding application (40% grant)
-- Energy sharing and billing
-- Geographic boundary management
-- GSE compliance tracking
-
-### 3. Asset Management
-Detailed equipment tracking:
-- Asset type system (flexible attributes)
-- Asset instances (panels, inverters, batteries)
-- Hierarchical organization (parent-child relationships)
-- Monitoring integration
-- Maintenance tracking
-
-### 4. Workflow Automation
-Intelligent workflow management:
-- Pre-built templates (activation, compliance, fiscal)
-- Phase-based execution
-- Task assignment and tracking
-- Document generation
-- Portal integration
-
-### 5. Compliance Management
-Automated compliance tracking:
-- Annual recurring obligations
-- Smart deadline calculation
-- Penalty prevention
-- Compliance scoring
-- Document expiration tracking
-
-### 6. Government Portal Integration
-Smart integration with Italian authorities:
-- GSE portal (RID, Fuel Mix, Anti-Mafia)
-- Terna GAUDÌ (plant registration)
-- DSO portals (connection management)
-- Agenzia Dogane (UTF license, EDI files)
 
 ---
 
 ## 📚 Documentation
 
-- [Architecture Guide](docs/architecture.md)
-- [API Reference](docs/api-reference.md)
-- [Deployment Guide](docs/deployment.md)
-- [Development Guide](docs/development.md)
-- [CER Management Guide](docs/cer-management.md)
-- [Compliance Guide](docs/compliance.md)
+### Getting Started
+- [Quick Start Guide](docs/setup/quick-start.md)
+- [Local Development](docs/setup/local-development.md)
+- [Testing Guide](docs/setup/testing.md)
+- [Docker Setup](docs/setup/docker-testing.md)
+
+### Architecture & Design
+- [System Architecture](docs/architecture/system-architecture.md)
+- [Database Schema](docs/architecture/database-schema.md)
+- [Multi-Tenant Design](docs/architecture/multi-tenant-design.md)
+- [API Architecture](docs/architecture/api-design.md)
+
+### Features
+- [Plant Management](docs/features/plant-management.md)
+- [CER Management](docs/features/cer-management.md)
+- [Visual Plant Designer](docs/features/visual-plant-designer.md)
+- [Compliance System](docs/features/compliance-system.md)
+- [Workflow Automation](docs/features/workflow-automation.md)
+
+### Deployment
+- [GCP Deployment Guide](docs/deployment/gcp-deployment.md)
+- [Production Checklist](docs/deployment/production-checklist.md)
+- [Environment Configuration](docs/deployment/environment-config.md)
+
+### Compliance & Regulations
+- [Italian Compliance Overview](docs/ITALIAN_COMPLIANCE_DOCUMENTS.md)
+- [Compliance Module Roadmap](docs/COMPLIANCE_MODULE_ROADMAP.md)
+
+---
+
+## 🚢 Deployment
+
+### GCP Deployment
+
+SentricS2 is designed for deployment on Google Cloud Platform with the following services:
+
+- **Cloud Run** or **GKE** for application hosting
+- **Cloud SQL** (PostgreSQL + PostGIS) for database
+- **Cloud Storage** for document storage
+- **Memorystore** (Redis) for caching
+- **Cloud Build** for CI/CD
+
+**Quick Deploy:**
+```bash
+cd deploy/gcp
+./deploy.sh production
+```
+
+See [GCP Deployment Guide](docs/deployment/gcp-deployment.md) for detailed instructions.
+
+---
+
+## 🔒 Security
+
+- **Authentication:** JWT tokens with refresh mechanism
+- **Authorization:** Role-Based Access Control (RBAC)
+- **Rate Limiting:** API endpoint protection
+- **Security Headers:** OWASP recommended headers
+- **Data Isolation:** Complete tenant separation
+- **Encryption:** TLS for data in transit, encryption at rest
+
+For security best practices, see [Security Guide](docs/deployment/security.md).
 
 ---
 
@@ -326,33 +272,53 @@ pytest --cov=app tests/
 cd frontend
 npm test
 
-# E2E tests
-npm run test:e2e
+# Run all tests
+npm run test:all
 ```
 
----
+Target: **70%+ code coverage**
 
-## 🚢 Deployment
-
-### Production Deployment
-
-```bash
-# GCP Deployment
-cd deploy/gcp
-./deploy.sh
-```
-
-See [deployment guide](docs/deployment.md) for detailed instructions.
+See [Testing Guide](docs/setup/testing.md) for comprehensive testing instructions.
 
 ---
 
 ## 🤝 Contributing
 
+We welcome contributions! Please see:
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Development Workflow](docs/setup/development-workflow.md)
+
+**Quick contribution steps:**
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
+
+---
+
+## 📊 Project Status
+
+**Current Version:** 2.0.0
+**Status:** Production Ready with Active Development
+**Last Updated:** January 2025
+
+### Recent Improvements
+- ✅ Comprehensive code analysis and optimization plan
+- ✅ Documentation cleanup and reorganization
+- ✅ Enhanced security measures
+- ✅ Performance optimizations
+- ✅ GCP deployment configuration
+
+### Roadmap
+- 🚧 Comprehensive test suite (Target: 70%+ coverage)
+- 🚧 CI/CD pipeline automation
+- 🚧 Advanced monitoring and observability
+- 📋 Mobile-responsive UI enhancements
+- 📋 Advanced reporting features
+
+See [CODE_ANALYSIS_AND_RECOMMENDATIONS.md](CODE_ANALYSIS_AND_RECOMMENDATIONS.md) for detailed improvement plan.
 
 ---
 
@@ -362,13 +328,26 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 👥 Team
+## 👥 Support & Contact
 
-Built with ❤️ for the Italian renewable energy sector
+- **Issues:** [GitHub Issues](https://github.com/Bloom79/SentricS2/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/Bloom79/SentricS2/discussions)
+- **Documentation:** [docs/](docs/)
+
+---
+
+## 🙏 Acknowledgments
+
+Built with ❤️ for the Italian renewable energy sector, supporting the transition to sustainable energy production and Community Energy Resources (CER).
+
+**Special thanks to:**
+- Italian regulatory bodies (GSE, Terna, ADM) for their documentation
+- Open source community for excellent tools and libraries
+- All contributors who help improve this platform
 
 ---
 
 <div align="center">
-  <p>© 2025 Kronos EAM. All rights reserved.</p>
+  <p><strong>SentricS2</strong> - Empowering the Renewable Energy Future</p>
+  <p>© 2025 SentricS2. All rights reserved.</p>
 </div>
-
