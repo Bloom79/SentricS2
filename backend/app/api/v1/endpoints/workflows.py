@@ -1,9 +1,10 @@
 """
 Workflow endpoints
 Consolidated from Kronos EAM
+REFACTORED: Reduced complexity by extracting helper functions
 """
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 import logging
@@ -18,6 +19,85 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _serialize_workflow(workflow: Workflow) -> Dict[str, Any]:
+    """
+    Serialize workflow model to dictionary
+
+    Returns:
+        Dictionary with workflow data
+    """
+    workflow_dict = {
+        "id": workflow.id,
+        "name": workflow.name,
+        "description": workflow.description,
+        "type": (
+            workflow.type.value
+            if hasattr(workflow.type, "value")
+            else str(workflow.type)
+        ),
+        "status": (
+            workflow.status.value
+            if hasattr(workflow.status, "value")
+            else str(workflow.status)
+        ),
+        "plant_id": workflow.plant_id,
+        "template_id": workflow.template_id,
+        "start_date": workflow.start_date.isoformat() if workflow.start_date else None,
+        "due_date": workflow.due_date.isoformat() if workflow.due_date else None,
+        "completed_date": (
+            workflow.completed_date.isoformat() if workflow.completed_date else None
+        ),
+        "progress_percentage": workflow.progress_percentage or 0,
+        "current_phase": workflow.current_phase,
+        "notes": workflow.notes,
+        "created_at": (
+            workflow.created_at.isoformat()
+            if hasattr(workflow, "created_at") and workflow.created_at
+            else None
+        ),
+        "updated_at": (
+            workflow.updated_at.isoformat()
+            if hasattr(workflow, "updated_at") and workflow.updated_at
+            else None
+        ),
+    }
+
+    # Add plant name if available
+    try:
+        if workflow.plant_id:
+            if hasattr(workflow, "plant") and workflow.plant:
+                workflow_dict["plant_name"] = workflow.plant.name
+            else:
+                workflow_dict["plant_name"] = f"Plant #{workflow.plant_id}"
+    except Exception as e:
+        logger.warning(f"Error loading plant for workflow {workflow.id}: {e}")
+        if workflow.plant_id:
+            workflow_dict["plant_name"] = f"Plant #{workflow.plant_id}"
+
+    return workflow_dict
+
+
+def _serialize_workflow_safe(workflow: Workflow) -> Dict[str, Any]:
+    """
+    Safely serialize workflow with fallback to basic info
+
+    Returns:
+        Dictionary with workflow data (full or minimal)
+    """
+    try:
+        return _serialize_workflow(workflow)
+    except Exception as e:
+        logger.warning(f"Error serializing workflow {workflow.id}: {e}", exc_info=True)
+        # Return basic info if full serialization fails
+        return {
+            "id": workflow.id,
+            "name": workflow.name,
+            "status": str(workflow.status),
+            "type": str(workflow.type),
+            "plant_id": workflow.plant_id,
+        }
+
+
 @router.get("/", response_model=List[dict])
 async def list_workflows(
     skip: int = Query(0, ge=0),
@@ -28,8 +108,13 @@ async def list_workflows(
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """List workflows"""
+    """
+    List workflows with optional filtering
+
+    REFACTORED: Complexity reduced from 11 to ~4 by extracting serialization helpers
+    """
     try:
+        # Get workflows from service
         workflows = workflow_service.list_workflows(
             db=db,
             tenant_id=current_user.tenant_id,
@@ -40,73 +125,9 @@ async def list_workflows(
             type=type,
         )
 
-        # Serialize workflows to dictionaries
-        result = []
-        for workflow in workflows:
-            try:
-                workflow_dict = {
-                    "id": workflow.id,
-                    "name": workflow.name,
-                    "description": workflow.description,
-                    "type": (
-                        workflow.type.value
-                        if hasattr(workflow.type, "value")
-                        else str(workflow.type)
-                    ),
-                    "status": (
-                        workflow.status.value
-                        if hasattr(workflow.status, "value")
-                        else str(workflow.status)
-                    ),
-                    "plant_id": workflow.plant_id,
-                    "template_id": workflow.template_id,
-                    "start_date": workflow.start_date.isoformat() if workflow.start_date else None,
-                    "due_date": workflow.due_date.isoformat() if workflow.due_date else None,
-                    "completed_date": (
-                        workflow.completed_date.isoformat() if workflow.completed_date else None
-                    ),
-                    "progress_percentage": workflow.progress_percentage or 0,
-                    "current_phase": workflow.current_phase,
-                    "notes": workflow.notes,
-                    "created_at": (
-                        workflow.created_at.isoformat()
-                        if hasattr(workflow, "created_at") and workflow.created_at
-                        else None
-                    ),
-                    "updated_at": (
-                        workflow.updated_at.isoformat()
-                        if hasattr(workflow, "updated_at") and workflow.updated_at
-                        else None
-                    ),
-                }
+        # Serialize workflows (with safe fallback)
+        return [_serialize_workflow_safe(workflow) for workflow in workflows]
 
-                # Add plant name if available
-                try:
-                    if workflow.plant_id:
-                        if hasattr(workflow, "plant") and workflow.plant:
-                            workflow_dict["plant_name"] = workflow.plant.name
-                        else:
-                            workflow_dict["plant_name"] = f"Plant #{workflow.plant_id}"
-                except Exception as e:
-                    logger.warning(f"Error loading plant for workflow {workflow.id}: {e}")
-                    if workflow.plant_id:
-                        workflow_dict["plant_name"] = f"Plant #{workflow.plant_id}"
-
-                result.append(workflow_dict)
-            except Exception as e:
-                logger.warning(f"Error serializing workflow {workflow.id}: {e}", exc_info=True)
-                # Include basic info even if enrichment fails
-                result.append(
-                    {
-                        "id": workflow.id,
-                        "name": workflow.name,
-                        "status": str(workflow.status),
-                        "type": str(workflow.type),
-                        "plant_id": workflow.plant_id,
-                    }
-                )
-
-        return result
     except Exception as e:
         logger.error(f"Error listing workflows: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to list workflows: {str(e)}")
