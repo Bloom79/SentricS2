@@ -1,9 +1,10 @@
 """
 Energy Service - Business logic for CER energy sharing calculations
 Implements the autoconsumo diffuso (diffuse self-consumption) model
+REFACTORED: Reduced complexity by extracting helper methods
 """
 
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from datetime import datetime, timedelta, timezone
@@ -15,37 +16,36 @@ from app.models.energy_transaction import (
     EnergySharingCalculation,
     TransactionType,
 )
+from app.services.base import BaseService
 
 logger = logging.getLogger(__name__)
 
 
-class EnergyService:
+class EnergyService(BaseService):
     """Service for energy sharing calculations and transactions"""
 
     @staticmethod
-    def calculate_shared_energy(
-        db: Session, cer_id: int, period_start: datetime, period_end: datetime, tenant_id: str
-    ) -> Dict[str, Any]:
+    def _verify_cer(db: Session, cer_id: int, tenant_id: str) -> CER:
         """
-        Calculate shared energy for a CER over a time period
+        Verify CER exists and user has access
 
-        Formula: Shared Energy = min(Total Production, Total Consumption)
-        Calculated hourly, then aggregated
-
-        Returns calculation results including member allocations
+        Raises:
+            ValueError if CER not found
         """
-        # Verify CER exists
-        cer = (
-            db.query(CER)
-            .filter(and_(CER.id == cer_id, CER.tenant_id == tenant_id, CER.deleted_at.is_(None)))
-            .first()
-        )
-
+        cer = BaseService._get_by_id(db, CER, cer_id, tenant_id)
         if not cer:
             raise ValueError("CER not found")
+        return cer
 
-        # Get all active members
-        members = (
+    @staticmethod
+    def _get_active_members(db: Session, cer_id: int, tenant_id: str) -> List[CERMember]:
+        """
+        Get all active members for a CER
+
+        Returns:
+            List of active CERMember instances
+        """
+        return (
             db.query(CERMember)
             .filter(
                 and_(
@@ -58,8 +58,17 @@ class EnergyService:
             .all()
         )
 
-        # Get hourly transactions for the period
-        transactions = (
+    @staticmethod
+    def _get_period_transactions(
+        db: Session, cer_id: int, tenant_id: str, period_start: datetime, period_end: datetime
+    ) -> List[EnergyTransaction]:
+        """
+        Get all transactions for a CER within a time period
+
+        Returns:
+            List of EnergyTransaction instances ordered by timestamp
+        """
+        return (
             db.query(EnergyTransaction)
             .filter(
                 and_(
@@ -74,7 +83,14 @@ class EnergyService:
             .all()
         )
 
-        # Aggregate hourly data
+    @staticmethod
+    def _aggregate_hourly_data(transactions: List[EnergyTransaction]) -> Dict[datetime, Dict]:
+        """
+        Aggregate transactions into hourly buckets
+
+        Returns:
+            Dictionary with hour_key -> {production, consumption, by_member}
+        """
         hourly_data = {}
         for tx in transactions:
             hour_key = tx.timestamp.replace(minute=0, second=0, microsecond=0)
@@ -86,7 +102,7 @@ class EnergyService:
             elif tx.transaction_type == TransactionType.CONSUMPTION:
                 hourly_data[hour_key]["consumption"] += tx.energy_kwh
 
-                # Track by member
+                # Track consumption by member
                 if tx.member_id:
                     if tx.member_id not in hourly_data[hour_key]["by_member"]:
                         hourly_data[hour_key]["by_member"][tx.member_id] = {
@@ -95,7 +111,18 @@ class EnergyService:
                         }
                     hourly_data[hour_key]["by_member"][tx.member_id]["consumption"] += tx.energy_kwh
 
-        # Calculate shared energy for each hour
+        return hourly_data
+
+    @staticmethod
+    def _calculate_hourly_sharing(
+        hourly_data: Dict[datetime, Dict], members: List[CERMember]
+    ) -> Tuple[float, float, float, Dict[int, Dict]]:
+        """
+        Calculate shared energy for each hour and allocate to members
+
+        Returns:
+            Tuple of (total_production, total_consumption, total_shared, member_totals)
+        """
         total_production = 0.0
         total_consumption = 0.0
         total_shared = 0.0
@@ -120,26 +147,59 @@ class EnergyService:
                         member_totals[member_id]["shared"] += member_share
                         member_totals[member_id]["consumption"] += member_data["consumption"]
 
-        # Calculate self-consumed energy (physical self-consumption at production sites)
-        # This is energy consumed directly at the production site
+        return total_production, total_consumption, total_shared, member_totals
+
+    @staticmethod
+    def _calculate_self_consumed(transactions: List[EnergyTransaction]) -> float:
+        """
+        Calculate self-consumed energy from transactions
+
+        Returns:
+            Total self-consumed energy in kWh
+        """
         self_consumed = 0.0
         for tx in transactions:
             if tx.transaction_type == TransactionType.SELF_CONSUMED:
                 self_consumed += tx.energy_kwh
+        return self_consumed
 
-        # Calculate grid export/import
+    @staticmethod
+    def _calculate_grid_flows(
+        total_production: float, total_shared: float, self_consumed: float, total_consumption: float
+    ) -> Tuple[float, float]:
+        """
+        Calculate grid export and import
+
+        Returns:
+            Tuple of (grid_export, grid_import)
+        """
         grid_export = max(0.0, total_production - total_shared - self_consumed)
         grid_import = max(0.0, total_consumption - total_shared - self_consumed)
+        return grid_export, grid_import
 
-        # Calculate incentivized energy (portion eligible for incentives)
-        # Base: 55% of shared energy, with adjustments for member types
+    @staticmethod
+    def _calculate_incentivized_energy(total_shared: float) -> float:
+        """
+        Calculate incentivized energy portion
+
+        Formula: 55% of shared energy, with 90% adjustment for member types
+        Returns:
+            Incentivized energy in kWh
+        """
         incentivized_energy = total_shared * 0.55  # Base rate
+        incentivized_energy = incentivized_energy * 0.90  # Adjustment factor for PMI-UC
+        return incentivized_energy
 
-        # Apply adjustments based on member types (PMI-UC gets 90% of 55%)
-        # This is simplified - actual calculation depends on member composition
-        incentivized_energy = incentivized_energy * 0.90  # Adjustment factor
+    @staticmethod
+    def _build_member_allocation(
+        member_totals: Dict[int, Dict], total_shared: float
+    ) -> Dict[int, Dict]:
+        """
+        Build member allocation dictionary with percentages
 
-        # Member allocation percentages
+        Returns:
+            Dictionary mapping member_id -> {energy_shared, percentage, energy_consumed}
+        """
         member_allocation = {}
         for member_id, totals in member_totals.items():
             if total_shared > 0:
@@ -152,6 +212,55 @@ class EnergyService:
                 "percentage": percentage,
                 "energy_consumed": totals["consumption"],
             }
+
+        return member_allocation
+
+    @staticmethod
+    def calculate_shared_energy(
+        db: Session, cer_id: int, period_start: datetime, period_end: datetime, tenant_id: str
+    ) -> Dict[str, Any]:
+        """
+        Calculate shared energy for a CER over a time period
+
+        Formula: Shared Energy = min(Total Production, Total Consumption)
+        Calculated hourly, then aggregated
+
+        REFACTORED: Complexity reduced from 16 to ~7 by extracting helpers
+
+        Returns calculation results including member allocations
+        """
+        # Verify CER exists
+        EnergyService._verify_cer(db, cer_id, tenant_id)
+
+        # Get all active members
+        members = EnergyService._get_active_members(db, cer_id, tenant_id)
+
+        # Get hourly transactions for the period
+        transactions = EnergyService._get_period_transactions(
+            db, cer_id, tenant_id, period_start, period_end
+        )
+
+        # Aggregate hourly data
+        hourly_data = EnergyService._aggregate_hourly_data(transactions)
+
+        # Calculate shared energy for each hour
+        total_production, total_consumption, total_shared, member_totals = (
+            EnergyService._calculate_hourly_sharing(hourly_data, members)
+        )
+
+        # Calculate self-consumed energy
+        self_consumed = EnergyService._calculate_self_consumed(transactions)
+
+        # Calculate grid export/import
+        grid_export, grid_import = EnergyService._calculate_grid_flows(
+            total_production, total_shared, self_consumed, total_consumption
+        )
+
+        # Calculate incentivized energy
+        incentivized_energy = EnergyService._calculate_incentivized_energy(total_shared)
+
+        # Build member allocation percentages
+        member_allocation = EnergyService._build_member_allocation(member_totals, total_shared)
 
         return {
             "cer_id": cer_id,
@@ -212,14 +321,7 @@ class EnergyService:
     ) -> EnergyTransaction:
         """Create an energy transaction"""
         # Verify CER exists
-        cer = (
-            db.query(CER)
-            .filter(and_(CER.id == cer_id, CER.tenant_id == tenant_id, CER.deleted_at.is_(None)))
-            .first()
-        )
-
-        if not cer:
-            raise ValueError("CER not found")
+        EnergyService._verify_cer(db, cer_id, tenant_id)
 
         transaction = EnergyTransaction(
             tenant_id=tenant_id,
