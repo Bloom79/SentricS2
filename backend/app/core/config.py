@@ -78,7 +78,7 @@ class Settings(BaseSettings):
                     import json
 
                     return json.loads(v)
-                except:
+                except (json.JSONDecodeError, ValueError):
                     pass
             # Handle comma-separated string
             if "," in v:

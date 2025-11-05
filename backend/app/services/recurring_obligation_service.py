@@ -275,7 +275,7 @@ class RecurringObligationService:
 
         query = db.query(RecurringObligation).filter(
             RecurringObligation.tenant_id == tenant_id,
-            RecurringObligation.is_active == True,
+            RecurringObligation.is_active.is_(True),
             RecurringObligation.next_due_date.between(now, end_date),
             RecurringObligation.deleted_at.is_(None),
         )

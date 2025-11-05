@@ -27,7 +27,7 @@ class PlantLayoutService:
                     and_(
                         PlantLayout.plant_id == plant_id,
                         PlantLayout.tenant_id == tenant_id,
-                        PlantLayout.is_active == True,
+                        PlantLayout.is_active.is_(True),
                     )
                 )
                 .first()

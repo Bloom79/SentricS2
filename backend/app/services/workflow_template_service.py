@@ -104,7 +104,7 @@ class WorkflowTemplateService:
         )
 
         if active_only:
-            query = query.filter(WorkflowTemplate.is_active == True)
+            query = query.filter(WorkflowTemplate.is_active.is_(True))
         if category:
             query = query.filter(WorkflowTemplate.category == category)
 

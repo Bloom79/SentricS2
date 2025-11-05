@@ -56,7 +56,7 @@ async def create_cer(
         return cer
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Failed to create CER")
 
 
@@ -868,8 +868,8 @@ async def get_cer_documents_overview(
 
         # Count by status
         by_status = {}
-        for status in DocumentStatusEnum:
-            by_status[status.value] = len([d for d in documents if d.status == status])
+        for doc_status in DocumentStatusEnum:
+            by_status[doc_status.value] = len([d for d in documents if d.status == doc_status])
 
         return {
             "cer_id": cer_id,
@@ -926,7 +926,7 @@ async def create_member_asset(
         return asset
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to create member asset")
         raise HTTPException(status_code=500, detail="Failed to create asset")
 
@@ -1061,7 +1061,7 @@ async def link_plant_to_cer(
         return {"message": "Plant linked successfully", "cer_id": cer_id, "plant_id": plant_id}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to link plant")
         raise HTTPException(status_code=500, detail="Failed to link plant")
 
@@ -1110,7 +1110,7 @@ async def unlink_plant_from_cer(
         return {"message": "Plant unlinked successfully", "cer_id": cer_id, "plant_id": plant_id}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to unlink plant")
         raise HTTPException(status_code=500, detail="Failed to unlink plant")
 

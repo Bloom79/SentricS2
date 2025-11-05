@@ -256,8 +256,6 @@ async def seed_test_data(db: Session = Depends(get_db)):
             plant_dict = {k: v for k, v in plant_data.items() if k != "site_id"}
 
             # Check if plant exists using raw SQL to avoid site_id column issue
-            from sqlalchemy import text
-
             existing_count = db.execute(
                 text("SELECT COUNT(*) FROM plants WHERE tenant_id = :tenant_id AND code = :code"),
                 {"tenant_id": "demo", "code": plant_dict["code"]},
@@ -265,8 +263,6 @@ async def seed_test_data(db: Session = Depends(get_db)):
 
             if existing_count == 0:
                 # Create plant using raw SQL insert to avoid site_id column issue
-                from sqlalchemy import text
-
                 result = db.execute(
                     text(
                         """
@@ -821,8 +817,6 @@ async def seed_test_data(db: Session = Depends(get_db)):
 
                 # Update CER total capacity from linked plants
                 for cer in created_cers:
-                    from sqlalchemy import text, func
-
                     total_capacity = (
                         db.execute(
                             text(

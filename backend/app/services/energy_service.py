@@ -59,17 +59,6 @@ class EnergyService:
             .all()
         )
 
-        # Get all linked plants
-        plants = (
-            db.query(Plant)
-            .filter(
-                and_(
-                    Plant.cer_id == cer_id, Plant.tenant_id == tenant_id, Plant.deleted_at.is_(None)
-                )
-            )
-            .all()
-        )
-
         # Get hourly transactions for the period
         transactions = (
             db.query(EnergyTransaction)

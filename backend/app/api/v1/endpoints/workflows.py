@@ -10,6 +10,7 @@ import logging
 
 from app.core.database import get_db
 from app.core.security import get_current_active_user, TokenData
+from app.models.workflow import Workflow
 from app.services.workflow_service import workflow_service
 from app.services.workflow_template_service import workflow_template_service
 

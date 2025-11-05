@@ -275,7 +275,7 @@ class SiteService:
         try:
             energy_flow = (
                 db.query(EnergyFlow)
-                .filter(and_(EnergyFlow.site_id == site_id, EnergyFlow.is_active == True))
+                .filter(and_(EnergyFlow.site_id == site_id, EnergyFlow.is_active.is_(True)))
                 .first()
             )
 
@@ -299,7 +299,7 @@ class SiteService:
             # Check if active flow exists
             existing_flow = (
                 db.query(EnergyFlow)
-                .filter(and_(EnergyFlow.site_id == site_id, EnergyFlow.is_active == True))
+                .filter(and_(EnergyFlow.site_id == site_id, EnergyFlow.is_active.is_(True)))
                 .first()
             )
 

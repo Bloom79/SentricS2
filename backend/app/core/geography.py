@@ -25,7 +25,6 @@ def create_point(longitude: float, latitude: float) -> str:
     Returns:
         WKT string for PostGIS POINT
     """
-    point = Point(longitude, latitude)
     return f"POINT({longitude} {latitude})"
 
 
@@ -90,18 +89,14 @@ def calculate_distance(point1: Tuple[float, float], point2: Tuple[float, float])
     Returns:
         Distance in meters
     """
-    from sqlalchemy import select
-
-    # Create PostGIS points
-    p1_wkt = create_point(point1[0], point1[1])
-    p2_wkt = create_point(point2[0], point2[1])
-
     # Use PostGIS ST_Distance
-    query = select(
-        [func.ST_Distance(func.ST_GeomFromText(p1_wkt, 4326), func.ST_GeomFromText(p2_wkt, 4326))]
-    )
-
     # Note: This would need a database session to execute
+    # Example implementation:
+    # from sqlalchemy import select
+    # p1_wkt = create_point(point1[0], point1[1])
+    # p2_wkt = create_point(point2[0], point2[1])
+    # query = select([func.ST_Distance(func.ST_GeomFromText(p1_wkt, 4326), func.ST_GeomFromText(p2_wkt, 4326))])
+    # result = db.execute(query).scalar()
     # In practice, use in a service method with db session
     return None  # Placeholder - implement with db session
 
