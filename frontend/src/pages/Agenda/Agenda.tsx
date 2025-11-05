@@ -88,15 +88,15 @@ export default function Agenda() {
     }
   };
 
-  const filteredDeadlines = deadlines.filter(d =>
-    filterEntity === 'all' || d.entity === filterEntity
+  const filteredDeadlines = deadlines.filter(
+    (d) => filterEntity === 'all' || d.entity === filterEntity
   );
 
   const stats = {
     total: filteredDeadlines.length,
-    completed: filteredDeadlines.filter(d => d.status === 'Completed').length,
-    inProgress: filteredDeadlines.filter(d => d.status === 'In Progress').length,
-    planned: filteredDeadlines.filter(d => d.status === 'Planned').length,
+    completed: filteredDeadlines.filter((d) => d.status === 'Completed').length,
+    inProgress: filteredDeadlines.filter((d) => d.status === 'In Progress').length,
+    planned: filteredDeadlines.filter((d) => d.status === 'Planned').length,
   };
 
   return (
@@ -176,10 +176,7 @@ export default function Agenda() {
           >
             Month
           </Button>
-          <Button
-            variant={view === 'list' ? 'default' : 'outline'}
-            onClick={() => setView('list')}
-          >
+          <Button variant={view === 'list' ? 'default' : 'outline'} onClick={() => setView('list')}>
             List
           </Button>
         </div>
@@ -232,11 +229,11 @@ export default function Agenda() {
                       <p className="text-sm text-muted-foreground">{deadline.description}</p>
                     </div>
                   </td>
+                  <td className="px-6 py-4">{new Date(deadline.date).toLocaleDateString()}</td>
                   <td className="px-6 py-4">
-                    {new Date(deadline.date).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs border ${getEntityColor(deadline.entity)}`}>
+                    <span
+                      className={`px-2 py-1 rounded text-xs border ${getEntityColor(deadline.entity)}`}
+                    >
                       {deadline.entity}
                     </span>
                   </td>
@@ -246,15 +243,17 @@ export default function Agenda() {
                         deadline.status === 'Completed'
                           ? 'bg-green-100 text-green-800'
                           : deadline.status === 'In Progress'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-800'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-gray-100 text-gray-800'
                       }`}
                     >
                       {deadline.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <Button variant="ghost" size="sm">View</Button>
+                    <Button variant="ghost" size="sm">
+                      View
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -265,5 +264,3 @@ export default function Agenda() {
     </div>
   );
 }
-
-

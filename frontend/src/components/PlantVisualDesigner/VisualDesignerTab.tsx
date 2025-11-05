@@ -11,7 +11,15 @@ import { Save, Edit, Eye, Download, Upload, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiClient } from '@/services/api/apiClient';
-import { Node, Edge, Connection, applyNodeChanges, applyEdgeChanges, NodeChange, EdgeChange } from '@xyflow/react';
+import {
+  Node,
+  Edge,
+  Connection,
+  applyNodeChanges,
+  applyEdgeChanges,
+  NodeChange,
+  EdgeChange,
+} from '@xyflow/react';
 import { nodeTypes, FlowNodeData } from './FlowNodeTypes';
 import { ComponentsPalette, PaletteComponent } from './ComponentsPalette';
 import { NodePropertiesSidebar } from './NodePropertiesSidebar';
@@ -154,27 +162,29 @@ function FlowCanvas({ plantId }: { plantId: number }) {
     [isEditMode, nodes, toast]
   );
 
-  const handleNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
-    if (isEditMode) {
-      setSelectedNode(node);
-      setSelectedEdge(null);
-    }
-  }, [isEditMode]);
+  const handleNodeClick = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      if (isEditMode) {
+        setSelectedNode(node);
+        setSelectedEdge(null);
+      }
+    },
+    [isEditMode]
+  );
 
-  const handleEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
-    if (isEditMode) {
-      setSelectedEdge(edge);
-      setSelectedNode(null);
-    }
-  }, [isEditMode]);
+  const handleEdgeClick = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      if (isEditMode) {
+        setSelectedEdge(edge);
+        setSelectedNode(null);
+      }
+    },
+    [isEditMode]
+  );
 
   const handleNodeUpdate = useCallback((nodeId: string, data: Partial<FlowNodeData>) => {
     setNodes((nds) =>
-      nds.map((node) =>
-        node.id === nodeId
-          ? { ...node, data: { ...node.data, ...data } }
-          : node
-      )
+      nds.map((node) => (node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node))
     );
     setSelectedNode(null);
   }, []);
@@ -185,9 +195,7 @@ function FlowCanvas({ plantId }: { plantId: number }) {
   }, []);
 
   const handleEdgeUpdate = useCallback((edgeId: string, data: Partial<Edge>) => {
-    setEdges((eds) =>
-      eds.map((edge) => (edge.id === edgeId ? { ...edge, ...data } : edge))
-    );
+    setEdges((eds) => eds.map((edge) => (edge.id === edgeId ? { ...edge, ...data } : edge)));
     setSelectedEdge(null);
   }, []);
 
@@ -244,7 +252,7 @@ function FlowCanvas({ plantId }: { plantId: number }) {
       const sourceNode = nodes.find((n) => n.id === edge.source);
       const targetNode = nodes.find((n) => n.id === edge.target);
       if (!sourceNode || !targetNode) return true;
-      
+
       const validation = validateConnection(
         (sourceNode.type || 'default') as any,
         (targetNode.type || 'default') as any
@@ -269,7 +277,9 @@ function FlowCanvas({ plantId }: { plantId: number }) {
   }, [nodes, edges, saveMutation, toast]);
 
   const handleGenerate = useCallback(() => {
-    if (window.confirm('Generate layout from existing assets? This will replace the current layout.')) {
+    if (
+      window.confirm('Generate layout from existing assets? This will replace the current layout.')
+    ) {
       generateMutation.mutate();
     }
   }, [generateMutation]);
@@ -310,7 +320,12 @@ function FlowCanvas({ plantId }: { plantId: number }) {
                 <Save className="mr-2 h-4 w-4" />
                 Save Layout
               </Button>
-              <Button size="sm" variant="outline" onClick={handleGenerate} disabled={generateMutation.isPending}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleGenerate}
+                disabled={generateMutation.isPending}
+              >
                 <RotateCcw className="mr-2 h-4 w-4" />
                 Generate from Assets
               </Button>
@@ -406,4 +421,3 @@ export function VisualDesignerTab({ plantId }: VisualDesignerTabProps) {
     </ReactFlowProvider>
   );
 }
-

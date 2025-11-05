@@ -4,7 +4,15 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { CheckSquare, Clock, AlertCircle, CheckCircle, FileText, Building2, Calendar } from 'lucide-react';
+import {
+  CheckSquare,
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  FileText,
+  Building2,
+  Calendar,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '@/services/api/apiClient';
@@ -59,12 +67,12 @@ export default function MyTasks() {
 
   const stats = {
     total: tasks.length,
-    todo: tasks.filter(t => t.status === 'pending').length,
-    overdue: tasks.filter(t => isOverdue(t)).length,
-    completed: tasks.filter(t => t.status === 'completed').length,
+    todo: tasks.filter((t) => t.status === 'pending').length,
+    overdue: tasks.filter((t) => isOverdue(t)).length,
+    completed: tasks.filter((t) => t.status === 'completed').length,
   };
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = tasks.filter((task) => {
     if (filter === 'overdue') return isOverdue(task);
     return true;
   });
@@ -82,9 +90,7 @@ export default function MyTasks() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">My Tasks</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage activities assigned to you in workflows
-        </p>
+        <p className="text-muted-foreground mt-1">Manage activities assigned to you in workflows</p>
       </div>
 
       {/* Stats */}
@@ -143,10 +149,7 @@ export default function MyTasks() {
       {/* Tasks List */}
       <div className="space-y-2">
         {filteredTasks.map((task) => (
-          <div
-            key={task.id}
-            className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-          >
+          <div key={task.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
@@ -160,9 +163,7 @@ export default function MyTasks() {
                   <h3 className="font-semibold">{task.title}</h3>
                 </div>
                 {task.description && (
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {task.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
                 )}
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   {task.workflow && (
@@ -186,9 +187,7 @@ export default function MyTasks() {
                 </div>
               </div>
               {task.status !== 'completed' && (
-                <Button
-                  onClick={() => navigate(`/workflows/${task.workflow?.id}`)}
-                >
+                <Button onClick={() => navigate(`/workflows/${task.workflow?.id}`)}>
                   View Workflow
                 </Button>
               )}
@@ -206,5 +205,3 @@ export default function MyTasks() {
     </div>
   );
 }
-
-

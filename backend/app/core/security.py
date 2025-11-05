@@ -20,13 +20,13 @@ logger = logging.getLogger(__name__)
 
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/auth/login",
-    scheme_name="JWT"
+    tokenUrl=f"{settings.API_V1_STR}/auth/login", scheme_name="JWT"
 )
 
 
 class TokenData(BaseModel):
     """Token payload data"""
+
     sub: str  # user_id
     tenant_id: str
     email: str
@@ -35,17 +35,14 @@ class TokenData(BaseModel):
     exp: Optional[datetime] = None
 
 
-def create_access_token(
-    data: Dict[str, Any],
-    expires_delta: Optional[timedelta] = None
-) -> str:
+def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """Create JWT access token"""
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
@@ -82,17 +79,18 @@ def verify_token(token: str) -> TokenData:
 
 def get_password_hash(password: str) -> str:
     """Hash password using bcrypt"""
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=settings.BCRYPT_ROUNDS)).decode('utf-8')
+    return bcrypt.hashpw(
+        password.encode("utf-8"), bcrypt.gensalt(rounds=settings.BCRYPT_ROUNDS)
+    ).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password against hash"""
-    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 async def get_current_user(
-    token: Optional[str] = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
+    token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ) -> TokenData:
     """Get current user from token"""
     if not token:
@@ -106,9 +104,7 @@ async def get_current_user(
     return verify_token(token)
 
 
-async def get_current_active_user(
-    current_user: TokenData = Depends(get_current_user)
-) -> TokenData:
+async def get_current_active_user(current_user: TokenData = Depends(get_current_user)) -> TokenData:
     """Get current active user"""
     # Additional checks can be added here
     return current_user
@@ -117,10 +113,8 @@ async def get_current_active_user(
 def authenticate_user(db: Session, username: str, password: str):
     """Authenticate user"""
     from app.models.user import User
-    user = db.query(User).filter(
-        User.email == username,
-        User.deleted_at.is_(None)
-    ).first()
+
+    user = db.query(User).filter(User.email == username, User.deleted_at.is_(None)).first()
     if not user:
         return None
     if not verify_password(password, user.password_hash):
@@ -128,4 +122,3 @@ def authenticate_user(db: Session, username: str, password: str):
     if not user.is_active:
         return None
     return user
-

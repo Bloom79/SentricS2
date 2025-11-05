@@ -6,7 +6,18 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Edit, Building2, Shield, Activity, TrendingUp, FileText, Network, Settings, Upload } from 'lucide-react';
+import {
+  ArrowLeft,
+  Edit,
+  Building2,
+  Shield,
+  Activity,
+  TrendingUp,
+  FileText,
+  Network,
+  Settings,
+  Upload,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -163,11 +174,7 @@ export default function PlantDetail() {
             <div className="flex items-center justify-between">
               <CardTitle>Assets ({assets.length})</CardTitle>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setBulkImportOpen(true)}
-                >
+                <Button variant="outline" size="sm" onClick={() => setBulkImportOpen(true)}>
                   <Upload className="mr-2 h-4 w-4" />
                   Bulk Import
                 </Button>
@@ -177,8 +184,8 @@ export default function PlantDetail() {
           <CardContent>
             <div className="space-y-2">
               {assets.map((asset: any) => (
-                <div 
-                  key={asset.id} 
+                <div
+                  key={asset.id}
                   className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1">
@@ -211,7 +218,8 @@ export default function PlantDetail() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {(asset.component_type === 'solar_array' || asset.component_type === 'panel') && (
+                    {(asset.component_type === 'solar_array' ||
+                      asset.component_type === 'panel') && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -295,7 +303,9 @@ export default function PlantDetail() {
                     <div>
                       <span className="text-sm text-muted-foreground">Municipality:</span>
                       <p className="font-medium">{plant.municipality}</p>
-                      {plant.province && <span className="text-sm text-muted-foreground"> ({plant.province})</span>}
+                      {plant.province && (
+                        <span className="text-sm text-muted-foreground"> ({plant.province})</span>
+                      )}
                     </div>
                   )}
                   {plant.latitude && plant.longitude && (
@@ -311,7 +321,9 @@ export default function PlantDetail() {
                       <span className="text-sm text-muted-foreground">Tags:</span>
                       <div className="flex flex-wrap gap-2 mt-1">
                         {plant.tags.map((tag: string, idx: number) => (
-                          <Badge key={idx} variant="outline">{tag}</Badge>
+                          <Badge key={idx} variant="outline">
+                            {tag}
+                          </Badge>
                         ))}
                       </div>
                     </div>
@@ -340,25 +352,33 @@ export default function PlantDetail() {
                     </div>
                     <div className="text-center p-4 border rounded-lg">
                       <p className="text-2xl font-bold">
-                        {assets.reduce((sum: number, a: any) => sum + (a.rated_power || 0), 0).toFixed(1)} kW
+                        {assets
+                          .reduce((sum: number, a: any) => sum + (a.rated_power || 0), 0)
+                          .toFixed(1)}{' '}
+                        kW
                       </p>
                       <p className="text-sm text-muted-foreground">Total Rated Power</p>
                     </div>
                   </div>
-                  
+
                   {/* Asset Types Breakdown */}
                   <div className="mt-6">
                     <h4 className="text-sm font-semibold mb-3">By Component Type</h4>
                     <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                      {Array.from(new Set(assets.map((a: any) => a.component_type))).map((type: string) => {
-                        const count = assets.filter((a: any) => a.component_type === type).length;
-                        return (
-                          <div key={type} className="flex justify-between items-center p-2 border rounded">
-                            <span className="text-sm capitalize">{type || 'Unknown'}</span>
-                            <Badge variant="outline">{count}</Badge>
-                          </div>
-                        );
-                      })}
+                      {Array.from(new Set(assets.map((a: any) => a.component_type))).map(
+                        (type: string) => {
+                          const count = assets.filter((a: any) => a.component_type === type).length;
+                          return (
+                            <div
+                              key={type}
+                              className="flex justify-between items-center p-2 border rounded"
+                            >
+                              <span className="text-sm capitalize">{type || 'Unknown'}</span>
+                              <Badge variant="outline">{count}</Badge>
+                            </div>
+                          );
+                        }
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -418,4 +438,3 @@ export default function PlantDetail() {
     </div>
   );
 }
-

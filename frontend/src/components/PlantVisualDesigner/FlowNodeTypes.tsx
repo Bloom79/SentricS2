@@ -6,17 +6,7 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { cn } from '@/lib/utils';
-import { 
-  Sun, 
-  Wind, 
-  Battery, 
-  Zap, 
-  Factory, 
-  Grid3x3, 
-  Cable, 
-  Gauge,
-  Radio
-} from 'lucide-react';
+import { Sun, Wind, Battery, Zap, Factory, Grid3x3, Cable, Gauge, Radio } from 'lucide-react';
 
 export interface FlowNodeData {
   label: string;
@@ -33,23 +23,25 @@ export interface FlowNodeData {
   [key: string]: any;
 }
 
-const nodeBaseStyles = "px-4 py-3 rounded-lg border-2 shadow-md min-w-[120px] text-center";
-const nodeActiveStyles = "border-green-500 bg-green-50";
-const nodeInactiveStyles = "border-gray-300 bg-gray-50";
-const nodeErrorStyles = "border-red-500 bg-red-50";
+const nodeBaseStyles = 'px-4 py-3 rounded-lg border-2 shadow-md min-w-[120px] text-center';
+const nodeActiveStyles = 'border-green-500 bg-green-50';
+const nodeInactiveStyles = 'border-gray-300 bg-gray-50';
+const nodeErrorStyles = 'border-red-500 bg-red-50';
 
 // Solar Panel Node
 export function SolarPanelNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Sun className="h-6 w-6 mx-auto mb-1" />
       <div className="font-semibold text-sm">{nodeData.label}</div>
@@ -66,14 +58,16 @@ export function SolarArrayNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary',
-      'min-w-[150px]'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary',
+        'min-w-[150px]'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Sun className="h-8 w-8 mx-auto mb-2" />
       <div className="font-semibold">{nodeData.label}</div>
@@ -92,13 +86,15 @@ export function WindTurbineNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Wind className="h-6 w-6 mx-auto mb-1" />
       <div className="font-semibold text-sm">{nodeData.label}</div>
@@ -115,13 +111,15 @@ export function InverterNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Zap className="h-6 w-6 mx-auto mb-1" />
       <div className="font-semibold text-sm">{nodeData.label}</div>
@@ -141,13 +139,15 @@ export function BESSNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Battery className="h-6 w-6 mx-auto mb-1" />
       <div className="font-semibold text-sm">{nodeData.label}</div>
@@ -164,13 +164,15 @@ export function TransformerNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Cable className="h-6 w-6 mx-auto mb-1" />
       <div className="font-semibold text-sm">{nodeData.label}</div>
@@ -187,13 +189,15 @@ export function GridNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Grid3x3 className="h-6 w-6 mx-auto mb-1" />
       <div className="font-semibold text-sm">{nodeData.label}</div>
@@ -208,13 +212,15 @@ export function ConsumerNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Factory className="h-6 w-6 mx-auto mb-1" />
       <div className="font-semibold text-sm">{nodeData.label}</div>
@@ -230,13 +236,15 @@ export function SCADANode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Gauge className="h-6 w-6 mx-auto mb-1" />
       <div className="font-semibold text-sm">{nodeData.label}</div>
@@ -251,14 +259,16 @@ export function SensorNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary',
-      'min-w-[100px]'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary',
+        'min-w-[100px]'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <Radio className="h-5 w-5 mx-auto mb-1" />
       <div className="font-semibold text-xs">{nodeData.label}</div>
@@ -272,13 +282,15 @@ export function DefaultNode({ data, selected }: NodeProps) {
   const nodeData = data as FlowNodeData;
   const isActive = nodeData.status === 'active';
   const hasError = nodeData.status === 'error';
-  
+
   return (
-    <div className={cn(
-      nodeBaseStyles,
-      hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
-      selected && 'ring-2 ring-primary'
-    )}>
+    <div
+      className={cn(
+        nodeBaseStyles,
+        hasError ? nodeErrorStyles : isActive ? nodeActiveStyles : nodeInactiveStyles,
+        selected && 'ring-2 ring-primary'
+      )}
+    >
       <Handle type="target" position={Position.Top} />
       <div className="font-semibold text-sm">{nodeData.label}</div>
       <Handle type="source" position={Position.Bottom} />
@@ -291,13 +303,13 @@ export const nodeTypes = {
   'solar-panel': SolarPanelNode,
   'solar-array': SolarArrayNode,
   'wind-turbine': WindTurbineNode,
-  'inverter': InverterNode,
-  'bess': BESSNode,
-  'battery': BESSNode,
-  'transformer': TransformerNode,
-  'grid': GridNode,
-  'consumer': ConsumerNode,
-  'scada': SCADANode,
-  'sensor': SensorNode,
-  'default': DefaultNode,
+  inverter: InverterNode,
+  bess: BESSNode,
+  battery: BESSNode,
+  transformer: TransformerNode,
+  grid: GridNode,
+  consumer: ConsumerNode,
+  scada: SCADANode,
+  sensor: SensorNode,
+  default: DefaultNode,
 };

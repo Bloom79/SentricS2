@@ -31,7 +31,7 @@ async def seed_test_data(db: Session = Depends(get_db)):
     """
     if settings.ENVIRONMENT != "development":
         raise HTTPException(status_code=403, detail="Only available in development mode")
-    
+
     try:
         results = {
             "tenant": None,
@@ -42,9 +42,9 @@ async def seed_test_data(db: Session = Depends(get_db)):
             "storage_units": [],
             "consumers": [],
             "cers": [],
-            "cer_members": []
+            "cer_members": [],
         }
-        
+
         # 1. Create or get tenant
         tenant = db.query(Tenant).filter(Tenant.id == "demo").first()
         if not tenant:
@@ -53,12 +53,12 @@ async def seed_test_data(db: Session = Depends(get_db)):
                 name="Demo Tenant",
                 status=TenantStatusEnum.ACTIVE,
                 plan="professional",
-                plan_expiry=datetime.utcnow() + timedelta(days=365)
+                plan_expiry=datetime.utcnow() + timedelta(days=365),
             )
             db.add(tenant)
             db.commit()
             results["tenant"] = {"id": tenant.id, "name": tenant.name}
-        
+
         # 2. Create or get user
         user = db.query(User).filter(User.email == "test@example.com").first()
         if not user:
@@ -69,12 +69,12 @@ async def seed_test_data(db: Session = Depends(get_db)):
                 password_hash=get_password_hash("test123"),
                 role=UserRoleEnum.ADMIN,
                 status=UserStatusEnum.ACTIVE,
-                email_verified=True
+                email_verified=True,
             )
             db.add(user)
             db.commit()
             results["user"] = {"email": user.email, "name": user.name}
-        
+
         # 3. Create Sites
         sites_data = [
             {
@@ -121,25 +121,26 @@ async def seed_test_data(db: Session = Depends(get_db)):
                 "longitude": 14.2681,
                 "capacity": 2500.0,
                 "efficiency": 82.0,
-            }
+            },
         ]
-        
+
         created_sites = []
         for site_data in sites_data:
-            existing_site = db.query(Site).filter(
-                Site.tenant_id == "demo",
-                Site.code == site_data["code"]
-            ).first()
-            
+            existing_site = (
+                db.query(Site)
+                .filter(Site.tenant_id == "demo", Site.code == site_data["code"])
+                .first()
+            )
+
             if not existing_site:
                 site = Site(tenant_id="demo", **site_data)
                 db.add(site)
                 db.flush()
                 created_sites.append(site)
                 results["sites"].append({"id": site.id, "name": site.name, "code": site.code})
-        
+
         db.commit()
-        
+
         # 4. Create Plants
         plants_data = [
             {
@@ -246,26 +247,29 @@ async def seed_test_data(db: Session = Depends(get_db)):
                 "latitude": 40.8520,
                 "longitude": 14.2685,
                 "tags": ["solar", "pending"],
-            }
+            },
         ]
-        
+
         created_plants = []
         for plant_data in plants_data:
             # Remove site_id from plant_data since column doesn't exist yet
             plant_dict = {k: v for k, v in plant_data.items() if k != "site_id"}
-            
+
             # Check if plant exists using raw SQL to avoid site_id column issue
             from sqlalchemy import text
+
             existing_count = db.execute(
                 text("SELECT COUNT(*) FROM plants WHERE tenant_id = :tenant_id AND code = :code"),
-                {"tenant_id": "demo", "code": plant_dict["code"]}
+                {"tenant_id": "demo", "code": plant_dict["code"]},
             ).scalar()
-            
+
             if existing_count == 0:
                 # Create plant using raw SQL insert to avoid site_id column issue
                 from sqlalchemy import text
+
                 result = db.execute(
-                    text("""
+                    text(
+                        """
                         INSERT INTO plants 
                         (name, code, power, power_kw, status, type, location, address, municipality, 
                          province, region, latitude, longitude, gse_integration, tags, tenant_id, created_by, created_at)
@@ -273,14 +277,23 @@ async def seed_test_data(db: Session = Depends(get_db)):
                         (:name, :code, :power, :power_kw, :status, :type, :location, :address, :municipality,
                          :province, :region, :latitude, :longitude, :gse_integration, :tags, :tenant_id, :created_by, NOW())
                         RETURNING id
-                    """),
+                    """
+                    ),
                     {
                         "name": plant_dict["name"],
                         "code": plant_dict["code"],
                         "power": plant_dict["power"],
                         "power_kw": plant_dict["power_kw"],
-                        "status": plant_dict["status"].value if hasattr(plant_dict["status"], "value") else str(plant_dict["status"]),
-                        "type": plant_dict["type"].value if hasattr(plant_dict["type"], "value") else str(plant_dict["type"]),
+                        "status": (
+                            plant_dict["status"].value
+                            if hasattr(plant_dict["status"], "value")
+                            else str(plant_dict["status"])
+                        ),
+                        "type": (
+                            plant_dict["type"].value
+                            if hasattr(plant_dict["type"], "value")
+                            else str(plant_dict["type"])
+                        ),
                         "location": plant_dict["location"],
                         "address": plant_dict.get("address"),
                         "municipality": plant_dict.get("municipality"),
@@ -291,32 +304,54 @@ async def seed_test_data(db: Session = Depends(get_db)):
                         "gse_integration": plant_dict.get("gse_integration", False),
                         "tags": json.dumps(plant_dict.get("tags", [])),
                         "tenant_id": "demo",
-                        "created_by": user.id
-                    }
+                        "created_by": user.id,
+                    },
                 )
                 plant_id = result.scalar()
                 db.flush()
                 # Store plant info without reloading (to avoid site_id column issue)
                 created_plants.append({"id": plant_id})  # Store minimal info
-                results["plants"].append({"id": plant_id, "name": plant_dict["name"], "code": plant_dict["code"]})
-        
+                results["plants"].append(
+                    {"id": plant_id, "name": plant_dict["name"], "code": plant_dict["code"]}
+                )
+
         db.commit()
-        
+
         # 5. Create Asset Types
         asset_types_data = [
-            {"name": "Solar Panel", "normalized_name": "solar_panel", "description": "Photovoltaic solar panel"},
-            {"name": "Inverter", "normalized_name": "inverter", "description": "DC to AC power inverter"},
-            {"name": "Battery", "normalized_name": "battery", "description": "Energy storage battery"},
-            {"name": "Transformer", "normalized_name": "transformer", "description": "Power transformer"},
+            {
+                "name": "Solar Panel",
+                "normalized_name": "solar_panel",
+                "description": "Photovoltaic solar panel",
+            },
+            {
+                "name": "Inverter",
+                "normalized_name": "inverter",
+                "description": "DC to AC power inverter",
+            },
+            {
+                "name": "Battery",
+                "normalized_name": "battery",
+                "description": "Energy storage battery",
+            },
+            {
+                "name": "Transformer",
+                "normalized_name": "transformer",
+                "description": "Power transformer",
+            },
         ]
-        
+
         created_asset_types = {}
         for at_data in asset_types_data:
-            existing_at = db.query(AssetType).filter(
-                AssetType.tenant_id == "demo",
-                AssetType.normalized_name == at_data["normalized_name"]
-            ).first()
-            
+            existing_at = (
+                db.query(AssetType)
+                .filter(
+                    AssetType.tenant_id == "demo",
+                    AssetType.normalized_name == at_data["normalized_name"],
+                )
+                .first()
+            )
+
             if not existing_at:
                 asset_type = AssetType(tenant_id="demo", **at_data)
                 db.add(asset_type)
@@ -325,10 +360,10 @@ async def seed_test_data(db: Session = Depends(get_db)):
             else:
                 # Use existing asset type
                 created_asset_types[at_data["normalized_name"]] = existing_at
-        
+
         db.commit()
-        
-        # 6. Create Assets  
+
+        # 6. Create Assets
         # Get all existing plants if we didn't create new ones
         if not created_plants:
             existing_plants = db.query(Plant).filter(Plant.tenant_id == "demo").all()
@@ -341,104 +376,129 @@ async def seed_test_data(db: Session = Depends(get_db)):
             for idx, plant_info in enumerate(created_plants):
                 if idx < len(plants_data):
                     plant_id_to_type[plant_info["id"]] = plants_data[idx].get("type")
-        
+
         if created_plants and created_asset_types:
             assets_data = []
-            
+
             # Create assets for all plants
             for plant_info in created_plants:
                 plant_id = plant_info["id"]
                 plant_type = plant_id_to_type.get(plant_id)
-                
+
                 # Skip if we don't know the plant type
                 if not plant_type:
                     continue
-                
+
                 if plant_type == PlantTypeEnum.PHOTOVOLTAIC:
                     # Create solar panel arrays
                     for i in range(1, 4):
-                        assets_data.append({
-                            "name": f"Panel Array {i}",
-                            "plant_id": plant_info["id"],
-                            "type_id": created_asset_types["solar_panel"].id,
-                            "component_type": ComponentType.PANEL.value,
-                            "status": AssetStatus.OPERATIONAL.value,
-                            "manufacturer": "SunPower",
-                            "model": "SPR-400",
-                            "rated_power": 0.4,  # kW per panel, array of ~100 panels = 40kW
-                            "voltage": 40.0,
-                            "current": 10.0,
-                            "efficiency": 22.8,
-                            "location": f"Zone {chr(64+i)}",
-                            "dynamic_attributes": {"power_w": 400, "voltage_v": 40, "current_a": 10, "panels_count": 100},
-                        })
-                    
+                        assets_data.append(
+                            {
+                                "name": f"Panel Array {i}",
+                                "plant_id": plant_info["id"],
+                                "type_id": created_asset_types["solar_panel"].id,
+                                "component_type": ComponentType.PANEL.value,
+                                "status": AssetStatus.OPERATIONAL.value,
+                                "manufacturer": "SunPower",
+                                "model": "SPR-400",
+                                "rated_power": 0.4,  # kW per panel, array of ~100 panels = 40kW
+                                "voltage": 40.0,
+                                "current": 10.0,
+                                "efficiency": 22.8,
+                                "location": f"Zone {chr(64+i)}",
+                                "dynamic_attributes": {
+                                    "power_w": 400,
+                                    "voltage_v": 40,
+                                    "current_a": 10,
+                                    "panels_count": 100,
+                                },
+                            }
+                        )
+
                     # Create inverters
                     for i in range(1, 3):
-                        assets_data.append({
-                            "name": f"Inverter {i}",
-                            "plant_id": plant_info["id"],
-                            "type_id": created_asset_types["inverter"].id,
-                            "component_type": ComponentType.INVERTER.value,
-                            "status": AssetStatus.OPERATIONAL.value,
-                            "manufacturer": "SMA",
-                            "model": "Sunny Boy 5000",
-                            "rated_power": 5.0,  # kW
-                            "efficiency": 98.5,
-                            "location": f"Inverter Station {i}",
-                            "dynamic_attributes": {"power_kw": 5.0, "efficiency": 98.5, "mppt_trackers": 2},
-                        })
-                
+                        assets_data.append(
+                            {
+                                "name": f"Inverter {i}",
+                                "plant_id": plant_info["id"],
+                                "type_id": created_asset_types["inverter"].id,
+                                "component_type": ComponentType.INVERTER.value,
+                                "status": AssetStatus.OPERATIONAL.value,
+                                "manufacturer": "SMA",
+                                "model": "Sunny Boy 5000",
+                                "rated_power": 5.0,  # kW
+                                "efficiency": 98.5,
+                                "location": f"Inverter Station {i}",
+                                "dynamic_attributes": {
+                                    "power_kw": 5.0,
+                                    "efficiency": 98.5,
+                                    "mppt_trackers": 2,
+                                },
+                            }
+                        )
+
                 elif plant_type == PlantTypeEnum.WIND:
-                    assets_data.append({
-                        "name": "Wind Turbine 1",
-                        "plant_id": plant_info["id"],
-                        "type_id": created_asset_types["transformer"].id,
-                        "component_type": ComponentType.TRANSFORMER.value,
-                        "status": AssetStatus.OPERATIONAL.value,
-                        "manufacturer": "Vestas",
-                        "model": "V150-3.0",
-                        "rated_power": 3000.0,  # kW
-                        "location": "Turbine Field - Position 1",
-                        "dynamic_attributes": {"power_mw": 3.0, "rotor_diameter_m": 150, "hub_height_m": 105},
-                    })
-                
+                    assets_data.append(
+                        {
+                            "name": "Wind Turbine 1",
+                            "plant_id": plant_info["id"],
+                            "type_id": created_asset_types["transformer"].id,
+                            "component_type": ComponentType.TRANSFORMER.value,
+                            "status": AssetStatus.OPERATIONAL.value,
+                            "manufacturer": "Vestas",
+                            "model": "V150-3.0",
+                            "rated_power": 3000.0,  # kW
+                            "location": "Turbine Field - Position 1",
+                            "dynamic_attributes": {
+                                "power_mw": 3.0,
+                                "rotor_diameter_m": 150,
+                                "hub_height_m": 105,
+                            },
+                        }
+                    )
+
                 elif plant_type == PlantTypeEnum.HYDROELECTRIC:
-                    assets_data.append({
-                        "name": "Hydro Generator 1",
-                        "plant_id": plant_info["id"],
-                        "type_id": created_asset_types["transformer"].id,
-                        "component_type": ComponentType.TRANSFORMER.value,
-                        "status": AssetStatus.OPERATIONAL.value,
-                        "manufacturer": "Andritz",
-                        "model": "HydroGen-5000",
-                        "rated_power": 5000.0,  # kW
-                        "efficiency": 92.0,
-                        "location": "Main Turbine Hall",
-                        "dynamic_attributes": {"power_mw": 5.0, "flow_rate_m3s": 50, "head_m": 100},
-                        })
-            
+                    assets_data.append(
+                        {
+                            "name": "Hydro Generator 1",
+                            "plant_id": plant_info["id"],
+                            "type_id": created_asset_types["transformer"].id,
+                            "component_type": ComponentType.TRANSFORMER.value,
+                            "status": AssetStatus.OPERATIONAL.value,
+                            "manufacturer": "Andritz",
+                            "model": "HydroGen-5000",
+                            "rated_power": 5000.0,  # kW
+                            "efficiency": 92.0,
+                            "location": "Main Turbine Hall",
+                            "dynamic_attributes": {
+                                "power_mw": 5.0,
+                                "flow_rate_m3s": 50,
+                                "head_m": 100,
+                            },
+                        }
+                    )
+
             # Only create assets that don't already exist
             for asset_data in assets_data:
                 # Check if asset already exists
-                existing_asset = db.query(Asset).filter(
-                    Asset.tenant_id == "demo",
-                    Asset.plant_id == asset_data["plant_id"],
-                    Asset.name == asset_data["name"]
-                ).first()
-                
-                if not existing_asset:
-                    asset = Asset(
-                        tenant_id="demo",
-                        created_by=user.id,
-                        **asset_data
+                existing_asset = (
+                    db.query(Asset)
+                    .filter(
+                        Asset.tenant_id == "demo",
+                        Asset.plant_id == asset_data["plant_id"],
+                        Asset.name == asset_data["name"],
                     )
+                    .first()
+                )
+
+                if not existing_asset:
+                    asset = Asset(tenant_id="demo", created_by=user.id, **asset_data)
                     db.add(asset)
                     db.flush()
                     results["assets"].append({"id": asset.id, "name": asset.name})
-            
+
             db.commit()
-        
+
         # 7. Create Storage Units
         if created_sites:
             storage_units_data = [
@@ -465,23 +525,26 @@ async def seed_test_data(db: Session = Depends(get_db)):
                     "status": "operational",
                     "manufacturer": "BYD",
                     "model": "Battery Box",
-                }
+                },
             ]
-            
+
             for su_data in storage_units_data:
-                existing_su = db.query(StorageUnit).filter(
-                    StorageUnit.tenant_id == "demo",
-                    StorageUnit.code == su_data["code"]
-                ).first()
-                
+                existing_su = (
+                    db.query(StorageUnit)
+                    .filter(StorageUnit.tenant_id == "demo", StorageUnit.code == su_data["code"])
+                    .first()
+                )
+
                 if not existing_su:
                     storage_unit = StorageUnit(tenant_id="demo", **su_data)
                     db.add(storage_unit)
                     db.flush()
-                    results["storage_units"].append({"id": storage_unit.id, "name": storage_unit.name})
-            
+                    results["storage_units"].append(
+                        {"id": storage_unit.id, "name": storage_unit.name}
+                    )
+
             db.commit()
-        
+
         # 8. Create Consumers
         if created_sites:
             consumers_data = [
@@ -514,23 +577,24 @@ async def seed_test_data(db: Session = Depends(get_db)):
                     "peak_consumption_kw": 10.0,
                     "status": "active",
                     "pod_id": "IT001E12345680",
-                }
+                },
             ]
-            
+
             for cons_data in consumers_data:
-                existing_cons = db.query(Consumer).filter(
-                    Consumer.tenant_id == "demo",
-                    Consumer.code == cons_data["code"]
-                ).first()
-                
+                existing_cons = (
+                    db.query(Consumer)
+                    .filter(Consumer.tenant_id == "demo", Consumer.code == cons_data["code"])
+                    .first()
+                )
+
                 if not existing_cons:
                     consumer = Consumer(tenant_id="demo", **cons_data)
                     db.add(consumer)
                     db.flush()
                     results["consumers"].append({"id": consumer.id, "name": consumer.name})
-            
+
             db.commit()
-        
+
         # 9. Create CERs (Renewable Energy Communities)
         if created_plants:
             cers_data = [
@@ -547,8 +611,11 @@ async def seed_test_data(db: Session = Depends(get_db)):
                     "primary_substation_id": "PS-MIL-001",
                     "location": [9.1900, 45.4642],  # [lon, lat]
                     "boundary": [
-                        [9.18, 45.45], [9.20, 45.45], 
-                        [9.20, 45.48], [9.18, 45.48], [9.18, 45.45]
+                        [9.18, 45.45],
+                        [9.20, 45.45],
+                        [9.20, 45.48],
+                        [9.18, 45.48],
+                        [9.18, 45.45],
                     ],
                     "technical_info": {"total_capacity_kw": 4300.0},
                     "billing_settings": {"tariff_type": "standard"},
@@ -566,8 +633,11 @@ async def seed_test_data(db: Session = Depends(get_db)):
                     "primary_substation_id": "PS-ROM-001",
                     "location": [12.4964, 41.9028],
                     "boundary": [
-                        [12.48, 41.89], [12.51, 41.89],
-                        [12.51, 41.92], [12.48, 41.92], [12.48, 41.89]
+                        [12.48, 41.89],
+                        [12.51, 41.89],
+                        [12.51, 41.92],
+                        [12.48, 41.92],
+                        [12.48, 41.89],
                     ],
                     "technical_info": {"total_capacity_kw": 8000.0},
                     "billing_settings": {"tariff_type": "premium"},
@@ -585,32 +655,38 @@ async def seed_test_data(db: Session = Depends(get_db)):
                     "primary_substation_id": "PS-NAP-001",
                     "location": [14.2681, 40.8518],
                     "boundary": [
-                        [14.26, 40.84], [14.28, 40.84],
-                        [14.28, 40.86], [14.26, 40.86], [14.26, 40.84]
+                        [14.26, 40.84],
+                        [14.28, 40.84],
+                        [14.28, 40.86],
+                        [14.26, 40.86],
+                        [14.26, 40.84],
                     ],
                     "technical_info": {"total_capacity_kw": 2000.0},
                     "billing_settings": {"tariff_type": "standard"},
-                }
+                },
             ]
-            
+
             created_cers = []
             for cer_data in cers_data:
-                existing_cer = db.query(CER).filter(
-                    CER.tenant_id == "demo",
-                    CER.name == cer_data["name"]
-                ).first()
-                
+                existing_cer = (
+                    db.query(CER)
+                    .filter(CER.tenant_id == "demo", CER.name == cer_data["name"])
+                    .first()
+                )
+
                 if not existing_cer:
                     # Create location point
                     location_wkt = None
                     if cer_data.get("location"):
-                        location_wkt = create_point(cer_data["location"][0], cer_data["location"][1])
-                    
+                        location_wkt = create_point(
+                            cer_data["location"][0], cer_data["location"][1]
+                        )
+
                     # Create boundary polygon
                     boundary_wkt = None
                     if cer_data.get("boundary"):
                         boundary_wkt = create_polygon(cer_data["boundary"])
-                    
+
                     cer = CER(
                         tenant_id="demo",
                         created_by=user.id,
@@ -628,15 +704,17 @@ async def seed_test_data(db: Session = Depends(get_db)):
                         boundary=boundary_wkt,
                         technical_info=cer_data.get("technical_info", {}),
                         billing_settings=cer_data.get("billing_settings", {}),
-                        total_capacity=cer_data.get("technical_info", {}).get("total_capacity_kw", 0.0)
+                        total_capacity=cer_data.get("technical_info", {}).get(
+                            "total_capacity_kw", 0.0
+                        ),
                     )
                     db.add(cer)
                     db.flush()
                     created_cers.append(cer)
                     results["cers"].append({"id": cer.id, "name": cer.name})
-            
+
             db.commit()
-            
+
             # 10. Link plants to CERs
             if created_cers and created_plants:
                 # Link first 2 plants to first CER
@@ -644,19 +722,19 @@ async def seed_test_data(db: Session = Depends(get_db)):
                     if i < len(created_cers):
                         db.execute(
                             text("UPDATE plants SET cer_id = :cer_id WHERE id = :plant_id"),
-                            {"cer_id": created_cers[0].id, "plant_id": plant_info["id"]}
+                            {"cer_id": created_cers[0].id, "plant_id": plant_info["id"]},
                         )
-                
+
                 # Link next 2 plants to second CER
                 for i, plant_info in enumerate(created_plants[2:4]):
                     if i < len(created_cers):
                         db.execute(
                             text("UPDATE plants SET cer_id = :cer_id WHERE id = :plant_id"),
-                            {"cer_id": created_cers[1].id, "plant_id": plant_info["id"]}
+                            {"cer_id": created_cers[1].id, "plant_id": plant_info["id"]},
                         )
-                
+
                 db.commit()
-            
+
             # 11. Create CER Members
             if created_cers:
                 members_data = [
@@ -719,38 +797,45 @@ async def seed_test_data(db: Session = Depends(get_db)):
                         "load_profile_type": "residential",
                         "contracted_power": 2.0,
                         "status": "active",
-                    }
+                    },
                 ]
-                
+
                 for member_data in members_data:
-                    existing_member = db.query(CERMember).filter(
-                        CERMember.tenant_id == "demo",
-                        CERMember.pod_id == member_data["pod_id"]
-                    ).first()
-                    
-                    if not existing_member:
-                        member = CERMember(
-                            tenant_id="demo",
-                            created_by=user.id,
-                            **member_data
+                    existing_member = (
+                        db.query(CERMember)
+                        .filter(
+                            CERMember.tenant_id == "demo", CERMember.pod_id == member_data["pod_id"]
                         )
+                        .first()
+                    )
+
+                    if not existing_member:
+                        member = CERMember(tenant_id="demo", created_by=user.id, **member_data)
                         db.add(member)
                         db.flush()
-                        results["cer_members"].append({"id": member.id, "name": member.name, "cer_id": member.cer_id})
-                
+                        results["cer_members"].append(
+                            {"id": member.id, "name": member.name, "cer_id": member.cer_id}
+                        )
+
                 db.commit()
-                
+
                 # Update CER total capacity from linked plants
                 for cer in created_cers:
                     from sqlalchemy import text, func
-                    total_capacity = db.execute(
-                        text("SELECT COALESCE(SUM(power_kw), 0) FROM plants WHERE cer_id = :cer_id AND deleted_at IS NULL"),
-                        {"cer_id": cer.id}
-                    ).scalar() or 0.0
-                    
+
+                    total_capacity = (
+                        db.execute(
+                            text(
+                                "SELECT COALESCE(SUM(power_kw), 0) FROM plants WHERE cer_id = :cer_id AND deleted_at IS NULL"
+                            ),
+                            {"cer_id": cer.id},
+                        ).scalar()
+                        or 0.0
+                    )
+
                     cer.total_capacity = total_capacity
                     db.commit()
-        
+
         return {
             "success": True,
             "message": "Test data seeded successfully",
@@ -762,14 +847,10 @@ async def seed_test_data(db: Session = Depends(get_db)):
                 "storage_units": len(results["storage_units"]),
                 "consumers": len(results["consumers"]),
                 "cers": len(results["cers"]),
-                "cer_members": len(results["cer_members"])
-            }
+                "cer_members": len(results["cer_members"]),
+            },
         }
-        
+
     except Exception as e:
         db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error seeding test data: {str(e)}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error seeding test data: {str(e)}")

@@ -121,7 +121,12 @@ export default function Plants() {
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const { data: plants, isLoading, isError, error } = useQuery<Plant[]>({
+  const {
+    data: plants,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Plant[]>({
     queryKey: ['plants', selectedType, selectedStatus, selectedRegion],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -149,14 +154,15 @@ export default function Plants() {
       };
     }
 
-    const operational = plants.filter(p => p.status?.toLowerCase() === 'in_operation').length;
-    const maintenance = plants.filter(p => p.status?.toLowerCase() === 'under_maintenance').length;
-    const offline = plants.filter(p => p.status?.toLowerCase() === 'offline').length;
+    const operational = plants.filter((p) => p.status?.toLowerCase() === 'in_operation').length;
+    const maintenance = plants.filter(
+      (p) => p.status?.toLowerCase() === 'under_maintenance'
+    ).length;
+    const offline = plants.filter((p) => p.status?.toLowerCase() === 'offline').length;
     const total_capacity_kw = plants.reduce((sum, p) => sum + (p.power_kw || 0), 0);
-    const efficiencies = plants.filter(p => p.efficiency).map(p => p.efficiency || 0);
-    const average_efficiency = efficiencies.length > 0 
-      ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length 
-      : 0;
+    const efficiencies = plants.filter((p) => p.efficiency).map((p) => p.efficiency || 0);
+    const average_efficiency =
+      efficiencies.length > 0 ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length : 0;
     const total_production_mwh = plants.reduce((sum, p) => sum + (p.production_mtd || 0), 0);
 
     return {
@@ -173,19 +179,20 @@ export default function Plants() {
   // Get unique regions for filter
   const regions = useMemo(() => {
     if (!plants) return [];
-    const uniqueRegions = [...new Set(plants.map(p => p.region).filter(Boolean))];
+    const uniqueRegions = [...new Set(plants.map((p) => p.region).filter(Boolean))];
     return uniqueRegions.sort();
   }, [plants]);
 
   const filteredPlants = useMemo(() => {
     if (!plants) return [];
-    
+
     return plants.filter((plant) => {
-      const matchesSearch = !searchTerm || 
+      const matchesSearch =
+        !searchTerm ||
         plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         plant.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
         plant.location?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       return matchesSearch;
     });
   }, [plants, searchTerm]);
@@ -216,7 +223,9 @@ export default function Plants() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-responsive-xl font-bold">Plants</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">Manage your renewable energy portfolio</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Manage your renewable energy portfolio
+          </p>
         </div>
         <Button onClick={() => navigate('/plants/new')} className="w-full sm:w-auto touch-target">
           <Plus className="mr-2 h-4 w-4" />
@@ -246,7 +255,9 @@ export default function Plants() {
             <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{stats.total_capacity_mw.toFixed(1)} MW</div>
+            <div className="text-xl sm:text-2xl font-bold">
+              {stats.total_capacity_mw.toFixed(1)} MW
+            </div>
             <Progress value={75} className="h-2 mt-2" />
           </CardContent>
         </Card>
@@ -257,7 +268,9 @@ export default function Plants() {
             <Gauge className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{stats.average_efficiency.toFixed(1)}%</div>
+            <div className="text-xl sm:text-2xl font-bold">
+              {stats.average_efficiency.toFixed(1)}%
+            </div>
             <div className="flex items-center gap-1 text-[10px] sm:text-xs">
               <TrendingUp className="h-3 w-3 text-green-500" />
               <span className="text-green-500">+2.5%</span>
@@ -271,7 +284,9 @@ export default function Plants() {
             <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{stats.total_production_mwh.toFixed(0)} MWh</div>
+            <div className="text-xl sm:text-2xl font-bold">
+              {stats.total_production_mwh.toFixed(0)} MWh
+            </div>
             <div className="text-[10px] sm:text-xs text-muted-foreground">MTD</div>
           </CardContent>
         </Card>
@@ -295,7 +310,7 @@ export default function Plants() {
                 />
               </div>
             </div>
-            
+
             <Select value={selectedType || 'all'} onValueChange={setSelectedType}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="All Types" />
@@ -329,8 +344,10 @@ export default function Plants() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Regions</SelectItem>
-                  {regions.map(region => (
-                    <SelectItem key={region} value={region}>{region}</SelectItem>
+                  {regions.map((region) => (
+                    <SelectItem key={region} value={region}>
+                      {region}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -351,7 +368,7 @@ export default function Plants() {
             {filteredPlants.map((plant) => {
               const Icon = getPlantIcon(plant.type);
               const daysSinceCommissioning = calculateDaysSince(plant.commissioning_date);
-              
+
               return (
                 <Card
                   key={plant.id}
@@ -365,8 +382,12 @@ export default function Plants() {
                           <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-base sm:text-lg truncate">{plant.name}</CardTitle>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">{plant.code}</p>
+                          <CardTitle className="text-base sm:text-lg truncate">
+                            {plant.name}
+                          </CardTitle>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                            {plant.code}
+                          </p>
                         </div>
                       </div>
                       {!isMobile && (
@@ -378,23 +399,29 @@ export default function Plants() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/plants/${plant.id}`);
-                            }}>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/plants/${plant.id}`);
+                              }}
+                            >
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/plants/${plant.id}/edit`);
-                            }}>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/plants/${plant.id}/edit`);
+                              }}
+                            >
                               Edit Plant
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/workflows/new?plant_id=${plant.id}`);
-                            }}>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/workflows/new?plant_id=${plant.id}`);
+                              }}
+                            >
                               Start Workflow
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -418,13 +445,19 @@ export default function Plants() {
                           <p className="text-[10px] sm:text-xs text-muted-foreground">Location</p>
                           <p className="text-xs sm:text-sm font-medium flex items-center gap-1 truncate">
                             <MapPin className="h-3 w-3 shrink-0" />
-                            <span className="truncate">{plant.location || plant.region || 'Not set'}</span>
+                            <span className="truncate">
+                              {plant.location || plant.region || 'Not set'}
+                            </span>
                           </p>
                         </div>
                         {plant.efficiency && (
                           <div className="space-y-0.5">
-                            <p className="text-[10px] sm:text-xs text-muted-foreground">Efficiency</p>
-                            <p className="text-xs sm:text-sm font-medium">{plant.efficiency.toFixed(1)}%</p>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground">
+                              Efficiency
+                            </p>
+                            <p className="text-xs sm:text-sm font-medium">
+                              {plant.efficiency.toFixed(1)}%
+                            </p>
                           </div>
                         )}
                       </div>
@@ -516,7 +549,9 @@ export default function Plants() {
                           <td className="p-4">
                             {plant.efficiency ? (
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">{plant.efficiency.toFixed(1)}%</span>
+                                <span className="text-sm font-medium">
+                                  {plant.efficiency.toFixed(1)}%
+                                </span>
                                 <Progress value={plant.efficiency} className="w-16 h-2" />
                               </div>
                             ) : (
@@ -552,12 +587,16 @@ export default function Plants() {
           <CardContent className="py-12 text-center">
             <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">No plants found matching your criteria</p>
-            <Button variant="outline" className="mt-4" onClick={() => {
-              setSearchTerm('');
-              setSelectedType('all');
-              setSelectedStatus('all');
-              setSelectedRegion('all');
-            }}>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedType('all');
+                setSelectedStatus('all');
+                setSelectedRegion('all');
+              }}
+            >
               Clear Filters
             </Button>
           </CardContent>

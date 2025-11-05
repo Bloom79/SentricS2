@@ -123,50 +123,50 @@ function AppRoutes() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        
+
         {/* Sites */}
         <Route path="sites" element={<Sites />} />
         <Route path="sites/:id" element={<SiteDetail />} />
-        
+
         {/* Plants */}
         <Route path="plants" element={<Plants />} />
         <Route path="plants/:id" element={<PlantDetail />} />
-        
+
         {/* CER */}
         <Route path="cer" element={<CERManagement />} />
         <Route path="cer/new" element={<CERCreate />} />
         <Route path="cer/:id" element={<CERDetail />} />
         <Route path="cer/:id/members/:memberId" element={<MemberDetail />} />
-        
+
         {/* Workflows */}
         <Route path="workflows" element={<Workflows />} />
         <Route path="workflows/:workflowId" element={<WorkflowDetail />} />
         <Route path="workflows/:workflowId/phases/:phaseId" element={<WorkflowPhaseDetail />} />
         <Route path="workflow-templates" element={<WorkflowTemplates />} />
-        
+
         {/* Compliance */}
         <Route path="compliance" element={<ComplianceManagement />} />
         <Route path="compliance-overview" element={<Compliance />} />
         <Route path="plants/:id/compliance" element={<PlantDetail />} />
-        
+
         {/* Documents */}
         <Route path="documents" element={<Documents />} />
-        
+
         {/* Admin */}
         <Route path="admin/users" element={<UserManagement />} />
         <Route path="administration" element={<Administration />} />
-        
+
         {/* User Pages */}
         <Route path="profile" element={<Profile />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="my-tasks" element={<MyTasks />} />
         <Route path="team" element={<Team />} />
-        
+
         {/* Tools */}
         <Route path="integrations" element={<Integrations />} />
         <Route path="agenda" element={<Agenda />} />
         <Route path="ai-assistant" element={<AIAssistant />} />
-        
+
         {/* Reports */}
         <Route path="reports" element={<Reports />} />
       </Route>
@@ -191,4 +191,3 @@ function App() {
 }
 
 export default App;
-

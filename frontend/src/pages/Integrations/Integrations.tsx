@@ -161,9 +161,7 @@ export default function Integrations() {
               {integration.errors > 0 && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Errors:</span>
-                  <span className="font-medium text-red-600">
-                    {integration.errors}
-                  </span>
+                  <span className="font-medium text-red-600">{integration.errors}</span>
                 </div>
               )}
             </div>
@@ -184,5 +182,3 @@ export default function Integrations() {
     </div>
   );
 }
-
-

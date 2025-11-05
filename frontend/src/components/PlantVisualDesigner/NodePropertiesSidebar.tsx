@@ -117,7 +117,10 @@ export function NodePropertiesSidebar({
         <div className="space-y-4 pt-4 border-t">
           <h4 className="font-semibold text-sm">Specifications</h4>
 
-          {(node.type === 'solar-panel' || node.type === 'solar-array' || node.type === 'wind-turbine' || node.type === 'inverter') && (
+          {(node.type === 'solar-panel' ||
+            node.type === 'solar-array' ||
+            node.type === 'wind-turbine' ||
+            node.type === 'inverter') && (
             <div className="space-y-2">
               <Label htmlFor="node-power">Power (kW)</Label>
               <Input
@@ -130,7 +133,9 @@ export function NodePropertiesSidebar({
             </div>
           )}
 
-          {(node.type === 'solar-panel' || node.type === 'solar-array' || node.type === 'inverter') && (
+          {(node.type === 'solar-panel' ||
+            node.type === 'solar-array' ||
+            node.type === 'inverter') && (
             <div className="space-y-2">
               <Label htmlFor="node-efficiency">Efficiency (%)</Label>
               <Input
@@ -198,4 +203,3 @@ export function NodePropertiesSidebar({
     </Card>
   );
 }
-

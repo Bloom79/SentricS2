@@ -47,14 +47,13 @@ export function PanelAssignmentDialog({
   });
 
   // Filter panels - exclude already assigned ones
-  const availablePanels = panels?.filter(
-    (panel: any) => !currentPanelIds.includes(panel.id)
-  ) || [];
+  const availablePanels = panels?.filter((panel: any) => !currentPanelIds.includes(panel.id)) || [];
 
-  const filteredPanels = availablePanels.filter((panel: any) =>
-    panel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    panel.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    panel.serial_number?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPanels = availablePanels.filter(
+    (panel: any) =>
+      panel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      panel.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      panel.serial_number?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Assign panels mutation
@@ -91,7 +90,7 @@ export function PanelAssignmentDialog({
     }
   };
 
-  const canAddMore = (selectedPanelIds.length + currentPanelIds.length) < maxPanels;
+  const canAddMore = selectedPanelIds.length + currentPanelIds.length < maxPanels;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -115,9 +114,7 @@ export function PanelAssignmentDialog({
                     {currentPanelIds.length + selectedPanelIds.length} / {maxPanels}
                   </p>
                 </div>
-                {!canAddMore && (
-                  <Badge variant="destructive">Maximum capacity reached</Badge>
-                )}
+                {!canAddMore && <Badge variant="destructive">Maximum capacity reached</Badge>}
               </div>
             </CardContent>
           </Card>
@@ -136,7 +133,9 @@ export function PanelAssignmentDialog({
           {/* Panels List */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Available Panels ({filteredPanels.length})</CardTitle>
+              <CardTitle className="text-base">
+                Available Panels ({filteredPanels.length})
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -200,7 +199,9 @@ export function PanelAssignmentDialog({
               onClick={handleAssign}
               disabled={selectedPanelIds.length === 0 || assignMutation.isPending}
             >
-              {assignMutation.isPending ? 'Assigning...' : `Assign ${selectedPanelIds.length} Panel(s)`}
+              {assignMutation.isPending
+                ? 'Assigning...'
+                : `Assign ${selectedPanelIds.length} Panel(s)`}
             </Button>
           </div>
         </div>
@@ -208,4 +209,3 @@ export function PanelAssignmentDialog({
     </Dialog>
   );
 }
-

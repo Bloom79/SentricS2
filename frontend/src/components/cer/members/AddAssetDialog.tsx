@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
-import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { ReactNode } from 'react';
+import { useForm } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -20,32 +20,37 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { cerService, CERMember } from "@/services/api/cer.service";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { cerService, CERMember } from '@/services/api/cer.service';
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  asset_type: z.enum(["SOLAR", "WIND", "STORAGE", "BIOMASS", "HYDRO"]),
-  capacity: z.number().min(0.1, "Capacity must be at least 0.1 kW").max(100, "Capacity cannot exceed 100 kW"),
-  installation_date: z.string().min(1, "Installation date is required"),
+  name: z.string().min(1, 'Name is required'),
+  asset_type: z.enum(['SOLAR', 'WIND', 'STORAGE', 'BIOMASS', 'HYDRO']),
+  capacity: z
+    .number()
+    .min(0.1, 'Capacity must be at least 0.1 kW')
+    .max(100, 'Capacity cannot exceed 100 kW'),
+  installation_date: z.string().min(1, 'Installation date is required'),
   gse_registration_id: z.string().optional(),
-  status: z.enum(["active", "maintenance", "inactive", "decommissioned"]).default("active"),
-  asset_metadata: z.object({
-    panel_type: z.string().optional(),
-    inverter_model: z.string().optional(),
-    orientation: z.string().optional(),
-    tilt_angle: z.number().optional(),
-  }).optional(),
+  status: z.enum(['active', 'maintenance', 'inactive', 'decommissioned']).default('active'),
+  asset_metadata: z
+    .object({
+      panel_type: z.string().optional(),
+      inverter_model: z.string().optional(),
+      orientation: z.string().optional(),
+      tilt_angle: z.number().optional(),
+    })
+    .optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -61,23 +66,23 @@ export function AddAssetDialog({ member, cerId, children }: AddAssetDialogProps)
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      asset_type: "SOLAR",
+      name: '',
+      asset_type: 'SOLAR',
       capacity: 0,
-      installation_date: new Date().toISOString().split("T")[0],
-      gse_registration_id: "",
-      status: "active",
+      installation_date: new Date().toISOString().split('T')[0],
+      gse_registration_id: '',
+      status: 'active',
       asset_metadata: {
-        panel_type: "",
-        inverter_model: "",
-        orientation: "south",
+        panel_type: '',
+        inverter_model: '',
+        orientation: 'south',
         tilt_angle: 30,
       },
     },
   });
 
-  const assetType = form.watch("asset_type");
-  const showSolarFields = assetType === "SOLAR";
+  const assetType = form.watch('asset_type');
+  const showSolarFields = assetType === 'SOLAR';
 
   const { mutate: addAsset, isPending } = useMutation({
     mutationFn: async (data: FormData) => {
@@ -87,13 +92,13 @@ export function AddAssetDialog({ member, cerId, children }: AddAssetDialogProps)
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cer-members", cerId] });
-      queryClient.invalidateQueries({ queryKey: ["member-assets", cerId, member.id] });
-      toast.success("Asset added successfully");
+      queryClient.invalidateQueries({ queryKey: ['cer-members', cerId] });
+      queryClient.invalidateQueries({ queryKey: ['member-assets', cerId, member.id] });
+      toast.success('Asset added successfully');
       form.reset();
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to add asset");
+      toast.error(error.message || 'Failed to add asset');
     },
   });
 
@@ -108,7 +113,8 @@ export function AddAssetDialog({ member, cerId, children }: AddAssetDialogProps)
         <DialogHeader>
           <DialogTitle>Add New Asset</DialogTitle>
           <DialogDescription>
-            Add a new energy asset for {member.name} ({member.pod_id}). Fill in the required information below.
+            Add a new energy asset for {member.name} ({member.pod_id}). Fill in the required
+            information below.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -318,7 +324,7 @@ export function AddAssetDialog({ member, cerId, children }: AddAssetDialogProps)
 
             <DialogFooter>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Adding..." : "Add Asset"}
+                {isPending ? 'Adding...' : 'Add Asset'}
               </Button>
             </DialogFooter>
           </form>
@@ -327,4 +333,3 @@ export function AddAssetDialog({ member, cerId, children }: AddAssetDialogProps)
     </Dialog>
   );
 }
-

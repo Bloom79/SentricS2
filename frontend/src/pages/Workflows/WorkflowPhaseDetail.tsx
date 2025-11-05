@@ -72,7 +72,7 @@ export default function WorkflowPhaseDetail() {
   const { workflowId, phaseId } = useParams<{ workflowId: string; phaseId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
+
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [notes, setNotes] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -101,7 +101,15 @@ export default function WorkflowPhaseDetail() {
 
   // Update phase status mutation
   const updatePhaseStatusMutation = useMutation({
-    mutationFn: async ({ status, notes: phaseNotes, form_data: formData }: { status: string; notes?: string; form_data?: Record<string, any> }) => {
+    mutationFn: async ({
+      status,
+      notes: phaseNotes,
+      form_data: formData,
+    }: {
+      status: string;
+      notes?: string;
+      form_data?: Record<string, any>;
+    }) => {
       const response = await apiClient.put(`/workflows/${workflowId}/phases/${phaseId}/status`, {
         status,
         notes: phaseNotes || notes,
@@ -121,7 +129,15 @@ export default function WorkflowPhaseDetail() {
 
   // Upload document mutation
   const uploadDocumentMutation = useMutation({
-    mutationFn: async ({ file, documentType, description }: { file: File; documentType: string; description?: string }) => {
+    mutationFn: async ({
+      file,
+      documentType,
+      description,
+    }: {
+      file: File;
+      documentType: string;
+      description?: string;
+    }) => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('document_type', documentType);
@@ -178,9 +194,10 @@ export default function WorkflowPhaseDetail() {
 
   const handleDocumentUpload = (file: File) => {
     setUploading(true);
-    const documentType = prompt('Enter document type (e.g., APPLICATION_FORM, CERTIFICATE):') || 'OTHER';
+    const documentType =
+      prompt('Enter document type (e.g., APPLICATION_FORM, CERTIFICATE):') || 'OTHER';
     const description = prompt('Enter document description (optional):') || undefined;
-    
+
     uploadDocumentMutation.mutate(
       { file, documentType, description },
       {
@@ -191,7 +208,7 @@ export default function WorkflowPhaseDetail() {
 
   const handleCompletePhase = () => {
     if (!phase) return;
-    
+
     // Save form data and notes before completing
     updatePhaseStatusMutation.mutate({
       status: 'completed',
@@ -202,7 +219,7 @@ export default function WorkflowPhaseDetail() {
 
   const handleSaveProgress = () => {
     if (!phase) return;
-    
+
     updatePhaseStatusMutation.mutate({
       status: phase.status === 'pending' ? 'in_progress' : phase.status,
       notes: notes,
@@ -238,7 +255,8 @@ export default function WorkflowPhaseDetail() {
   }
 
   const isCompleted = phase.status?.toLowerCase() === 'completed';
-  const isInProgress = phase.status?.toLowerCase() === 'in_progress' || phase.status?.toLowerCase() === 'in progress';
+  const isInProgress =
+    phase.status?.toLowerCase() === 'in_progress' || phase.status?.toLowerCase() === 'in progress';
   const isOverdue = phase.due_date && new Date(phase.due_date) < new Date() && !isCompleted;
 
   return (
@@ -258,11 +276,13 @@ export default function WorkflowPhaseDetail() {
                   isCompleted
                     ? 'border-green-300 text-green-700'
                     : isInProgress
-                    ? 'border-blue-300 text-blue-700'
-                    : 'border-gray-300'
+                      ? 'border-blue-300 text-blue-700'
+                      : 'border-gray-300'
                 }
               >
-                {phase.status ? phase.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : 'Pending'}
+                {phase.status
+                  ? phase.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
+                  : 'Pending'}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -272,7 +292,11 @@ export default function WorkflowPhaseDetail() {
         </div>
         {!isCompleted && (
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleSaveProgress} disabled={updatePhaseStatusMutation.isPending}>
+            <Button
+              variant="outline"
+              onClick={handleSaveProgress}
+              disabled={updatePhaseStatusMutation.isPending}
+            >
               <Save className="h-4 w-4 mr-2" />
               Save Progress
             </Button>
@@ -292,7 +316,9 @@ export default function WorkflowPhaseDetail() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Calendar className={`h-4 w-4 ${isOverdue ? 'text-red-600' : 'text-muted-foreground'}`} />
+              <Calendar
+                className={`h-4 w-4 ${isOverdue ? 'text-red-600' : 'text-muted-foreground'}`}
+              />
               <span className={isOverdue ? 'text-red-600 font-medium' : ''}>
                 {phase.due_date ? new Date(phase.due_date).toLocaleDateString() : 'Not set'}
                 {isOverdue && ' (Overdue)'}
@@ -303,7 +329,9 @@ export default function WorkflowPhaseDetail() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Estimated Duration</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Estimated Duration
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -513,4 +541,3 @@ export default function WorkflowPhaseDetail() {
     </div>
   );
 }
-

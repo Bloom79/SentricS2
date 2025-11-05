@@ -6,11 +6,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  ArrowLeft, 
-  Clock, 
-  AlertCircle, 
-  FileText, 
+import {
+  ArrowLeft,
+  Clock,
+  AlertCircle,
+  FileText,
   Factory,
   Calendar,
   Target,
@@ -21,7 +21,7 @@ import {
   XCircle,
   Upload,
   MessageSquare,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -167,62 +167,66 @@ export default function WorkflowDetail() {
   const [commentText, setCommentText] = useState('');
   const loadingRef = React.useRef(false);
 
-  const loadWorkflow = React.useCallback(async (workflowId: number) => {
-    if (!workflowId || isNaN(workflowId)) {
-      console.error('Invalid workflow ID:', workflowId);
-      setLoading(false);
-      loadingRef.current = false;
-      return;
-    }
-    
-    // Prevent multiple simultaneous loads using ref
-    if (loadingRef.current) {
-      console.log('Already loading, skipping...');
-      return;
-    }
-    
-    try {
-      loadingRef.current = true;
-      setLoading(true);
-      console.log('Loading workflow:', workflowId);
-      console.log('Current user data:', localStorage.getItem('user_data'));
-      
-      const response = await apiClient.get(`/workflows/${workflowId}`);
-      console.log('Workflow response received:', response);
-      console.log('Response status:', response.status);
-      console.log('Response data:', response.data);
-      
-      if (response && response.data) {
-        console.log('Setting workflow data:', response.data);
-      setWorkflow(response.data);
-      } else {
-        console.error('No data in response:', response);
-        toast.error('Workflow data is empty');
+  const loadWorkflow = React.useCallback(
+    async (workflowId: number) => {
+      if (!workflowId || isNaN(workflowId)) {
+        console.error('Invalid workflow ID:', workflowId);
+        setLoading(false);
+        loadingRef.current = false;
+        return;
+      }
+
+      // Prevent multiple simultaneous loads using ref
+      if (loadingRef.current) {
+        console.log('Already loading, skipping...');
+        return;
+      }
+
+      try {
+        loadingRef.current = true;
+        setLoading(true);
+        console.log('Loading workflow:', workflowId);
+        console.log('Current user data:', localStorage.getItem('user_data'));
+
+        const response = await apiClient.get(`/workflows/${workflowId}`);
+        console.log('Workflow response received:', response);
+        console.log('Response status:', response.status);
+        console.log('Response data:', response.data);
+
+        if (response && response.data) {
+          console.log('Setting workflow data:', response.data);
+          setWorkflow(response.data);
+        } else {
+          console.error('No data in response:', response);
+          toast.error('Workflow data is empty');
+          setWorkflow(null);
+        }
+      } catch (error: any) {
+        console.error('Error loading workflow:', error);
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response,
+          status: error.response?.status,
+          data: error.response?.data,
+        });
+
+        const errorMessage =
+          error.response?.data?.detail || error.message || 'Failed to load workflow';
+        toast.error(errorMessage);
         setWorkflow(null);
+
+        // If 404 or 403, navigate back to workflows list
+        if (error.response?.status === 404 || error.response?.status === 403) {
+          setTimeout(() => navigate('/workflows'), 2000);
+        }
+      } finally {
+        console.log('Setting loading to false');
+        loadingRef.current = false;
+        setLoading(false);
       }
-    } catch (error: any) {
-      console.error('Error loading workflow:', error);
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-      
-      const errorMessage = error.response?.data?.detail || error.message || 'Failed to load workflow';
-      toast.error(errorMessage);
-      setWorkflow(null);
-      
-      // If 404 or 403, navigate back to workflows list
-      if (error.response?.status === 404 || error.response?.status === 403) {
-        setTimeout(() => navigate('/workflows'), 2000);
-      }
-    } finally {
-      console.log('Setting loading to false');
-      loadingRef.current = false;
-      setLoading(false);
-    }
-  }, [navigate]);
+    },
+    [navigate]
+  );
 
   useEffect(() => {
     if (id) {
@@ -241,7 +245,15 @@ export default function WorkflowDetail() {
   }, [id, loadWorkflow, navigate]);
 
   const updatePhaseStatusMutation = useMutation({
-    mutationFn: async ({ phaseId, status, notes }: { phaseId: number; status: string; notes?: string }) => {
+    mutationFn: async ({
+      phaseId,
+      status,
+      notes,
+    }: {
+      phaseId: number;
+      status: string;
+      notes?: string;
+    }) => {
       const workflowId = id || params.workflowId;
       const response = await apiClient.put(`/workflows/${workflowId}/phases/${phaseId}/status`, {
         status,
@@ -330,9 +342,14 @@ export default function WorkflowDetail() {
     );
   }
 
-  const isOverdue = workflow.due_date && new Date(workflow.due_date) < new Date() && workflow.status !== 'Completed';
-  const daysRemaining = workflow.due_date 
-    ? Math.ceil((new Date(workflow.due_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+  const isOverdue =
+    workflow.due_date &&
+    new Date(workflow.due_date) < new Date() &&
+    workflow.status !== 'Completed';
+  const daysRemaining = workflow.due_date
+    ? Math.ceil(
+        (new Date(workflow.due_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+      )
     : null;
 
   return (
@@ -346,7 +363,7 @@ export default function WorkflowDetail() {
           </Button>
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">{workflow.name}</h1>
+              <h1 className="text-3xl font-bold">{workflow.name}</h1>
               <Badge className={getStatusColor(workflow.status)}>
                 <span className="flex items-center gap-1.5">
                   {getStatusIcon(workflow.status)}
@@ -358,7 +375,7 @@ export default function WorkflowDetail() {
               </Badge>
             </div>
             {workflow.description && (
-            <p className="text-muted-foreground mt-1">{workflow.description}</p>
+              <p className="text-muted-foreground mt-1">{workflow.description}</p>
             )}
           </div>
         </div>
@@ -385,7 +402,7 @@ export default function WorkflowDetail() {
                   <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
                 </Button>
               )}
-        </div>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -397,10 +414,10 @@ export default function WorkflowDetail() {
             <div className="flex items-center gap-3">
               <Target className="h-5 w-5 text-muted-foreground" />
               <div>
-          <p className="text-sm text-muted-foreground">Progress</p>
+                <p className="text-sm text-muted-foreground">Progress</p>
                 <p className="text-2xl font-bold">{workflow.progress_percentage}%</p>
               </div>
-        </div>
+            </div>
             <Progress value={workflow.progress_percentage} className="mt-3" />
           </CardContent>
         </Card>
@@ -409,22 +426,25 @@ export default function WorkflowDetail() {
           <Card className={isOverdue ? 'border-red-200 bg-red-50 dark:bg-red-950/20' : ''}>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <Calendar className={`h-5 w-5 ${isOverdue ? 'text-red-600' : 'text-muted-foreground'}`} />
+                <Calendar
+                  className={`h-5 w-5 ${isOverdue ? 'text-red-600' : 'text-muted-foreground'}`}
+                />
                 <div>
                   <p className="text-sm text-muted-foreground">Due Date</p>
                   <p className={`text-2xl font-bold ${isOverdue ? 'text-red-600' : ''}`}>
                     {new Date(workflow.due_date).toLocaleDateString()}
                   </p>
                   {daysRemaining !== null && (
-                    <p className={`text-xs mt-1 ${isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'}`}>
-                      {isOverdue 
+                    <p
+                      className={`text-xs mt-1 ${isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'}`}
+                    >
+                      {isOverdue
                         ? `Overdue by ${Math.abs(daysRemaining)} days`
-                        : `${daysRemaining} days remaining`
-                      }
+                        : `${daysRemaining} days remaining`}
                     </p>
                   )}
-        </div>
-      </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -474,17 +494,21 @@ export default function WorkflowDetail() {
               <>
                 {/* Progress Overview */}
                 <div className="bg-muted/50 rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">Overall Progress</span>
                     <span className="text-sm font-semibold">
-                      {workflow.phases.filter(p => p.status?.toLowerCase() === 'completed').length} / {workflow.phases.length} completed
-                  </span>
+                      {
+                        workflow.phases.filter((p) => p.status?.toLowerCase() === 'completed')
+                          .length
+                      }{' '}
+                      / {workflow.phases.length} completed
+                    </span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
                       className="bg-primary h-2 rounded-full transition-all"
                       style={{
-                        width: `${(workflow.phases.filter(p => p.status?.toLowerCase() === 'completed').length / workflow.phases.length) * 100}%`
+                        width: `${(workflow.phases.filter((p) => p.status?.toLowerCase() === 'completed').length / workflow.phases.length) * 100}%`,
                       }}
                     />
                   </div>
@@ -494,10 +518,13 @@ export default function WorkflowDetail() {
                 <div className="space-y-3">
                   {workflow.phases.map((phase, index) => {
                     const isCompleted = phase.status?.toLowerCase() === 'completed';
-                    const isInProgress = phase.status?.toLowerCase() === 'in_progress' || phase.status?.toLowerCase() === 'in progress';
+                    const isInProgress =
+                      phase.status?.toLowerCase() === 'in_progress' ||
+                      phase.status?.toLowerCase() === 'in progress';
                     const isPending = phase.status?.toLowerCase() === 'pending' || !phase.status;
-                    const isOverdue = phase.due_date && new Date(phase.due_date) < new Date() && !isCompleted;
-                    
+                    const isOverdue =
+                      phase.due_date && new Date(phase.due_date) < new Date() && !isCompleted;
+
                     return (
                       <div
                         key={phase.id}
@@ -505,29 +532,33 @@ export default function WorkflowDetail() {
                           isCompleted
                             ? 'bg-green-50 dark:bg-green-950/20 border-green-300'
                             : isInProgress
-                            ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-300'
-                            : isOverdue
-                            ? 'bg-red-50 dark:bg-red-950/20 border-red-300'
-                            : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200'
+                              ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-300'
+                              : isOverdue
+                                ? 'bg-red-50 dark:bg-red-950/20 border-red-300'
+                                : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200'
                         }`}
                         onClick={() => navigate(`/workflows/${workflow.id}/phases/${phase.id}`)}
                       >
                         {/* Step Number Badge */}
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                          isCompleted
-                            ? 'bg-green-500 text-white'
-                            : isInProgress
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                        }`}>
+                        <div
+                          className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                            isCompleted
+                              ? 'bg-green-500 text-white'
+                              : isInProgress
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
                           {phase.order}
                         </div>
 
                         {/* Connecting Line */}
                         {index < workflow.phases.length - 1 && (
-                          <div className={`absolute left-[33px] top-[50px] w-0.5 h-6 ${
-                            isCompleted ? 'bg-green-300' : 'bg-gray-300'
-                          }`} />
+                          <div
+                            className={`absolute left-[33px] top-[50px] w-0.5 h-6 ${
+                              isCompleted ? 'bg-green-300' : 'bg-gray-300'
+                            }`}
+                          />
                         )}
 
                         {/* Phase Content */}
@@ -537,38 +568,46 @@ export default function WorkflowDetail() {
                               <div className="flex items-center gap-2 mb-1">
                                 <h3 className="font-semibold text-lg">{phase.name}</h3>
                                 {getPhaseStatusIcon(phase.status)}
-                </div>
-                {phase.description && (
-                                <p className="text-sm text-muted-foreground">
-                    {phase.description}
-                  </p>
-                )}
+                              </div>
+                              {phase.description && (
+                                <p className="text-sm text-muted-foreground">{phase.description}</p>
+                              )}
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <Badge 
-                                variant="outline" 
+                              <Badge
+                                variant="outline"
                                 className={`text-xs ${
                                   isCompleted
                                     ? 'border-green-300 text-green-700'
                                     : isInProgress
-                                    ? 'border-blue-300 text-blue-700'
-                                    : 'border-gray-300'
+                                      ? 'border-blue-300 text-blue-700'
+                                      : 'border-gray-300'
                                 }`}
                               >
-                                {phase.status ? phase.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Pending'}
+                                {phase.status
+                                  ? phase.status
+                                      .replace('_', ' ')
+                                      .replace(/\b\w/g, (l) => l.toUpperCase())
+                                  : 'Pending'}
                               </Badge>
                             </div>
                           </div>
 
                           {/* Phase Details */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                {phase.due_date && (
+                            {phase.due_date && (
                               <div className="flex items-center gap-2 text-xs">
-                                <Calendar className={`h-4 w-4 ${
-                                  isOverdue ? 'text-red-600' : 'text-muted-foreground'
-                                }`} />
-                                <span className={isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'}>
-                    Due: {new Date(phase.due_date).toLocaleDateString()}
+                                <Calendar
+                                  className={`h-4 w-4 ${
+                                    isOverdue ? 'text-red-600' : 'text-muted-foreground'
+                                  }`}
+                                />
+                                <span
+                                  className={
+                                    isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'
+                                  }
+                                >
+                                  Due: {new Date(phase.due_date).toLocaleDateString()}
                                   {isOverdue && ' (Overdue)'}
                                 </span>
                               </div>
@@ -586,8 +625,8 @@ export default function WorkflowDetail() {
                                 <Clock className="h-4 w-4" />
                                 <span>Estimated: {phase.phase_data.estimated_days} days</span>
                               </div>
-                )}
-              </div>
+                            )}
+                          </div>
 
                           {/* Phase Actions */}
                           {!isCompleted && (
@@ -639,12 +678,16 @@ export default function WorkflowDetail() {
                           {/* Phase Comments */}
                           {phase.phase_data?.comments && phase.phase_data.comments.length > 0 && (
                             <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                              <p className="text-xs font-medium text-muted-foreground mb-2">Comments ({phase.phase_data.comments.length})</p>
+                              <p className="text-xs font-medium text-muted-foreground mb-2">
+                                Comments ({phase.phase_data.comments.length})
+                              </p>
                               <div className="space-y-2">
                                 {phase.phase_data.comments.map((comment: any) => (
                                   <div key={comment.id} className="text-xs bg-muted/50 rounded p-2">
                                     <div className="flex items-center gap-2 mb-1">
-                                      <span className="font-medium">{comment.author_name || comment.author}</span>
+                                      <span className="font-medium">
+                                        {comment.author_name || comment.author}
+                                      </span>
                                       <span className="text-muted-foreground">
                                         {new Date(comment.timestamp).toLocaleString()}
                                       </span>
@@ -659,7 +702,9 @@ export default function WorkflowDetail() {
                           {/* Phase Documents */}
                           {phase.phase_data?.documents && phase.phase_data.documents.length > 0 && (
                             <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                              <p className="text-xs font-medium text-muted-foreground mb-2">Documents ({phase.phase_data.documents.length})</p>
+                              <p className="text-xs font-medium text-muted-foreground mb-2">
+                                Documents ({phase.phase_data.documents.length})
+                              </p>
                               <div className="space-y-1">
                                 {phase.phase_data.documents.map((doc: any, idx: number) => (
                                   <div key={idx} className="flex items-center gap-2 text-xs">
@@ -668,10 +713,10 @@ export default function WorkflowDetail() {
                                     <Badge variant="outline" className="text-xs ml-auto">
                                       {doc.type}
                                     </Badge>
-            </div>
-          ))}
-        </div>
-      </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -741,9 +786,7 @@ export default function WorkflowDetail() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Comment to Phase</DialogTitle>
-            <DialogDescription>
-              Add a note or comment for {selectedPhase?.name}
-            </DialogDescription>
+            <DialogDescription>Add a note or comment for {selectedPhase?.name}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -783,9 +826,7 @@ export default function WorkflowDetail() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Upload Document</DialogTitle>
-            <DialogDescription>
-              Upload a document for {selectedPhase?.name}
-            </DialogDescription>
+            <DialogDescription>Upload a document for {selectedPhase?.name}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -814,14 +855,10 @@ export default function WorkflowDetail() {
             <Button variant="outline" onClick={() => setShowPhaseDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => toast.info('Document upload coming soon')}>
-              Upload
-            </Button>
+            <Button onClick={() => toast.info('Document upload coming soon')}>Upload</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
-
-

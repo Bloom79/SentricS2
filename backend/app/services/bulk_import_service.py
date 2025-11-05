@@ -22,15 +22,22 @@ class BulkImportService:
 
     REQUIRED_COLUMNS = ["name", "model"]
     OPTIONAL_COLUMNS = [
-        "manufacturer", "serial_number", "location", "installation_date",
-        "status", "power_rating", "efficiency", "voltage", "current",
-        "string_number", "notes"
+        "manufacturer",
+        "serial_number",
+        "location",
+        "installation_date",
+        "status",
+        "power_rating",
+        "efficiency",
+        "voltage",
+        "current",
+        "string_number",
+        "notes",
     ]
 
     @staticmethod
     def parse_csv(
-        csv_content: str,
-        has_header: bool = True
+        csv_content: str, has_header: bool = True
     ) -> Tuple[List[Dict[str, Any]], List[str]]:
         """Parse CSV content and return rows with errors"""
         errors = []
@@ -38,33 +45,36 @@ class BulkImportService:
 
         try:
             csv_reader = csv.DictReader(io.StringIO(csv_content))
-            
+
             # Check required columns
             if has_header:
                 reader_fieldnames = csv_reader.fieldnames or []
-                missing_columns = [col for col in BulkImportService.REQUIRED_COLUMNS if col not in reader_fieldnames]
+                missing_columns = [
+                    col
+                    for col in BulkImportService.REQUIRED_COLUMNS
+                    if col not in reader_fieldnames
+                ]
                 if missing_columns:
                     errors.append(f"Missing required columns: {', '.join(missing_columns)}")
                     return rows, errors
 
             for row_num, row in enumerate(csv_reader, start=2 if has_header else 1):
                 # Normalize keys (lowercase, strip spaces)
-                normalized_row = {k.lower().strip(): v.strip() if v else None for k, v in row.items()}
-                
+                normalized_row = {
+                    k.lower().strip(): v.strip() if v else None for k, v in row.items()
+                }
+
                 # Validate required fields
                 row_errors = []
                 for col in BulkImportService.REQUIRED_COLUMNS:
                     if not normalized_row.get(col):
                         row_errors.append(f"Row {row_num}: Missing required field '{col}'")
-                
+
                 if row_errors:
                     errors.extend(row_errors)
                     continue
 
-                rows.append({
-                    "row_number": row_num,
-                    "data": normalized_row
-                })
+                rows.append({"row_number": row_num, "data": normalized_row})
 
         except Exception as e:
             errors.append(f"CSV parsing error: {str(e)}")
@@ -79,7 +89,7 @@ class BulkImportService:
         db: Session,
         tenant_id: str,
         number_of_strings: int = 0,
-        panels_per_string: int = 0
+        panels_per_string: int = 0,
     ) -> List[str]:
         """Validate a single panel row"""
         errors = []
@@ -105,7 +115,9 @@ class BulkImportService:
                 try:
                     datetime.strptime(installation_date, "%Y-%m-%d %H:%M:%S")
                 except ValueError:
-                    errors.append("Installation date must be in format YYYY-MM-DD or YYYY-MM-DD HH:MM:SS")
+                    errors.append(
+                        "Installation date must be in format YYYY-MM-DD or YYYY-MM-DD HH:MM:SS"
+                    )
 
         # Validate status
         status = row_data.get("status", "operational")
@@ -133,24 +145,18 @@ class BulkImportService:
         csv_content: str,
         tenant_id: str,
         user_id: int,
-        has_header: bool = True
+        has_header: bool = True,
     ) -> Dict[str, Any]:
         """Import panels from CSV with string assignment"""
-        import_results = {
-            "success": 0,
-            "failed": 0,
-            "errors": [],
-            "imported_panels": []
-        }
+        import_results = {"success": 0, "failed": 0, "errors": [], "imported_panels": []}
 
         try:
             # Verify plant exists
-            plant = db.query(Plant).filter(
-                and_(
-                    Plant.id == plant_id,
-                    Plant.tenant_id == tenant_id
-                )
-            ).first()
+            plant = (
+                db.query(Plant)
+                .filter(and_(Plant.id == plant_id, Plant.tenant_id == tenant_id))
+                .first()
+            )
 
             if not plant:
                 raise ValueError(f"Plant {plant_id} not found")
@@ -162,13 +168,17 @@ class BulkImportService:
             string_assignments = {}
 
             if array_id:
-                array = db.query(Asset).filter(
-                    and_(
-                        Asset.id == array_id,
-                        Asset.tenant_id == tenant_id,
-                        Asset.component_type == "solar_array"
+                array = (
+                    db.query(Asset)
+                    .filter(
+                        and_(
+                            Asset.id == array_id,
+                            Asset.tenant_id == tenant_id,
+                            Asset.component_type == "solar_array",
+                        )
                     )
-                ).first()
+                    .first()
+                )
 
                 if array:
                     dynamic_attrs = array.dynamic_attributes or {}
@@ -194,8 +204,13 @@ class BulkImportService:
 
                 # Validate row
                 validation_errors = BulkImportService.validate_panel_row(
-                    row_data, array_id, plant_id, db, tenant_id,
-                    number_of_strings, panels_per_string
+                    row_data,
+                    array_id,
+                    plant_id,
+                    db,
+                    tenant_id,
+                    number_of_strings,
+                    panels_per_string,
                 )
 
                 if validation_errors:
@@ -208,9 +223,13 @@ class BulkImportService:
                 installation_date = None
                 if row_data.get("installation_date"):
                     try:
-                        installation_date = datetime.strptime(row_data["installation_date"], "%Y-%m-%d")
+                        installation_date = datetime.strptime(
+                            row_data["installation_date"], "%Y-%m-%d"
+                        )
                     except ValueError:
-                        installation_date = datetime.strptime(row_data["installation_date"], "%Y-%m-%d %H:%M:%S")
+                        installation_date = datetime.strptime(
+                            row_data["installation_date"], "%Y-%m-%d %H:%M:%S"
+                        )
 
                 # Create panel asset data
                 panel_data = {
@@ -224,17 +243,29 @@ class BulkImportService:
                     "component_type": "panel",
                     "plant_id": plant_id,
                     "dynamic_attributes": {
-                        "power_rating": float(row_data["power_rating"]) if row_data.get("power_rating") else None,
-                        "efficiency": float(row_data["efficiency"]) if row_data.get("efficiency") else None,
-                        "nominal_voltage": float(row_data["voltage"]) if row_data.get("voltage") else None,
-                        "nominal_current": float(row_data["current"]) if row_data.get("current") else None,
-                    }
+                        "power_rating": (
+                            float(row_data["power_rating"])
+                            if row_data.get("power_rating")
+                            else None
+                        ),
+                        "efficiency": (
+                            float(row_data["efficiency"]) if row_data.get("efficiency") else None
+                        ),
+                        "nominal_voltage": (
+                            float(row_data["voltage"]) if row_data.get("voltage") else None
+                        ),
+                        "nominal_current": (
+                            float(row_data["current"]) if row_data.get("current") else None
+                        ),
+                    },
                 }
 
-                panels_to_create.append({
-                    **panel_data,
-                    "row_number": row_num,  # Keep row number for error reporting
-                })
+                panels_to_create.append(
+                    {
+                        **panel_data,
+                        "row_number": row_num,  # Keep row number for error reporting
+                    }
+                )
 
                 # Store string assignment if provided
                 string_number = row_data.get("string_number")
@@ -247,12 +278,16 @@ class BulkImportService:
                 try:
                     # Check for duplicate serial numbers
                     if panel_data.get("serial_number"):
-                        existing = db.query(Asset).filter(
-                            and_(
-                                Asset.serial_number == panel_data["serial_number"],
-                                Asset.tenant_id == tenant_id
+                        existing = (
+                            db.query(Asset)
+                            .filter(
+                                and_(
+                                    Asset.serial_number == panel_data["serial_number"],
+                                    Asset.tenant_id == tenant_id,
+                                )
                             )
-                        ).first()
+                            .first()
+                        )
                         if existing:
                             import_results["errors"].append(
                                 f"Row {panel_data.get('row_number', idx + 1)}: Serial number {panel_data['serial_number']} already exists"
@@ -273,17 +308,19 @@ class BulkImportService:
                         installation_date=panel_data.get("installation_date"),
                         status=panel_data.get("status", "operational"),
                         dynamic_attributes=panel_data.get("dynamic_attributes", {}),
-                        created_by=user_id
+                        created_by=user_id,
                     )
 
                     db.add(panel)
                     db.flush()  # Get the ID
 
-                    created_panels.append({
-                        "id": panel.id,
-                        "name": panel.name,
-                        "string_number": panel_string_assignments.get(idx)
-                    })
+                    created_panels.append(
+                        {
+                            "id": panel.id,
+                            "name": panel.name,
+                            "string_number": panel_string_assignments.get(idx),
+                        }
+                    )
 
                     # Assign to string if specified
                     if idx in panel_string_assignments and array:
@@ -295,7 +332,9 @@ class BulkImportService:
                         f"Row {panel_data.get('row_number', idx + 1)}: Failed to create panel: {str(e)}"
                     )
                     import_results["failed"] += 1
-                    logger.error(f"Error creating panel in row {panel_data.get('row_number', idx + 1)}: {e}")
+                    logger.error(
+                        f"Error creating panel in row {panel_data.get('row_number', idx + 1)}: {e}"
+                    )
                     continue
 
             # Update array string assignments if panels were assigned
@@ -328,20 +367,21 @@ class BulkImportService:
     def generate_csv_template() -> str:
         """Generate CSV template for panel import"""
         header = ",".join(BulkImportService.REQUIRED_COLUMNS + BulkImportService.OPTIONAL_COLUMNS)
-        example_row = ",".join([
-            "Panel-001",  # name
-            "JKM420M-72H-V",  # model
-            "Jinko Solar",  # manufacturer
-            "SN001234",  # serial_number
-            "Row 1, Position 1",  # location
-            "2024-01-15",  # installation_date
-            "operational",  # status
-            "420",  # power_rating (W)
-            "21.5",  # efficiency (%)
-            "41.0",  # voltage (V)
-            "10.24",  # current (A)
-            "1",  # string_number
-            "Initial installation"  # notes
-        ])
+        example_row = ",".join(
+            [
+                "Panel-001",  # name
+                "JKM420M-72H-V",  # model
+                "Jinko Solar",  # manufacturer
+                "SN001234",  # serial_number
+                "Row 1, Position 1",  # location
+                "2024-01-15",  # installation_date
+                "operational",  # status
+                "420",  # power_rating (W)
+                "21.5",  # efficiency (%)
+                "41.0",  # voltage (V)
+                "10.24",  # current (A)
+                "1",  # string_number
+                "Initial installation",  # notes
+            ]
+        )
         return f"{header}\n{example_row}"
-

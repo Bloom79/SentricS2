@@ -10,6 +10,7 @@ from app.models.plant import PlantStatusEnum, PlantTypeEnum
 
 class PlantBase(BaseModel):
     """Base plant schema"""
+
     name: str = Field(..., min_length=1, max_length=200)
     code: str = Field(..., min_length=1, max_length=50)
     power: str = Field(..., description="Power as string, e.g., '1.2 MW'")
@@ -27,6 +28,7 @@ class PlantBase(BaseModel):
 
 class PlantCreate(PlantBase):
     """Schema for creating plant"""
+
     site_id: Optional[int] = None  # NEW: Site relationship
     cer_id: Optional[int] = None
     tags: List[str] = []
@@ -36,6 +38,7 @@ class PlantCreate(PlantBase):
 
 class PlantUpdate(BaseModel):
     """Schema for updating plant"""
+
     name: Optional[str] = None
     status: Optional[PlantStatusEnum] = None
     cer_id: Optional[int] = None
@@ -45,6 +48,7 @@ class PlantUpdate(BaseModel):
 
 class PlantResponse(PlantBase):
     """Schema for plant response"""
+
     id: int
     tenant_id: str
     site_id: Optional[int] = None  # NEW: Site relationship
@@ -58,7 +62,6 @@ class PlantResponse(PlantBase):
     dso_integration: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
-

@@ -34,12 +34,12 @@ import { toast } from 'sonner';
 import { cerService } from '@/services/api/cer.service';
 
 const cerFormSchema = z.object({
-  name: z.string().min(1, "Name is required").min(3, "Name must be at least 3 characters"),
+  name: z.string().min(1, 'Name is required').min(3, 'Name must be at least 3 characters'),
   description: z.string().optional(),
-  legal_type: z.enum(["cooperative", "association", "consortium"]),
-  address: z.string().min(1, "Address is required"),
-  region: z.string().min(1, "Region is required"),
-  primary_substation_id: z.string().min(1, "Primary substation ID is required"),
+  legal_type: z.enum(['cooperative', 'association', 'consortium']),
+  address: z.string().min(1, 'Address is required'),
+  region: z.string().min(1, 'Region is required'),
+  primary_substation_id: z.string().min(1, 'Primary substation ID is required'),
   location: z.array(z.number()).length(2).optional(), // [longitude, latitude]
   boundary: z.array(z.array(z.number())).optional(), // List of [lon, lat] pairs
 });
@@ -130,11 +130,7 @@ export default function CERCreate() {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Enter community description"
-                        {...field}
-                        rows={4}
-                      />
+                      <Textarea placeholder="Enter community description" {...field} rows={4} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -194,7 +190,6 @@ export default function CERCreate() {
                 )}
               />
 
-
               <FormField
                 control={form.control}
                 name="primary_substation_id"
@@ -233,4 +228,3 @@ export default function CERCreate() {
     </div>
   );
 }
-

@@ -10,6 +10,7 @@ from app.models.cer import CERLegalType, CERStatus, CERType
 
 class CERBase(BaseModel):
     """Base CER schema"""
+
     name: str = Field(..., min_length=3, max_length=200)
     description: Optional[str] = None
     legal_type: CERLegalType
@@ -21,6 +22,7 @@ class CERBase(BaseModel):
 
 class CERCreate(CERBase):
     """Schema for creating CER"""
+
     location: Optional[List[float]] = None  # [longitude, latitude]
     boundary: Optional[List[List[float]]] = None  # List of [lon, lat] pairs
     technical_info: Dict[str, Any] = {}
@@ -29,6 +31,7 @@ class CERCreate(CERBase):
 
 class CERUpdate(BaseModel):
     """Schema for updating CER"""
+
     name: Optional[str] = None
     description: Optional[str] = None
     status: Optional[CERStatus] = None
@@ -38,6 +41,7 @@ class CERUpdate(BaseModel):
 
 class CERResponse(CERBase):
     """Schema for CER response"""
+
     id: int
     status: CERStatus
     total_capacity: float
@@ -45,13 +49,14 @@ class CERResponse(CERBase):
     pnrr_funding_applied: bool
     created_at: datetime
     updated_at: Optional[datetime]
-    
+
     class Config:
         from_attributes = True
 
 
 class CERMemberBase(BaseModel):
     """Base CER member schema"""
+
     name: str
     address: str
     member_type: str  # consumer, producer, prosumer
@@ -64,6 +69,7 @@ class CERMemberBase(BaseModel):
 
 class CERMemberCreate(CERMemberBase):
     """Schema for creating CER member - supports all fields from old project"""
+
     smart_meter_id: Optional[str] = None
     meter_type: Optional[str] = None
     fiscal_code: Optional[str] = None
@@ -72,18 +78,18 @@ class CERMemberCreate(CERMemberBase):
     voltage_level: Optional[str] = None
     activation_date: Optional[datetime] = None
     verification_status: Optional[str] = None
-    
+
     # Production fields (for PRODUCER/PROSUMER) - stored in technical_info
     plant_type: Optional[str] = None  # PHOTOVOLTAIC, WIND, HYDRO, BIOMASS
     plant_capacity: Optional[float] = None  # in kW
     commissioning_date: Optional[datetime] = None
     is_incentivized: Optional[bool] = False
     capital_contribution: Optional[float] = None  # percentage 0-100
-    
+
     # Storage fields - stored in technical_info
     has_storage: Optional[bool] = False
     storage_capacity: Optional[float] = None  # in kWh
-    
+
     # Additional fields stored in JSON columns
     technical_info: Optional[Dict[str, Any]] = None
     load_profile_data: Optional[Dict[str, Any]] = None
@@ -94,6 +100,7 @@ class CERMemberCreate(CERMemberBase):
 
 class CERMemberUpdate(BaseModel):
     """Schema for updating CER member"""
+
     name: Optional[str] = None
     address: Optional[str] = None
     status: Optional[str] = None
@@ -111,6 +118,7 @@ class CERMemberUpdate(BaseModel):
 
 class CERMemberResponse(CERMemberBase):
     """Schema for CER member response"""
+
     id: int
     cer_id: int
     status: str
@@ -128,13 +136,14 @@ class CERMemberResponse(CERMemberBase):
     load_profile_data: Optional[Dict[str, Any]] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
 
 class CERStatsResponse(BaseModel):
     """Schema for CER statistics"""
+
     cer_id: int
     total_members: int
     producers: int
@@ -149,18 +158,21 @@ class CERStatsResponse(BaseModel):
 
 class CERParticipationRequestCreate(BaseModel):
     """Schema for creating participation request"""
+
     cer_id: int
     notes: Optional[str] = None
 
 
 class CERParticipationRequestUpdate(BaseModel):
     """Schema for updating participation request"""
+
     status: str  # pending, approved, rejected, cancelled
     notes: Optional[str] = None
 
 
 class CERParticipationRequestResponse(BaseModel):
     """Schema for participation request response"""
+
     id: int
     cer_id: int
     user_id: int
@@ -168,17 +180,17 @@ class CERParticipationRequestResponse(BaseModel):
     request_date: datetime
     processed_date: Optional[datetime] = None
     notes: Optional[str] = None
-    
+
     class Config:
         from_attributes = True
 
 
 class CERParticipationRequestWithDetails(CERParticipationRequestResponse):
     """Schema for participation request with user and CER details"""
+
     user_name: Optional[str] = None
     user_email: Optional[str] = None
     cer_name: Optional[str] = None
-    
+
     class Config:
         from_attributes = True
-

@@ -59,7 +59,8 @@ export function handleError(error: unknown): AppError {
 
     const code = errorCodeMap[status] || ErrorCodes.API_ERROR;
     const responseData = axiosError.response?.data as any;
-    const userMessage = responseData?.detail || responseData?.message || getDefaultUserMessage(status);
+    const userMessage =
+      responseData?.detail || responseData?.message || getDefaultUserMessage(status);
 
     return new AppError(
       axiosError.message || `API request failed: ${method} ${endpoint}`,
@@ -97,4 +98,3 @@ function getDefaultUserMessage(status: number): string {
   };
   return messages[status] || 'An error occurred. Please try again.';
 }
-

@@ -27,13 +27,13 @@ async def list_documents(
     type: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """List documents"""
     from app.models.plant import Plant
     from app.models.cer import CER
     from datetime import datetime
-    
+
     documents = document_service.list_documents(
         db=db,
         tenant_id=current_user.tenant_id,
@@ -43,9 +43,9 @@ async def list_documents(
         cer_id=cer_id,
         compliance_record_id=compliance_record_id,
         type=type,
-        status=status
+        status=status,
     )
-    
+
     # Enrich documents with related entity information
     result = []
     for doc in documents:
@@ -53,8 +53,8 @@ async def list_documents(
             "id": doc.id,
             "name": doc.name,
             "description": doc.description,
-            "type": doc.type.value if hasattr(doc.type, 'value') else str(doc.type),
-            "status": doc.status.value if hasattr(doc.status, 'value') else str(doc.status),
+            "type": doc.type.value if hasattr(doc.type, "value") else str(doc.type),
+            "status": doc.status.value if hasattr(doc.status, "value") else str(doc.status),
             "file_name": doc.file_name,
             "file_size": doc.file_size,
             "mime_type": doc.mime_type,
@@ -67,27 +67,27 @@ async def list_documents(
             "tags": doc.tags or [],
             "version": doc.version,
         }
-        
+
         # Add plant name if linked
         if doc.plant_id:
             plant = db.query(Plant).filter(Plant.id == doc.plant_id).first()
             if plant:
                 doc_dict["plant_name"] = plant.name
-        
+
         # Add CER name if linked
         if doc.cer_id:
             cer = db.query(CER).filter(CER.id == doc.cer_id).first()
             if cer:
                 doc_dict["cer_name"] = cer.name
-        
+
         # Calculate expiry status
         if doc.expiry_date:
             delta = doc.expiry_date - datetime.utcnow()
             doc_dict["days_until_expiry"] = delta.days
             doc_dict["is_expired"] = delta.days < 0
-        
+
         result.append(doc_dict)
-    
+
     return result
 
 
@@ -95,7 +95,7 @@ async def list_documents(
 async def get_document(
     document_id: int,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get document details"""
     document = document_service.get_document(db, document_id, current_user.tenant_id)
@@ -116,42 +116,42 @@ async def create_document(
     issue_date: Optional[str] = Query(None),
     expiry_date: Optional[str] = Query(None),
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Upload and create document"""
     try:
         from datetime import datetime
-        
+
         # Save file
         upload_dir = os.path.join(settings.UPLOAD_DIR, current_user.tenant_id)
         os.makedirs(upload_dir, exist_ok=True)
-        
+
         file_path = os.path.join(upload_dir, file.filename)
         with open(file_path, "wb") as f:
             content = await file.read()
             f.write(content)
-        
+
         # Parse dates if provided
         parsed_issue_date = None
         parsed_expiry_date = None
         if issue_date:
             try:
-                parsed_issue_date = datetime.fromisoformat(issue_date.replace('Z', '+00:00'))
+                parsed_issue_date = datetime.fromisoformat(issue_date.replace("Z", "+00:00"))
             except ValueError:
                 try:
-                    parsed_issue_date = datetime.strptime(issue_date, '%Y-%m-%d')
+                    parsed_issue_date = datetime.strptime(issue_date, "%Y-%m-%d")
                 except ValueError:
                     pass
-        
+
         if expiry_date:
             try:
-                parsed_expiry_date = datetime.fromisoformat(expiry_date.replace('Z', '+00:00'))
+                parsed_expiry_date = datetime.fromisoformat(expiry_date.replace("Z", "+00:00"))
             except ValueError:
                 try:
-                    parsed_expiry_date = datetime.strptime(expiry_date, '%Y-%m-%d')
+                    parsed_expiry_date = datetime.strptime(expiry_date, "%Y-%m-%d")
                 except ValueError:
                     pass
-        
+
         document_data = {
             "name": name,
             "description": description,
@@ -164,13 +164,13 @@ async def create_document(
             "issue_date": parsed_issue_date,
             "expiry_date": parsed_expiry_date,
         }
-        
+
         document = document_service.create_document(
             db=db,
             document_data=document_data,
             tenant_id=current_user.tenant_id,
             user_id=int(current_user.sub),
-            file_path=file_path
+            file_path=file_path,
         )
         return document
     except Exception as e:
@@ -182,36 +182,42 @@ async def update_document(
     document_id: int,
     update_data: dict,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update document"""
     from datetime import datetime
-    
+
     # Parse dates if provided as strings
-    if 'issue_date' in update_data and isinstance(update_data['issue_date'], str):
+    if "issue_date" in update_data and isinstance(update_data["issue_date"], str):
         try:
-            update_data['issue_date'] = datetime.fromisoformat(update_data['issue_date'].replace('Z', '+00:00'))
+            update_data["issue_date"] = datetime.fromisoformat(
+                update_data["issue_date"].replace("Z", "+00:00")
+            )
         except ValueError:
             try:
-                update_data['issue_date'] = datetime.strptime(update_data['issue_date'], '%Y-%m-%d')
+                update_data["issue_date"] = datetime.strptime(update_data["issue_date"], "%Y-%m-%d")
             except ValueError:
-                update_data['issue_date'] = None
-    
-    if 'expiry_date' in update_data and isinstance(update_data['expiry_date'], str):
+                update_data["issue_date"] = None
+
+    if "expiry_date" in update_data and isinstance(update_data["expiry_date"], str):
         try:
-            update_data['expiry_date'] = datetime.fromisoformat(update_data['expiry_date'].replace('Z', '+00:00'))
+            update_data["expiry_date"] = datetime.fromisoformat(
+                update_data["expiry_date"].replace("Z", "+00:00")
+            )
         except ValueError:
             try:
-                update_data['expiry_date'] = datetime.strptime(update_data['expiry_date'], '%Y-%m-%d')
+                update_data["expiry_date"] = datetime.strptime(
+                    update_data["expiry_date"], "%Y-%m-%d"
+                )
             except ValueError:
-                update_data['expiry_date'] = None
-    
+                update_data["expiry_date"] = None
+
     document = document_service.update_document(
         db=db,
         document_id=document_id,
         update_data=update_data,
         tenant_id=current_user.tenant_id,
-        user_id=int(current_user.sub)
+        user_id=int(current_user.sub),
     )
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -222,20 +228,20 @@ async def update_document(
 async def download_document(
     document_id: int,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Download document file"""
     document = document_service.get_document(db, document_id, current_user.tenant_id)
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
-    
+
     if not os.path.exists(document.file_path):
         raise HTTPException(status_code=404, detail="File not found on server")
-    
+
     return FileResponse(
         document.file_path,
-        media_type=document.mime_type or 'application/octet-stream',
-        filename=document.file_name
+        media_type=document.mime_type or "application/octet-stream",
+        filename=document.file_name,
     )
 
 
@@ -243,16 +249,15 @@ async def download_document(
 async def delete_document(
     document_id: int,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Delete document"""
     success = document_service.delete_document(
         db=db,
         document_id=document_id,
         tenant_id=current_user.tenant_id,
-        user_id=int(current_user.sub)
+        user_id=int(current_user.sub),
     )
     if not success:
         raise HTTPException(status_code=404, detail="Document not found")
     return None
-

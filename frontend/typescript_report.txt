@@ -1,0 +1,100 @@
+
+> kronos-eam-frontend@2.0.0 type-check
+> tsc --noEmit
+
+src/App.tsx(6,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/App.tsx(7,66): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/App.tsx(8,50): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+src/App.tsx(29,28): error TS2306: File '/home/user/SentricS2/frontend/src/pages/Admin/UserManagement.tsx' is not a module.
+src/App.tsx(65,68): error TS7031: Binding element 'children' implicitly has an 'any' type.
+src/App.tsx(70,7): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/App.tsx(71,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/App.tsx(72,7): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/App.tsx(84,65): error TS7031: Binding element 'children' implicitly has an 'any' type.
+src/App.tsx(89,7): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/App.tsx(90,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/App.tsx(91,7): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/App.tsx(104,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/BulkImport/BulkImportDialog.tsx(6,46): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/BulkImport/BulkImportDialog.tsx(7,45): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+src/components/BulkImport/BulkImportDialog.tsx(8,73): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/BulkImport/BulkImportDialog.tsx(52,17): error TS7006: Parameter 'result' implicitly has an 'any' type.
+src/components/BulkImport/BulkImportDialog.tsx(149,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/BulkImport/BulkImportDialog.tsx(158,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(165,15): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(165,73): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(166,15): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(166,67): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(167,15): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(167,67): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(169,17): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(171,17): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(177,11): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(182,13): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(184,17): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(187,17): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(189,15): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(190,13): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(191,11): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(194,11): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(195,13): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(199,26): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/BulkImport/BulkImportDialog.tsx(202,13): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(204,13): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(205,11): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(213,15): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(215,28): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/BulkImport/BulkImportDialog.tsx(233,17): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(234,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(235,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(237,25): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(239,29): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(241,29): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(243,25): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(245,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(246,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(247,66): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/components/BulkImport/BulkImportDialog.tsx(247,71): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/components/BulkImport/BulkImportDialog.tsx(248,25): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(250,29): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(252,29): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(254,25): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(256,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(257,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(258,17): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(270,17): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(272,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(272,94): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(273,17): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(275,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(277,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(277,94): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(278,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(281,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(282,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(282,62): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(283,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(284,69): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/components/BulkImport/BulkImportDialog.tsx(284,76): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/components/BulkImport/BulkImportDialog.tsx(285,25): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(287,25): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(289,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(290,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(297,11): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(304,11): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/BulkImport/BulkImportDialog.tsx(305,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(6,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(7,80): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(24,11): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(124,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(124,54): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(125,9): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(128,13): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(129,15): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(131,15): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(132,15): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(134,19): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(137,35): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(140,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(140,76): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+src/components/PlantVisualDesigner/ComponentsPalette.tsx(141,21): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.

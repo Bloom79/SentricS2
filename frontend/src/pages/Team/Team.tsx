@@ -53,9 +53,7 @@ export default function Team() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Team</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage team members, roles, and permissions
-          </p>
+          <p className="text-muted-foreground mt-1">Manage team members, roles, and permissions</p>
         </div>
         <Button>
           <UserPlus className="mr-2 h-4 w-4" />
@@ -66,10 +64,7 @@ export default function Team() {
       {/* Team Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {members.map((member) => (
-          <div
-            key={member.id}
-            className="border rounded-lg p-6 hover:shadow-md transition-shadow"
-          >
+          <div key={member.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -90,11 +85,9 @@ export default function Team() {
                   <p className="text-sm text-muted-foreground">{member.email}</p>
                 </div>
               </div>
-              {member.status === 'ACTIVE' && (
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              )}
+              {member.status === 'ACTIVE' && <CheckCircle className="h-5 w-5 text-green-600" />}
             </div>
-            
+
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
@@ -122,7 +115,9 @@ export default function Team() {
                 <Mail className="mr-2 h-4 w-4" />
                 Contact
               </Button>
-              <Button variant="outline" size="sm">View</Button>
+              <Button variant="outline" size="sm">
+                View
+              </Button>
             </div>
           </div>
         ))}
@@ -137,5 +132,3 @@ export default function Team() {
     </div>
   );
 }
-
-

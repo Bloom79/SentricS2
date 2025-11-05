@@ -10,6 +10,7 @@ from datetime import datetime
 
 class WorkflowPhaseBase(BaseModel):
     """Base workflow phase schema"""
+
     name: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None
     order: int = Field(..., ge=0)
@@ -20,6 +21,7 @@ class WorkflowPhaseBase(BaseModel):
 
 class WorkflowPhaseCreate(WorkflowPhaseBase):
     """Schema for creating workflow phase"""
+
     required_documents: List[str] = []
     official_form_fields: Dict[str, Any] = {}
     portal_url: Optional[str] = None
@@ -47,6 +49,7 @@ class WorkflowPhaseCreate(WorkflowPhaseBase):
 
 class WorkflowPhaseUpdate(BaseModel):
     """Schema for updating workflow phase"""
+
     name: Optional[str] = None
     description: Optional[str] = None
     status: Optional[str] = None
@@ -61,6 +64,7 @@ class WorkflowPhaseUpdate(BaseModel):
 
 class WorkflowPhaseResponse(WorkflowPhaseBase):
     """Schema for workflow phase response"""
+
     id: int
     workflow_id: int
     tenant_id: str
@@ -94,13 +98,14 @@ class WorkflowPhaseResponse(WorkflowPhaseBase):
     completed_date: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
 
 class WorkflowBase(BaseModel):
     """Base workflow schema"""
+
     name: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None
     type: str
@@ -113,11 +118,13 @@ class WorkflowBase(BaseModel):
 
 class WorkflowCreate(WorkflowBase):
     """Schema for creating workflow"""
+
     workflow_data: Dict[str, Any] = {}
 
 
 class WorkflowUpdate(BaseModel):
     """Schema for updating workflow"""
+
     name: Optional[str] = None
     description: Optional[str] = None
     status: Optional[str] = None
@@ -129,6 +136,7 @@ class WorkflowUpdate(BaseModel):
 
 class WorkflowResponse(WorkflowBase):
     """Schema for workflow response"""
+
     id: int
     tenant_id: str
     status: str
@@ -138,7 +146,6 @@ class WorkflowResponse(WorkflowBase):
     completed_date: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
-

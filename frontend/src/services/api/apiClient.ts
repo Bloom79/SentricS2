@@ -69,18 +69,20 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_data');
-      
+
       // Only redirect if not already on login page
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
-      
+
       return Promise.reject(error);
     }
 
     // Handle network errors (timeout, no connection, etc.)
     if (error.code === 'ECONNABORTED' || error.message === 'Network Error' || !error.response) {
-      logger.error(`Network error: ${error.message || 'Connection timeout or network unavailable'}`);
+      logger.error(
+        `Network error: ${error.message || 'Connection timeout or network unavailable'}`
+      );
       // Don't block the UI - let React Query handle the error state
       return Promise.reject(error);
     }

@@ -396,7 +396,7 @@ def get_dso_tica_request_phases() -> List[Dict[str, Any]]:
                 "potenza_nominale": "Potenza nominale",
                 "dati_ubicazione": "Dati ubicazione",
                 "tipologia_connessione": "Tipologia connessione",
-            ],
+            },
             "checklist_items": [
                 "Inserimento potenza nominale",
                 "Inserimento dati ubicazione",
@@ -651,4 +651,3 @@ def get_all_italian_workflow_templates() -> Dict[str, List[Dict[str, Any]]]:
         "comune_authorization_100kw": get_comune_authorization_phases(100),
         "comune_authorization_300kw": get_comune_authorization_phases(300),
     }
-

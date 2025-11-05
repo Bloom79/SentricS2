@@ -20,7 +20,7 @@ import {
   Play,
   FileCheck,
   Loader2,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -97,28 +97,34 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
       ]);
 
       // Process requirements with their status
-      const processedRequirements = requirements.data?.map((req: any) => {
-        const relevantRecord = records.data?.find((r: any) => r.requirement_id === req.id);
-        const status = relevantRecord?.status === 'overdue' ? 'overdue' : 
-                      relevantRecord?.status === 'pending' ? 'pending' : 'compliant';
-        
-        return {
-          ...req,
-          status,
-          next_due: relevantRecord?.due_date,
-          last_completed: relevantRecord?.completed_date,
-        };
-      }) || [];
+      const processedRequirements =
+        requirements.data?.map((req: any) => {
+          const relevantRecord = records.data?.find((r: any) => r.requirement_id === req.id);
+          const status =
+            relevantRecord?.status === 'overdue'
+              ? 'overdue'
+              : relevantRecord?.status === 'pending'
+                ? 'pending'
+                : 'compliant';
+
+          return {
+            ...req,
+            status,
+            next_due: relevantRecord?.due_date,
+            last_completed: relevantRecord?.completed_date,
+          };
+        }) || [];
 
       // Calculate compliance metrics
       const totalRequirements = processedRequirements.length;
-      const compliantItems = processedRequirements.filter((r: any) => r.status === 'compliant').length;
+      const compliantItems = processedRequirements.filter(
+        (r: any) => r.status === 'compliant'
+      ).length;
       const overdueItems = processedRequirements.filter((r: any) => r.status === 'overdue').length;
       const pendingItems = processedRequirements.filter((r: any) => r.status === 'pending').length;
 
-      const complianceScore = totalRequirements > 0 
-        ? Math.round((compliantItems / totalRequirements) * 100)
-        : 0;
+      const complianceScore =
+        totalRequirements > 0 ? Math.round((compliantItems / totalRequirements) * 100) : 0;
 
       return {
         requirements: processedRequirements,
@@ -131,13 +137,15 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
           compliantItems,
           overdueItems,
           pendingItems,
-          activeWorkflows: workflows.data?.filter((w: any) => w.status === 'In Progress').length || 0,
+          activeWorkflows:
+            workflows.data?.filter((w: any) => w.status === 'In Progress').length || 0,
           totalDocuments: documents.data?.length || 0,
-          expiringDocuments: documents.data?.filter((d: any) => {
-            if (!d.expiry_date) return false;
-            const daysUntilExpiry = differenceInDays(new Date(d.expiry_date), new Date());
-            return daysUntilExpiry >= 0 && daysUntilExpiry <= 30;
-          }).length || 0,
+          expiringDocuments:
+            documents.data?.filter((d: any) => {
+              if (!d.expiry_date) return false;
+              const daysUntilExpiry = differenceInDays(new Date(d.expiry_date), new Date());
+              return daysUntilExpiry >= 0 && daysUntilExpiry <= 30;
+            }).length || 0,
         },
       };
     },
@@ -163,9 +171,9 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
   const handleStartWorkflow = (type: string) => {
     // Map workflow type to template ID
     const templateMap: Record<string, number> = {
-      'registration': 1,  // CER Registration
-      'activation': 2,    // Plant Activation
-      'monthly_report': 3, // Monthly Report
+      registration: 1, // CER Registration
+      activation: 2, // Plant Activation
+      monthly_report: 3, // Monthly Report
     };
 
     const templateId = templateMap[type];
@@ -191,10 +199,13 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Compliance Status</CardTitle>
-            <Badge 
+            <Badge
               variant={
-                (metrics?.complianceScore ?? 0) >= 80 ? 'default' : 
-                (metrics?.complianceScore ?? 0) >= 60 ? 'secondary' : 'destructive'
+                (metrics?.complianceScore ?? 0) >= 80
+                  ? 'default'
+                  : (metrics?.complianceScore ?? 0) >= 60
+                    ? 'secondary'
+                    : 'destructive'
               }
               className="text-lg px-3 py-1"
             >
@@ -204,7 +215,7 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
         </CardHeader>
         <CardContent className="space-y-4">
           <Progress value={metrics?.complianceScore || 0} className="h-3" />
-          
+
           <div className="grid grid-cols-4 gap-4">
             <div className="text-center">
               <p className="text-2xl font-bold">{metrics?.totalRequirements || 0}</p>
@@ -228,7 +239,8 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                You have {metrics?.overdueItems ?? 0} overdue compliance items that require immediate attention.
+                You have {metrics?.overdueItems ?? 0} overdue compliance items that require
+                immediate attention.
               </AlertDescription>
             </Alert>
           )}
@@ -273,15 +285,18 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {workflows?.filter((w: any) => w.status === 'In Progress').slice(0, 3).map((workflow: any) => (
-                    <div key={workflow.id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Play className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm">{workflow.name}</span>
+                  {workflows
+                    ?.filter((w: any) => w.status === 'In Progress')
+                    .slice(0, 3)
+                    .map((workflow: any) => (
+                      <div key={workflow.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Play className="h-4 w-4 text-blue-500" />
+                          <span className="text-sm">{workflow.name}</span>
+                        </div>
+                        <Badge variant="outline">{workflow.progress_percentage}%</Badge>
                       </div>
-                      <Badge variant="outline">{workflow.progress_percentage}%</Badge>
-                    </div>
-                  ))}
+                    ))}
                   {workflows?.filter((w: any) => w.status === 'In Progress').length === 0 && (
                     <p className="text-sm text-muted-foreground">No active workflows</p>
                   )}
@@ -295,8 +310,12 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {requirements?.filter((r: any) => r.next_due)
-                    .sort((a: any, b: any) => new Date(a.next_due).getTime() - new Date(b.next_due).getTime())
+                  {requirements
+                    ?.filter((r: any) => r.next_due)
+                    .sort(
+                      (a: any, b: any) =>
+                        new Date(a.next_due).getTime() - new Date(b.next_due).getTime()
+                    )
                     .slice(0, 3)
                     .map((req: any) => (
                       <div key={req.id} className="flex items-center justify-between">
@@ -350,10 +369,13 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
                       <TableCell>{req.authority}</TableCell>
                       <TableCell>{req.portal_name || '-'}</TableCell>
                       <TableCell>
-                        <Badge 
+                        <Badge
                           variant={
-                            req.status === 'compliant' ? 'default' : 
-                            req.status === 'overdue' ? 'destructive' : 'secondary'
+                            req.status === 'compliant'
+                              ? 'default'
+                              : req.status === 'overdue'
+                                ? 'destructive'
+                                : 'secondary'
                           }
                         >
                           {req.status}
@@ -363,8 +385,8 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
                         {req.next_due ? format(new Date(req.next_due), 'PPP') : '-'}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => {
                             // Start workflow for this requirement
@@ -418,7 +440,9 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
                       <TableCell className="font-medium">{workflow.name}</TableCell>
                       <TableCell>{workflow.type}</TableCell>
                       <TableCell>
-                        <Badge variant={workflow.status === 'In Progress' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={workflow.status === 'In Progress' ? 'default' : 'secondary'}
+                        >
                           {workflow.status}
                         </Badge>
                       </TableCell>
@@ -432,8 +456,8 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
                         {workflow.due_date ? format(new Date(workflow.due_date), 'PPP') : '-'}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => navigate(`/workflows/${workflow.id}`)}
                         >
@@ -492,13 +516,18 @@ export function PlantComplianceView({ plantId, plantName }: PlantComplianceViewP
                       <TableCell>{format(new Date(doc.upload_date), 'PPP')}</TableCell>
                       <TableCell>
                         {doc.expiry_date ? (
-                          <span className={
-                            differenceInDays(new Date(doc.expiry_date), new Date()) < 30 
-                              ? 'text-orange-500' : ''
-                          }>
+                          <span
+                            className={
+                              differenceInDays(new Date(doc.expiry_date), new Date()) < 30
+                                ? 'text-orange-500'
+                                : ''
+                            }
+                          >
                             {format(new Date(doc.expiry_date), 'PPP')}
                           </span>
-                        ) : '-'}
+                        ) : (
+                          '-'
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button size="sm" variant="outline">

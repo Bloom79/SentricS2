@@ -6,12 +6,12 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { 
-  AlertTriangle, 
-  Clock, 
-  CheckCircle2, 
-  FileText, 
-  Calendar, 
+import {
+  AlertTriangle,
+  Clock,
+  CheckCircle2,
+  FileText,
+  Calendar,
   Upload,
   Play,
   Plus,
@@ -20,7 +20,7 @@ import {
   AlertCircle,
   ChevronRight,
   FileCheck,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -86,10 +86,13 @@ export default function ComplianceManagement() {
 
       return {
         total_plants: plants.data?.length || 0,
-        compliant_plants: plants.data?.filter((p: any) => p.compliance_status === 'compliant').length || 0,
-        plants_with_issues: plants.data?.filter((p: any) => p.compliance_status !== 'compliant').length || 0,
+        compliant_plants:
+          plants.data?.filter((p: any) => p.compliance_status === 'compliant').length || 0,
+        plants_with_issues:
+          plants.data?.filter((p: any) => p.compliance_status !== 'compliant').length || 0,
         active_workflows: workflows.data?.length || 0,
-        pending_submissions: workflows.data?.filter((w: any) => w.type === 'Document Submission').length || 0,
+        pending_submissions:
+          workflows.data?.filter((w: any) => w.type === 'Document Submission').length || 0,
         documents_expiring_soon: documents.data?.length || 0,
         upcoming_deadlines_7d: 0, // Calculate from compliance records
         overdue_items: compliance.data?.length || 0,
@@ -102,7 +105,7 @@ export default function ComplianceManagement() {
     queryKey: ['plant-compliance'],
     queryFn: async () => {
       const plants = await apiClient.get('/plants');
-      
+
       // For each plant, fetch compliance data
       const plantComplianceData = await Promise.all(
         plants.data.map(async (plant: any) => {
@@ -111,13 +114,19 @@ export default function ComplianceManagement() {
             apiClient.get('/compliance/records', { params: { plant_id: plant.id } }),
           ]);
 
-          const overdueItems = compliance.data?.filter((c: any) => 
-            c.status === 'overdue' || (c.due_date && new Date(c.due_date) < new Date())
-          ).length || 0;
+          const overdueItems =
+            compliance.data?.filter(
+              (c: any) =>
+                c.status === 'overdue' || (c.due_date && new Date(c.due_date) < new Date())
+            ).length || 0;
 
-          const upcomingDeadlines = compliance.data?.filter((c: any) => 
-            c.due_date && new Date(c.due_date) > new Date() && new Date(c.due_date) < addDays(new Date(), 30)
-          ).length || 0;
+          const upcomingDeadlines =
+            compliance.data?.filter(
+              (c: any) =>
+                c.due_date &&
+                new Date(c.due_date) > new Date() &&
+                new Date(c.due_date) < addDays(new Date(), 30)
+            ).length || 0;
 
           // Calculate compliance score (0-100)
           const complianceScore = overdueItems > 0 ? 40 : upcomingDeadlines > 0 ? 70 : 100;
@@ -127,7 +136,8 @@ export default function ComplianceManagement() {
             plant_name: plant.name,
             plant_type: plant.type,
             status: overdueItems > 0 ? 'critical' : upcomingDeadlines > 2 ? 'warning' : 'compliant',
-            active_workflows: workflows.data?.filter((w: any) => w.status === 'In Progress').length || 0,
+            active_workflows:
+              workflows.data?.filter((w: any) => w.status === 'In Progress').length || 0,
             pending_documents: 0, // Calculate from document requirements
             upcoming_deadlines: upcomingDeadlines,
             overdue_items: overdueItems,
@@ -151,24 +161,29 @@ export default function ComplianceManagement() {
         params: { status: 'pending' },
       });
 
-      return compliance.data?.map((record: any) => {
-        const dueDate = new Date(record.due_date);
-        const today = new Date();
-        const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      return (
+        compliance.data?.map((record: any) => {
+          const dueDate = new Date(record.due_date);
+          const today = new Date();
+          const daysUntilDue = Math.ceil(
+            (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+          );
 
-        return {
-          id: record.id,
-          plant_id: record.plant_id,
-          plant_name: record.plant_name || `Plant #${record.plant_id}`,
-          requirement: record.requirement_name || record.requirement?.name || 'Compliance Requirement',
-          due_date: record.due_date,
-          status: daysUntilDue < 0 ? 'overdue' : daysUntilDue <= 7 ? 'due_soon' : 'upcoming',
-          portal: record.portal || 'GSE',
-          documents_required: record.required_documents || [],
-          penalty_amount: record.penalty_amount,
-          workflow_id: record.workflow_id,
-        };
-      }) || [];
+          return {
+            id: record.id,
+            plant_id: record.plant_id,
+            plant_name: record.plant_name || `Plant #${record.plant_id}`,
+            requirement:
+              record.requirement_name || record.requirement?.name || 'Compliance Requirement',
+            due_date: record.due_date,
+            status: daysUntilDue < 0 ? 'overdue' : daysUntilDue <= 7 ? 'due_soon' : 'upcoming',
+            portal: record.portal || 'GSE',
+            documents_required: record.required_documents || [],
+            penalty_amount: record.penalty_amount,
+            workflow_id: record.workflow_id,
+          };
+        }) || []
+      );
     },
   });
 
@@ -226,13 +241,13 @@ export default function ComplianceManagement() {
         <Card className={metrics?.overdue_items ? 'border-red-500' : ''}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Overdue Items</CardTitle>
-            <AlertTriangle className={`h-4 w-4 ${metrics?.overdue_items ? 'text-red-500' : 'text-muted-foreground'}`} />
+            <AlertTriangle
+              className={`h-4 w-4 ${metrics?.overdue_items ? 'text-red-500' : 'text-muted-foreground'}`}
+            />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.overdue_items || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Requires immediate attention
-            </p>
+            <p className="text-xs text-muted-foreground">Requires immediate attention</p>
           </CardContent>
         </Card>
 
@@ -256,9 +271,7 @@ export default function ComplianceManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.upcoming_deadlines_7d || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Next 7 days
-            </p>
+            <p className="text-xs text-muted-foreground">Next 7 days</p>
           </CardContent>
         </Card>
 
@@ -269,8 +282,10 @@ export default function ComplianceManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {metrics?.total_plants ? 
-                Math.round((metrics.compliant_plants / metrics.total_plants) * 100) : 0}%
+              {metrics?.total_plants
+                ? Math.round((metrics.compliant_plants / metrics.total_plants) * 100)
+                : 0}
+              %
             </div>
             <p className="text-xs text-muted-foreground">
               {metrics?.compliant_plants || 0} of {metrics?.total_plants || 0} plants
@@ -286,32 +301,32 @@ export default function ComplianceManagement() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="justify-start"
               onClick={() => handleQuickAction('submit-report')}
             >
               <Upload className="mr-2 h-4 w-4" />
               Submit Monthly Report
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="justify-start"
               onClick={() => handleQuickAction('upload-document')}
             >
               <FileText className="mr-2 h-4 w-4" />
               Upload Document
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="justify-start"
               onClick={() => navigate('/workflows')}
             >
               <Play className="mr-2 h-4 w-4" />
               View All Workflows
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="justify-start"
               onClick={() => navigate('/documents')}
             >
@@ -335,11 +350,14 @@ export default function ComplianceManagement() {
         <TabsContent value="plants" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {plantCompliance?.map((plant) => (
-              <Card 
+              <Card
                 key={plant.plant_id}
                 className={`cursor-pointer hover:shadow-md transition-shadow ${
-                  plant.status === 'critical' ? 'border-red-500' : 
-                  plant.status === 'warning' ? 'border-yellow-500' : ''
+                  plant.status === 'critical'
+                    ? 'border-red-500'
+                    : plant.status === 'warning'
+                      ? 'border-yellow-500'
+                      : ''
                 }`}
                 onClick={() => navigate(`/plants/${plant.plant_id}/compliance`)}
               >
@@ -349,10 +367,13 @@ export default function ComplianceManagement() {
                       <Factory className="h-4 w-4" />
                       <CardTitle className="text-base">{plant.plant_name}</CardTitle>
                     </div>
-                    <Badge 
+                    <Badge
                       variant={
-                        plant.status === 'compliant' ? 'default' : 
-                        plant.status === 'warning' ? 'secondary' : 'destructive'
+                        plant.status === 'compliant'
+                          ? 'default'
+                          : plant.status === 'warning'
+                            ? 'secondary'
+                            : 'destructive'
                       }
                     >
                       {plant.status}
@@ -384,17 +405,15 @@ export default function ComplianceManagement() {
                   {plant.next_deadline && (
                     <div className="pt-2 border-t">
                       <p className="text-xs text-muted-foreground">Next Deadline</p>
-                      <p className="text-sm font-medium">
-                        {plant.next_deadline_description}
-                      </p>
+                      <p className="text-sm font-medium">{plant.next_deadline_description}</p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(plant.next_deadline), 'PPP')}
                       </p>
                     </div>
                   )}
 
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -418,72 +437,76 @@ export default function ComplianceManagement() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {deadlines?.sort((a, b) => 
-                  new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
-                ).map((deadline) => (
-                  <div 
-                    key={deadline.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 mt-1">
-                        {deadline.status === 'overdue' ? (
-                          <AlertCircle className="h-5 w-5 text-red-500" />
-                        ) : deadline.status === 'due_soon' ? (
-                          <Clock className="h-5 w-5 text-yellow-500" />
-                        ) : (
-                          <Calendar className="h-5 w-5 text-blue-500" />
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-medium">{deadline.requirement}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {deadline.plant_name} • Portal: {deadline.portal}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs">
-                          <span className={deadline.status === 'overdue' ? 'text-red-500 font-medium' : ''}>
-                            Due: {format(new Date(deadline.due_date), 'PPP')}
-                          </span>
-                          {deadline.penalty_amount && (
-                            <span className="text-muted-foreground">
-                              Penalty: €{deadline.penalty_amount}
-                            </span>
+                {deadlines
+                  ?.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
+                  .map((deadline) => (
+                    <div
+                      key={deadline.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 mt-1">
+                          {deadline.status === 'overdue' ? (
+                            <AlertCircle className="h-5 w-5 text-red-500" />
+                          ) : deadline.status === 'due_soon' ? (
+                            <Clock className="h-5 w-5 text-yellow-500" />
+                          ) : (
+                            <Calendar className="h-5 w-5 text-blue-500" />
                           )}
                         </div>
-                        {deadline.documents_required.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {deadline.documents_required.map((doc, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {doc}
-                              </Badge>
-                            ))}
+                        <div className="space-y-1">
+                          <p className="font-medium">{deadline.requirement}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {deadline.plant_name} • Portal: {deadline.portal}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs">
+                            <span
+                              className={
+                                deadline.status === 'overdue' ? 'text-red-500 font-medium' : ''
+                              }
+                            >
+                              Due: {format(new Date(deadline.due_date), 'PPP')}
+                            </span>
+                            {deadline.penalty_amount && (
+                              <span className="text-muted-foreground">
+                                Penalty: €{deadline.penalty_amount}
+                              </span>
+                            )}
                           </div>
+                          {deadline.documents_required.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {deadline.documents_required.map((doc, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  {doc}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {deadline.workflow_id ? (
+                          <Button
+                            size="sm"
+                            onClick={() => navigate(`/workflows/${deadline.workflow_id}`)}
+                          >
+                            View Workflow
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              // Create workflow for this deadline
+                              navigate(`/workflows/new?requirement=${deadline.id}`);
+                            }}
+                          >
+                            Start Workflow
+                          </Button>
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      {deadline.workflow_id ? (
-                        <Button
-                          size="sm"
-                          onClick={() => navigate(`/workflows/${deadline.workflow_id}`)}
-                        >
-                          View Workflow
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            // Create workflow for this deadline
-                            navigate(`/workflows/new?requirement=${deadline.id}`);
-                          }}
-                        >
-                          Start Workflow
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  ))}
                 {(!deadlines || deadlines.length === 0) && (
                   <div className="text-center py-8">
                     <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
@@ -529,9 +552,7 @@ export default function ComplianceManagement() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Recently uploaded compliance documents
-              </p>
+              <p className="text-muted-foreground">Recently uploaded compliance documents</p>
               {/* Document list would go here */}
             </CardContent>
           </Card>

@@ -21,16 +21,19 @@ import { Button } from '@/components/ui/button';
 export default function AIAssistant() {
   const [activeTab, setActiveTab] = useState<'extraction' | 'chat'>('extraction');
   const [inputMessage, setInputMessage] = useState('');
-  const [messages] = useState<Array<{
-    id: string;
-    type: 'user' | 'assistant';
-    content: string;
-    timestamp: string;
-  }>>([
+  const [messages] = useState<
+    Array<{
+      id: string;
+      type: 'user' | 'assistant';
+      content: string;
+      timestamp: string;
+    }>
+  >([
     {
       id: '1',
       type: 'assistant',
-      content: 'Hello! I am your AI assistant specialized in energy documents. How can I help you today?',
+      content:
+        'Hello! I am your AI assistant specialized in energy documents. How can I help you today?',
       timestamp: '14:30:00',
     },
   ]);
@@ -79,9 +82,7 @@ export default function AIAssistant() {
               <h3 className="text-lg font-semibold mb-4">Upload Documents</h3>
               <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
                 <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground mb-2">
-                  Drag documents here or click to select
-                </p>
+                <p className="text-muted-foreground mb-2">Drag documents here or click to select</p>
                 <p className="text-sm text-muted-foreground">
                   PDF, Images, Excel, Word, XML (max 50MB)
                 </p>
@@ -141,15 +142,11 @@ export default function AIAssistant() {
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${
-                      message.type === 'user' ? 'justify-end' : 'justify-start'
-                    }`}
+                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
                       className={`max-w-[70%] rounded-lg p-4 ${
-                        message.type === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
+                        message.type === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
                       }`}
                     >
                       <p className="text-sm">{message.content}</p>
@@ -168,7 +165,9 @@ export default function AIAssistant() {
                     onChange={(e) => setInputMessage(e.target.value)}
                     placeholder="Type a message..."
                     className="flex-1 px-4 py-2 border rounded-lg"
-                    onKeyPress={(e) => e.key === 'Enter' && inputMessage.trim() && setInputMessage('')}
+                    onKeyPress={(e) =>
+                      e.key === 'Enter' && inputMessage.trim() && setInputMessage('')
+                    }
                   />
                   <Button onClick={() => inputMessage.trim() && setInputMessage('')}>
                     <Send className="h-4 w-4" />
@@ -209,5 +208,3 @@ export default function AIAssistant() {
     </div>
   );
 }
-
-

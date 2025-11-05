@@ -6,19 +6,19 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Plus, 
-  Search, 
-  Factory, 
-  FileText, 
-  Loader2, 
-  ArrowRight, 
+import {
+  Plus,
+  Search,
+  Factory,
+  FileText,
+  Loader2,
+  ArrowRight,
   Calendar,
   Clock,
   AlertTriangle,
   Circle,
   Target,
-  Tag
+  Tag,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -61,20 +61,23 @@ interface Workflow {
 }
 
 // Helper function to calculate urgency priority
-const getUrgencyPriority = (dueDate?: string, status: string = ''): { priority: 'high' | 'medium' | 'low' | 'none', daysRemaining?: number } => {
+const getUrgencyPriority = (
+  dueDate?: string,
+  status: string = ''
+): { priority: 'high' | 'medium' | 'low' | 'none'; daysRemaining?: number } => {
   if (status === 'Completed' || status === 'Cancelled') {
     return { priority: 'none' };
   }
-  
+
   if (!dueDate) {
     return { priority: 'low' };
   }
-  
+
   const due = new Date(dueDate);
   const now = new Date();
   const diffTime = due.getTime() - now.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays < 0) {
     return { priority: 'high', daysRemaining: diffDays }; // Overdue
   } else if (diffDays <= 7) {
@@ -144,7 +147,9 @@ export default function Workflows() {
   const { data: templates } = useQuery({
     queryKey: ['workflow-templates'],
     queryFn: async () => {
-      const response = await apiClient.get('/workflows/templates', { params: { active_only: true } });
+      const response = await apiClient.get('/workflows/templates', {
+        params: { active_only: true },
+      });
       return response.data || [];
     },
   });
@@ -162,7 +167,11 @@ export default function Workflows() {
       const response = await apiClient.post(
         `/workflows/templates/${data.template_id}/create-workflow`,
         {
-          plant_id: data.plant_id ? (typeof data.plant_id === 'string' ? parseInt(data.plant_id) : data.plant_id) : undefined,
+          plant_id: data.plant_id
+            ? typeof data.plant_id === 'string'
+              ? parseInt(data.plant_id)
+              : data.plant_id
+            : undefined,
         }
       );
       return response.data;
@@ -180,11 +189,12 @@ export default function Workflows() {
     },
   });
 
-  const filteredWorkflows = workflows?.filter(
-    (workflow) =>
-      workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (workflow.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredWorkflows =
+    workflows?.filter(
+      (workflow) =>
+        workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (workflow.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
   const handleCreateWorkflow = () => {
     if (!selectedTemplateId) {
@@ -253,29 +263,29 @@ export default function Workflows() {
           filteredWorkflows.map((workflow) => {
             const urgency = getUrgencyPriority(workflow.due_date, workflow.status);
             const isOverdue = urgency.daysRemaining !== undefined && urgency.daysRemaining < 0;
-            
+
             return (
-            <Card
-              key={workflow.id}
+              <Card
+                key={workflow.id}
                 className={`cursor-pointer hover:shadow-xl hover:-translate-y-0.5 transition-all border-l-4 ${
                   urgency.priority === 'high' && !isOverdue
                     ? 'border-l-orange-500'
                     : isOverdue
-                    ? 'border-l-red-500'
-                    : urgency.priority === 'medium'
-                    ? 'border-l-yellow-500'
-                    : 'border-l-gray-300'
+                      ? 'border-l-red-500'
+                      : urgency.priority === 'medium'
+                        ? 'border-l-yellow-500'
+                        : 'border-l-gray-300'
                 }`}
-              onClick={() => navigate(`/workflows/${workflow.id}`)}
-            >
+                onClick={() => navigate(`/workflows/${workflow.id}`)}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <CardTitle className="text-lg leading-tight flex-1">{workflow.name}</CardTitle>
                     <Badge className={`text-xs ${getStatusColor(workflow.status)}`}>
-                    {workflow.status}
-                  </Badge>
-                </div>
-                  
+                      {workflow.status}
+                    </Badge>
+                  </div>
+
                   {/* Plant Association - Prominent */}
                   {workflow.plant_name ? (
                     <div className="flex items-center gap-2 text-sm font-medium text-foreground bg-blue-50 dark:bg-blue-950/20 px-2 py-1.5 rounded-md -mx-1">
@@ -288,8 +298,8 @@ export default function Workflows() {
                       <span>No plant assigned</span>
                     </div>
                   )}
-              </CardHeader>
-                
+                </CardHeader>
+
                 <CardContent className="space-y-4">
                   {/* Type Badge */}
                   <div className="flex items-center gap-2">
@@ -301,25 +311,29 @@ export default function Workflows() {
 
                   {/* Urgency Indicator */}
                   {urgency.priority !== 'none' && workflow.due_date && (
-                    <div className={`flex items-center gap-2 text-sm px-2 py-1.5 rounded-md ${
-                      isOverdue
-                        ? 'bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400'
-                        : urgency.priority === 'high'
-                        ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400'
-                        : 'bg-yellow-50 dark:bg-yellow-950/20 text-yellow-700 dark:text-yellow-400'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 text-sm px-2 py-1.5 rounded-md ${
+                        isOverdue
+                          ? 'bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400'
+                          : urgency.priority === 'high'
+                            ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400'
+                            : 'bg-yellow-50 dark:bg-yellow-950/20 text-yellow-700 dark:text-yellow-400'
+                      }`}
+                    >
                       {isOverdue ? (
                         <>
                           <AlertTriangle className="h-4 w-4" />
                           <span className="font-medium">
-                            Overdue by {Math.abs(urgency.daysRemaining!)} {Math.abs(urgency.daysRemaining!) === 1 ? 'day' : 'days'}
+                            Overdue by {Math.abs(urgency.daysRemaining!)}{' '}
+                            {Math.abs(urgency.daysRemaining!) === 1 ? 'day' : 'days'}
                           </span>
                         </>
                       ) : (
                         <>
                           <Clock className="h-4 w-4" />
                           <span>
-                            {urgency.daysRemaining} {urgency.daysRemaining === 1 ? 'day' : 'days'} remaining
+                            {urgency.daysRemaining} {urgency.daysRemaining === 1 ? 'day' : 'days'}{' '}
+                            remaining
                           </span>
                         </>
                       )}
@@ -361,8 +375,8 @@ export default function Workflows() {
                             workflow.progress_percentage === 100
                               ? 'bg-green-500'
                               : workflow.progress_percentage >= 50
-                              ? 'bg-blue-500'
-                              : 'bg-orange-500'
+                                ? 'bg-blue-500'
+                                : 'bg-orange-500'
                           }`}
                           style={{ width: `${workflow.progress_percentage}%` }}
                         />
@@ -378,19 +392,19 @@ export default function Workflows() {
                   )}
 
                   {/* Action Button */}
-                <Button
+                  <Button
                     variant="outline"
                     className="w-full mt-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/workflows/${workflow.id}`);
-                  }}
-                >
-                  View Details
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/workflows/${workflow.id}`);
+                    }}
+                  >
+                    View Details
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
             );
           })
         ) : (
@@ -434,7 +448,10 @@ export default function Workflows() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="plant">Plant (Optional)</Label>
-              <Select value={selectedPlantId || "none"} onValueChange={(value) => setSelectedPlantId(value === "none" ? "" : value)}>
+              <Select
+                value={selectedPlantId || 'none'}
+                onValueChange={(value) => setSelectedPlantId(value === 'none' ? '' : value)}
+              >
                 <SelectTrigger id="plant">
                   <SelectValue placeholder="Select a plant (optional)" />
                 </SelectTrigger>
@@ -465,5 +482,3 @@ export default function Workflows() {
     </div>
   );
 }
-
-

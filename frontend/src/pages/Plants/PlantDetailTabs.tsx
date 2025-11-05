@@ -132,19 +132,19 @@ export function ComplianceTab({ plant }: { plant: Plant }) {
 
 export function WorkflowsTab({ plantId }: { plantId: number }) {
   // Import dynamically to avoid circular dependencies
-  const WorkflowsTabComponent = React.lazy(() => 
-    import('./WorkflowsTab').then(module => ({ default: module.WorkflowsTab }))
+  const WorkflowsTabComponent = React.lazy(() =>
+    import('./WorkflowsTab').then((module) => ({ default: module.WorkflowsTab }))
   );
-  
+
   return (
-    <React.Suspense fallback={
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-    </div>
-    }>
+    <React.Suspense
+      fallback={
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
+      }
+    >
       <WorkflowsTabComponent plantId={plantId} />
     </React.Suspense>
   );
 }
-
-

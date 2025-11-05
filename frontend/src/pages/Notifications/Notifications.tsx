@@ -42,7 +42,7 @@ export default function Notifications() {
   const markAsRead = async (id: number) => {
     try {
       await apiClient.patch(`/notifications/${id}/read`);
-      setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+      setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)));
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -51,7 +51,7 @@ export default function Notifications() {
   const markAllAsRead = async () => {
     try {
       await apiClient.post('/notifications/read-all');
-      setNotifications(notifications.map(n => ({ ...n, read: true })));
+      setNotifications(notifications.map((n) => ({ ...n, read: true })));
     } catch (error) {
       console.error('Error marking all as read:', error);
     }
@@ -70,11 +70,9 @@ export default function Notifications() {
     }
   };
 
-  const filteredNotifications = notifications.filter(n => 
-    filter === 'all' || !n.read
-  );
+  const filteredNotifications = notifications.filter((n) => filter === 'all' || !n.read);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   if (loading) {
     return (
@@ -90,9 +88,7 @@ export default function Notifications() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Notifications</h1>
-          <p className="text-muted-foreground mt-1">
-            All notifications and system alerts
-          </p>
+          <p className="text-muted-foreground mt-1">All notifications and system alerts</p>
         </div>
         <div className="flex gap-2">
           <select
@@ -123,19 +119,13 @@ export default function Notifications() {
             <div className="mt-1">{getIcon(notification.type)}</div>
             <div className="flex-1">
               <h3 className="font-semibold">{notification.title}</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                {notification.message}
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
               <p className="text-xs text-muted-foreground mt-2">
                 {new Date(notification.created_at).toLocaleString()}
               </p>
             </div>
             {!notification.read && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => markAsRead(notification.id)}
-              >
+              <Button variant="ghost" size="sm" onClick={() => markAsRead(notification.id)}>
                 <Check className="h-4 w-4" />
               </Button>
             )}
@@ -152,5 +142,3 @@ export default function Notifications() {
     </div>
   );
 }
-
-

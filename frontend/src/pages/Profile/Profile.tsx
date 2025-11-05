@@ -29,9 +29,7 @@ export default function Profile() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">Profile & Settings</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage your profile and preferences
-        </p>
+        <p className="text-muted-foreground mt-1">Manage your profile and preferences</p>
       </div>
 
       {/* Profile Info */}
@@ -43,9 +41,7 @@ export default function Profile() {
           <div>
             <h2 className="text-2xl font-bold">{user?.name}</h2>
             <p className="text-muted-foreground">{user?.email}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Role: {user?.role}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">Role: {user?.role}</p>
           </div>
         </div>
 
@@ -158,5 +154,3 @@ export default function Profile() {
     </div>
   );
 }
-
-

@@ -9,13 +9,14 @@ from pydantic import BaseModel, Field, validator
 
 class SiteBase(BaseModel):
     """Base site schema"""
+
     name: str = Field(..., min_length=1, max_length=200)
     code: Optional[str] = Field(None, max_length=50)
     description: Optional[str] = None
     site_type: str = Field(default="industrial")
     status: str = Field(default="active")
     operational_status: Optional[str] = None
-    
+
     # Location
     location: Optional[str] = None
     address: Optional[str] = None
@@ -27,31 +28,31 @@ class SiteBase(BaseModel):
     country: str = Field(default="Italy")
     latitude: Optional[float] = None
     longitude: Optional[float] = None
-    
+
     # Capacity
     capacity: Optional[float] = Field(None, ge=0)
     efficiency: Optional[float] = Field(None, ge=0, le=100)
-    
+
     # Area
     available_area: Optional[float] = Field(None, ge=0)
     reserved_area: Optional[float] = Field(None, ge=0)
-    
+
     # Dates
     commissioning_date: Optional[datetime] = None
     decommissioning_date: Optional[datetime] = None
-    
+
     # Ownership
     owner: Optional[str] = None
     operator: Optional[str] = None
     maintenance_provider: Optional[str] = None
-    
+
     # Environmental
     environmental_impact_rating: Optional[int] = Field(None, ge=1, le=10)
-    
+
     # Grid
     grid_connection_status: str = Field(default="connected")
     grid_capacity: Optional[float] = Field(None, ge=0)
-    
+
     # Metadata
     tags: List[str] = Field(default_factory=list)
     notes: Optional[str] = None
@@ -60,18 +61,20 @@ class SiteBase(BaseModel):
 
 class SiteCreate(SiteBase):
     """Schema for creating a site"""
+
     pass
 
 
 class SiteUpdate(BaseModel):
     """Schema for updating a site"""
+
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     code: Optional[str] = Field(None, max_length=50)
     description: Optional[str] = None
     site_type: Optional[str] = None
     status: Optional[str] = None
     operational_status: Optional[str] = None
-    
+
     # Location
     location: Optional[str] = None
     address: Optional[str] = None
@@ -83,31 +86,31 @@ class SiteUpdate(BaseModel):
     country: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
-    
+
     # Capacity
     capacity: Optional[float] = Field(None, ge=0)
     efficiency: Optional[float] = Field(None, ge=0, le=100)
-    
+
     # Area
     available_area: Optional[float] = Field(None, ge=0)
     reserved_area: Optional[float] = Field(None, ge=0)
-    
+
     # Dates
     commissioning_date: Optional[datetime] = None
     decommissioning_date: Optional[datetime] = None
-    
+
     # Ownership
     owner: Optional[str] = None
     operator: Optional[str] = None
     maintenance_provider: Optional[str] = None
-    
+
     # Environmental
     environmental_impact_rating: Optional[int] = Field(None, ge=1, le=10)
-    
+
     # Grid
     grid_connection_status: Optional[str] = None
     grid_capacity: Optional[float] = Field(None, ge=0)
-    
+
     # Metadata
     tags: Optional[List[str]] = None
     notes: Optional[str] = None
@@ -116,6 +119,7 @@ class SiteUpdate(BaseModel):
 
 class SiteResponse(SiteBase):
     """Schema for site response"""
+
     id: int
     tenant_id: str
     plants_count: Optional[int] = 0
@@ -126,13 +130,14 @@ class SiteResponse(SiteBase):
     updated_at: Optional[datetime] = None
     created_by: Optional[int] = None
     updated_by: Optional[int] = None
-    
+
     class Config:
         from_attributes = True
 
 
 class SiteStatsResponse(BaseModel):
     """Schema for site statistics"""
+
     site_id: int
     plants_count: int
     total_capacity_kw: float
@@ -145,6 +150,7 @@ class SiteStatsResponse(BaseModel):
 
 class StorageUnitBase(BaseModel):
     """Base storage unit schema"""
+
     name: str = Field(..., min_length=1, max_length=200)
     code: Optional[str] = Field(None, max_length=50)
     capacity_kwh: float = Field(..., gt=0)
@@ -164,11 +170,13 @@ class StorageUnitBase(BaseModel):
 
 class StorageUnitCreate(StorageUnitBase):
     """Schema for creating storage unit"""
+
     pass
 
 
 class StorageUnitUpdate(BaseModel):
     """Schema for updating storage unit"""
+
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     code: Optional[str] = Field(None, max_length=50)
     capacity_kwh: Optional[float] = Field(None, gt=0)
@@ -188,18 +196,20 @@ class StorageUnitUpdate(BaseModel):
 
 class StorageUnitResponse(StorageUnitBase):
     """Schema for storage unit response"""
+
     id: int
     site_id: int
     tenant_id: str
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
 
 class ConsumerBase(BaseModel):
     """Base consumer schema"""
+
     name: str = Field(..., min_length=1, max_length=200)
     code: Optional[str] = Field(None, max_length=50)
     consumer_type: str = Field(..., description="residential, commercial, industrial")
@@ -218,11 +228,13 @@ class ConsumerBase(BaseModel):
 
 class ConsumerCreate(ConsumerBase):
     """Schema for creating consumer"""
+
     pass
 
 
 class ConsumerUpdate(BaseModel):
     """Schema for updating consumer"""
+
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     code: Optional[str] = Field(None, max_length=50)
     consumer_type: Optional[str] = None
@@ -241,18 +253,20 @@ class ConsumerUpdate(BaseModel):
 
 class ConsumerResponse(ConsumerBase):
     """Schema for consumer response"""
+
     id: int
     site_id: int
     tenant_id: str
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
 
 class EnergyFlowBase(BaseModel):
     """Base energy flow schema"""
+
     nodes: List[Dict[str, Any]] = Field(default_factory=list)
     edges: List[Dict[str, Any]] = Field(default_factory=list)
     description: Optional[str] = None
@@ -261,11 +275,13 @@ class EnergyFlowBase(BaseModel):
 
 class EnergyFlowCreate(EnergyFlowBase):
     """Schema for creating energy flow"""
+
     pass
 
 
 class EnergyFlowUpdate(BaseModel):
     """Schema for updating energy flow"""
+
     nodes: Optional[List[Dict[str, Any]]] = None
     edges: Optional[List[Dict[str, Any]]] = None
     description: Optional[str] = None
@@ -274,6 +290,7 @@ class EnergyFlowUpdate(BaseModel):
 
 class EnergyFlowResponse(EnergyFlowBase):
     """Schema for energy flow response"""
+
     id: int
     site_id: Optional[int] = None
     plant_id: Optional[int] = None
@@ -281,7 +298,6 @@ class EnergyFlowResponse(EnergyFlowBase):
     version: int
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
-

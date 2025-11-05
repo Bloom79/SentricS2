@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
-import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { ReactNode } from 'react';
+import { useForm } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -20,30 +20,30 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { format } from "date-fns";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/lib/utils";
-import React from "react";
-import { cerService } from "@/services/api/cer.service";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { format } from 'date-fns';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { cn } from '@/lib/utils';
+import React from 'react';
+import { cerService } from '@/services/api/cer.service';
 
 const baseFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  address: z.string().min(1, "Address is required"),
-  pod_id: z.string().min(1, "POD ID is required"),
-  load_profile_type: z.enum(["residential", "commercial", "industrial", "custom"]),
-  contracted_power: z.number().min(0, "Contracted power must be positive").optional(),
-  user_type: z.enum(["real", "simulated"]).default("real"),
+  name: z.string().min(1, 'Name is required'),
+  address: z.string().min(1, 'Address is required'),
+  pod_id: z.string().min(1, 'POD ID is required'),
+  load_profile_type: z.enum(['residential', 'commercial', 'industrial', 'custom']),
+  contracted_power: z.number().min(0, 'Contracted power must be positive').optional(),
+  user_type: z.enum(['real', 'simulated']).default('real'),
   consumption_class: z.string().optional(),
   smart_meter_id: z.string().optional(),
   meter_type: z.string().optional(),
@@ -52,27 +52,31 @@ const baseFormSchema = z.object({
 });
 
 const productionFormSchema = z.object({
-  plant_type: z.enum(["PHOTOVOLTAIC", "WIND", "HYDRO", "BIOMASS"]).optional(),
-  plant_capacity: z.number().min(0, "Capacity must be positive").optional(),
+  plant_type: z.enum(['PHOTOVOLTAIC', 'WIND', 'HYDRO', 'BIOMASS']).optional(),
+  plant_capacity: z.number().min(0, 'Capacity must be positive').optional(),
   commissioning_date: z.date().optional(),
   is_incentivized: z.boolean().optional(),
-  capital_contribution: z.number().min(0).max(100, "Contribution must be between 0 and 100").optional(),
+  capital_contribution: z
+    .number()
+    .min(0)
+    .max(100, 'Contribution must be between 0 and 100')
+    .optional(),
   has_storage: z.boolean().optional(),
-  storage_capacity: z.number().min(0, "Storage capacity must be positive").optional(),
+  storage_capacity: z.number().min(0, 'Storage capacity must be positive').optional(),
 });
 
-const formSchema = z.discriminatedUnion("member_type", [
+const formSchema = z.discriminatedUnion('member_type', [
   z.object({
-    member_type: z.literal("consumer"),
+    member_type: z.literal('consumer'),
     ...baseFormSchema.shape,
   }),
   z.object({
-    member_type: z.literal("producer"),
+    member_type: z.literal('producer'),
     ...baseFormSchema.shape,
     ...productionFormSchema.shape,
   }),
   z.object({
-    member_type: z.literal("prosumer"),
+    member_type: z.literal('prosumer'),
     ...baseFormSchema.shape,
     ...productionFormSchema.shape,
   }),
@@ -90,30 +94,30 @@ export function AddMemberDialog({ children, communityId }: AddMemberDialogProps)
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      member_type: "consumer",
-      name: "",
-      address: "",
-      pod_id: "",
-      load_profile_type: "residential",
-      user_type: "real",
+      member_type: 'consumer',
+      name: '',
+      address: '',
+      pod_id: '',
+      load_profile_type: 'residential',
+      user_type: 'real',
       contracted_power: 0,
     },
   });
 
-  const memberType = form.watch("member_type");
-  const hasStorage = form.watch("has_storage");
-  const showProductionFields = memberType === "producer" || memberType === "prosumer";
+  const memberType = form.watch('member_type');
+  const hasStorage = form.watch('has_storage');
+  const showProductionFields = memberType === 'producer' || memberType === 'prosumer';
 
   // When member type changes, set production field defaults if needed
   React.useEffect(() => {
     if (showProductionFields) {
-      form.setValue("plant_type", "PHOTOVOLTAIC", { shouldValidate: true });
-      form.setValue("plant_capacity", 0, { shouldValidate: true });
-      form.setValue("commissioning_date", new Date(), { shouldValidate: true });
-      form.setValue("is_incentivized", false, { shouldValidate: true });
-      form.setValue("capital_contribution", 0, { shouldValidate: true });
-      form.setValue("has_storage", false, { shouldValidate: true });
-      form.setValue("storage_capacity", 0, { shouldValidate: true });
+      form.setValue('plant_type', 'PHOTOVOLTAIC', { shouldValidate: true });
+      form.setValue('plant_capacity', 0, { shouldValidate: true });
+      form.setValue('commissioning_date', new Date(), { shouldValidate: true });
+      form.setValue('is_incentivized', false, { shouldValidate: true });
+      form.setValue('capital_contribution', 0, { shouldValidate: true });
+      form.setValue('has_storage', false, { shouldValidate: true });
+      form.setValue('storage_capacity', 0, { shouldValidate: true });
     }
   }, [showProductionFields, form]);
 
@@ -122,14 +126,14 @@ export function AddMemberDialog({ children, communityId }: AddMemberDialogProps)
       return cerService.addMember(communityId, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cer-members", communityId] });
-      queryClient.invalidateQueries({ queryKey: ["cer", communityId] });
-      queryClient.invalidateQueries({ queryKey: ["cer-stats", communityId] });
-      toast.success("Member added successfully");
+      queryClient.invalidateQueries({ queryKey: ['cer-members', communityId] });
+      queryClient.invalidateQueries({ queryKey: ['cer', communityId] });
+      queryClient.invalidateQueries({ queryKey: ['cer-stats', communityId] });
+      toast.success('Member added successfully');
       form.reset();
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to add member");
+      toast.error(error.message || 'Failed to add member');
     },
   });
 
@@ -315,7 +319,7 @@ export function AddMemberDialog({ children, communityId }: AddMemberDialogProps)
                         <Input
                           type="date"
                           {...field}
-                          value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                          value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
                           onChange={(e) => {
                             const date = e.target.value ? new Date(e.target.value) : undefined;
                             field.onChange(date);
@@ -333,10 +337,7 @@ export function AddMemberDialog({ children, communityId }: AddMemberDialogProps)
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                         <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel>Incentivized Plant</FormLabel>
@@ -376,10 +377,7 @@ export function AddMemberDialog({ children, communityId }: AddMemberDialogProps)
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                         <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel>Has Storage</FormLabel>
@@ -417,7 +415,7 @@ export function AddMemberDialog({ children, communityId }: AddMemberDialogProps)
 
             <DialogFooter>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Adding..." : "Add Member"}
+                {isPending ? 'Adding...' : 'Add Member'}
               </Button>
             </DialogFooter>
           </form>
@@ -426,4 +424,3 @@ export function AddMemberDialog({ children, communityId }: AddMemberDialogProps)
     </Dialog>
   );
 }
-

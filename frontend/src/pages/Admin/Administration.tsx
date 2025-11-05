@@ -136,9 +136,7 @@ export default function Administration() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">Administration</h1>
-        <p className="text-muted-foreground mt-1">
-          System administration and configuration
-        </p>
+        <p className="text-muted-foreground mt-1">System administration and configuration</p>
       </div>
 
       {/* Admin Cards Grid */}
@@ -159,13 +157,9 @@ export default function Administration() {
                 <div className={`p-3 rounded-lg ${getColorClasses(card.color)}`}>
                   <Icon className="h-6 w-6" />
                 </div>
-                {card.available && (
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                )}
+                {card.available && <ChevronRight className="h-5 w-5 text-muted-foreground" />}
                 {!card.available && (
-                  <span className="text-xs bg-muted px-2 py-1 rounded">
-                    Coming Soon
-                  </span>
+                  <span className="text-xs bg-muted px-2 py-1 rounded">Coming Soon</span>
                 )}
               </div>
               <h3 className="font-semibold text-lg mb-2">{card.title}</h3>
@@ -177,5 +171,3 @@ export default function Administration() {
     </div>
   );
 }
-
-

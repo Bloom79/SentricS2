@@ -111,11 +111,12 @@ export default function WorkflowTemplates() {
     },
   });
 
-  const filteredTemplates = templates?.filter(
-    (template) =>
-      template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (template.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredTemplates =
+    templates?.filter(
+      (template) =>
+        template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (template.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
   const handleViewTemplate = (template: WorkflowTemplate) => {
     setSelectedTemplate(template);
@@ -212,7 +213,9 @@ export default function WorkflowTemplates() {
                         <div className="flex items-center gap-2">
                           {template.name}
                           {template.is_system_template && (
-                            <Badge variant="outline" className="text-xs">System</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              System
+                            </Badge>
                           )}
                         </div>
                         {template.description && (
@@ -328,7 +331,9 @@ export default function WorkflowTemplates() {
               </div>
 
               <div>
-                <Label className="mb-2 block">Phases ({selectedTemplate.phases?.length || 0})</Label>
+                <Label className="mb-2 block">
+                  Phases ({selectedTemplate.phases?.length || 0})
+                </Label>
                 <div className="space-y-2">
                   {selectedTemplate.phases?.map((phase, index) => (
                     <Card key={phase.id || index} className="p-4">
@@ -340,7 +345,9 @@ export default function WorkflowTemplates() {
                             </span>
                           </div>
                           {phase.description && (
-                            <p className="text-sm text-muted-foreground mt-1">{phase.description}</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {phase.description}
+                            </p>
                           )}
                           {phase.required_documents && phase.required_documents.length > 0 && (
                             <div className="mt-2">

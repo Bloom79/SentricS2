@@ -27,7 +27,7 @@ async def list_plants(
     cer_id: Optional[int] = Query(None),
     region: Optional[str] = Query(None),
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """List plants with optional filters"""
     plants = plant_service.list_plants(
@@ -38,7 +38,7 @@ async def list_plants(
         type=type,
         status=status,
         cer_id=cer_id,
-        region=region
+        region=region,
     )
     return plants
 
@@ -47,19 +47,16 @@ async def list_plants(
 async def get_plant(
     plant_id: int,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get plant details including CER and Assets"""
     plant = plant_service.get_plant(
-        db=db,
-        plant_id=plant_id,
-        tenant_id=current_user.tenant_id,
-        include_relations=True
+        db=db, plant_id=plant_id, tenant_id=current_user.tenant_id, include_relations=True
     )
-    
+
     if not plant:
         raise HTTPException(status_code=404, detail="Plant not found")
-    
+
     return plant
 
 
@@ -67,7 +64,7 @@ async def get_plant(
 async def create_plant(
     plant_data: PlantCreate,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Create new plant"""
     try:
@@ -75,7 +72,7 @@ async def create_plant(
             db=db,
             plant_data=plant_data,
             tenant_id=current_user.tenant_id,
-            user_id=int(current_user.sub)
+            user_id=int(current_user.sub),
         )
         return plant
     except ValueError as e:
@@ -89,7 +86,7 @@ async def update_plant(
     plant_id: int,
     plant_data: PlantUpdate,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update plant"""
     plant = plant_service.update_plant(
@@ -97,12 +94,12 @@ async def update_plant(
         plant_id=plant_id,
         plant_data=plant_data,
         tenant_id=current_user.tenant_id,
-        user_id=int(current_user.sub)
+        user_id=int(current_user.sub),
     )
-    
+
     if not plant:
         raise HTTPException(status_code=404, detail="Plant not found")
-    
+
     return plant
 
 
@@ -110,19 +107,16 @@ async def update_plant(
 async def delete_plant(
     plant_id: int,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Delete plant (soft delete)"""
     success = plant_service.delete_plant(
-        db=db,
-        plant_id=plant_id,
-        tenant_id=current_user.tenant_id,
-        user_id=int(current_user.sub)
+        db=db, plant_id=plant_id, tenant_id=current_user.tenant_id, user_id=int(current_user.sub)
     )
-    
+
     if not success:
         raise HTTPException(status_code=404, detail="Plant not found")
-    
+
     return None
 
 
@@ -130,13 +124,11 @@ async def delete_plant(
 async def get_plant_stats(
     plant_id: int,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get plant statistics"""
     stats = plant_service.get_plant_stats(
-        db=db,
-        plant_id=plant_id,
-        tenant_id=current_user.tenant_id
+        db=db, plant_id=plant_id, tenant_id=current_user.tenant_id
     )
     if not stats:
         raise HTTPException(status_code=404, detail="Plant not found")
@@ -148,27 +140,26 @@ async def link_plant_to_cer(
     plant_id: int,
     cer_id: int,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Link plant to CER"""
-    plant = db.query(Plant).filter(
-        Plant.id == plant_id,
-        Plant.tenant_id == current_user.tenant_id
-    ).first()
-    
+    plant = (
+        db.query(Plant)
+        .filter(Plant.id == plant_id, Plant.tenant_id == current_user.tenant_id)
+        .first()
+    )
+
     if not plant:
         raise HTTPException(status_code=404, detail="Plant not found")
-    
+
     # Verify CER exists and belongs to tenant
     from app.models.cer import CER
-    cer = db.query(CER).filter(
-        CER.id == cer_id,
-        CER.tenant_id == current_user.tenant_id
-    ).first()
-    
+
+    cer = db.query(CER).filter(CER.id == cer_id, CER.tenant_id == current_user.tenant_id).first()
+
     if not cer:
         raise HTTPException(status_code=404, detail="CER not found")
-    
+
     plant.cer_id = cer_id
     db.commit()
     db.refresh(plant)
@@ -180,13 +171,11 @@ async def link_plant_to_cer(
 async def get_plant_layout(
     plant_id: int,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get plant layout (React Flow canvas data)"""
     layout = PlantLayoutService.get_layout(
-        db=db,
-        plant_id=plant_id,
-        tenant_id=current_user.tenant_id
+        db=db, plant_id=plant_id, tenant_id=current_user.tenant_id
     )
     if not layout:
         return None
@@ -198,7 +187,7 @@ async def save_plant_layout(
     plant_id: int,
     layout_data: PlantLayoutCreate,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Save or update plant layout"""
     try:
@@ -208,7 +197,7 @@ async def save_plant_layout(
             nodes=layout_data.nodes,
             edges=layout_data.edges,
             tenant_id=current_user.tenant_id,
-            user_id=int(current_user.sub)
+            user_id=int(current_user.sub),
         )
         return PlantLayoutResponse.from_orm(layout)
     except ValueError as e:
@@ -222,14 +211,11 @@ async def delete_plant_layout(
     plant_id: int,
     soft: bool = Query(True, description="Soft delete (default) or hard delete"),
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Delete plant layout"""
     success = PlantLayoutService.delete_layout(
-        db=db,
-        plant_id=plant_id,
-        tenant_id=current_user.tenant_id,
-        soft=soft
+        db=db, plant_id=plant_id, tenant_id=current_user.tenant_id, soft=soft
     )
     if not success:
         raise HTTPException(status_code=404, detail="Layout not found")
@@ -240,7 +226,7 @@ async def delete_plant_layout(
 async def generate_layout_from_assets(
     plant_id: int,
     current_user: TokenData = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Generate plant layout from existing assets"""
     try:
@@ -248,9 +234,8 @@ async def generate_layout_from_assets(
             db=db,
             plant_id=plant_id,
             tenant_id=current_user.tenant_id,
-            user_id=int(current_user.sub)
+            user_id=int(current_user.sub),
         )
         return PlantLayoutResponse.from_orm(layout)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate layout: {str(e)}")
-

@@ -8,7 +8,13 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -79,7 +85,11 @@ export function NewComplianceRecord({ cerId, onSuccess, onCancel }: NewComplianc
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="requirement">Requirement *</Label>
-            <Select value={requirementId} onValueChange={setRequirementId} disabled={loadingRequirements}>
+            <Select
+              value={requirementId}
+              onValueChange={setRequirementId}
+              disabled={loadingRequirements}
+            >
               <SelectTrigger id="requirement">
                 <SelectValue placeholder="Select a requirement" />
               </SelectTrigger>
@@ -145,4 +155,3 @@ export function NewComplianceRecord({ cerId, onSuccess, onCancel }: NewComplianc
     </Card>
   );
 }
-

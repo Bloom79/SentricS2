@@ -11,7 +11,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import {
   Form,
@@ -48,19 +55,19 @@ import {
 } from '@/components/ui/alert-dialog';
 
 const memberFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  address: z.string().min(1, "Address is required"),
-  pod_id: z.string().min(1, "POD ID is required"),
-  member_type: z.enum(["consumer", "producer", "prosumer"]),
-  user_type: z.enum(["real", "simulated"]),
-  load_profile_type: z.enum(["residential", "commercial", "industrial", "custom"]),
+  name: z.string().min(1, 'Name is required'),
+  address: z.string().min(1, 'Address is required'),
+  pod_id: z.string().min(1, 'POD ID is required'),
+  member_type: z.enum(['consumer', 'producer', 'prosumer']),
+  user_type: z.enum(['real', 'simulated']),
+  load_profile_type: z.enum(['residential', 'commercial', 'industrial', 'custom']),
   contracted_power: z.number().min(0).optional(),
   smart_meter_id: z.string().optional(),
   meter_type: z.string().optional(),
   fiscal_code: z.string().optional(),
   vat_number: z.string().optional(),
   voltage_level: z.string().optional(),
-  status: z.enum(["active", "inactive", "pending"]),
+  status: z.enum(['active', 'inactive', 'pending']),
 });
 
 type MemberFormData = z.infer<typeof memberFormSchema>;
@@ -70,7 +77,7 @@ export default function MemberDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  
+
   // Parse IDs safely, return null if invalid
   const cerIdNum = cerId && !isNaN(parseInt(cerId)) ? parseInt(cerId) : null;
   const memberIdNum = memberId && !isNaN(parseInt(memberId)) ? parseInt(memberId) : null;
@@ -114,16 +121,20 @@ export default function MemberDetail() {
         name: member.name,
         address: member.address,
         pod_id: member.pod_id,
-        member_type: member.member_type as "consumer" | "producer" | "prosumer",
-        user_type: (member.user_type || 'real') as "real" | "simulated",
-        load_profile_type: member.load_profile_type as "residential" | "commercial" | "industrial" | "custom",
+        member_type: member.member_type as 'consumer' | 'producer' | 'prosumer',
+        user_type: (member.user_type || 'real') as 'real' | 'simulated',
+        load_profile_type: member.load_profile_type as
+          | 'residential'
+          | 'commercial'
+          | 'industrial'
+          | 'custom',
         contracted_power: member.contracted_power || 0,
         smart_meter_id: member.smart_meter_id || '',
         meter_type: member.meter_type || '',
         fiscal_code: member.fiscal_code || '',
         vat_number: member.vat_number || '',
         voltage_level: member.voltage_level || '',
-        status: member.status as "active" | "inactive" | "pending",
+        status: member.status as 'active' | 'inactive' | 'pending',
       });
     }
   }, [member, form, isEditing]);
@@ -578,14 +589,15 @@ export default function MemberDetail() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Member Assets</CardTitle>
-                {(member.member_type === 'producer' || member.member_type === 'prosumer') && cerIdNum && (
-                  <AddAssetDialog member={member} cerId={cerIdNum}>
-                    <Button>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Asset
-                    </Button>
-                  </AddAssetDialog>
-                )}
+                {(member.member_type === 'producer' || member.member_type === 'prosumer') &&
+                  cerIdNum && (
+                    <AddAssetDialog member={member} cerId={cerIdNum}>
+                      <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Asset
+                      </Button>
+                    </AddAssetDialog>
+                  )}
               </div>
             </CardHeader>
             <CardContent>
@@ -636,7 +648,8 @@ export default function MemberDetail() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Asset</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete {asset.name}? This action cannot be undone.
+                                  Are you sure you want to delete {asset.name}? This action cannot
+                                  be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -658,13 +671,14 @@ export default function MemberDetail() {
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>No assets yet</p>
-                  {(member.member_type === 'producer' || member.member_type === 'prosumer') && cerIdNum && (
-                    <AddAssetDialog member={member} cerId={cerIdNum}>
-                      <Button className="mt-4" variant="outline">
-                        Add First Asset
-                      </Button>
-                    </AddAssetDialog>
-                  )}
+                  {(member.member_type === 'producer' || member.member_type === 'prosumer') &&
+                    cerIdNum && (
+                      <AddAssetDialog member={member} cerId={cerIdNum}>
+                        <Button className="mt-4" variant="outline">
+                          Add First Asset
+                        </Button>
+                      </AddAssetDialog>
+                    )}
                 </div>
               )}
             </CardContent>
@@ -710,11 +724,15 @@ export default function MemberDetail() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-sm text-muted-foreground">Total Energy Produced:</span>
-                  <p className="text-2xl font-bold">{(member.energy_produced || 0).toFixed(2)} kWh</p>
+                  <p className="text-2xl font-bold">
+                    {(member.energy_produced || 0).toFixed(2)} kWh
+                  </p>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Total Energy Consumed:</span>
-                  <p className="text-2xl font-bold">{(member.energy_consumed || 0).toFixed(2)} kWh</p>
+                  <p className="text-2xl font-bold">
+                    {(member.energy_consumed || 0).toFixed(2)} kWh
+                  </p>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Total Energy Shared:</span>
@@ -722,7 +740,9 @@ export default function MemberDetail() {
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Contracted Power:</span>
-                  <p className="text-2xl font-bold">{member.contracted_power?.toFixed(1) || 0} kW</p>
+                  <p className="text-2xl font-bold">
+                    {member.contracted_power?.toFixed(1) || 0} kW
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -732,4 +752,3 @@ export default function MemberDetail() {
     </div>
   );
 }
-

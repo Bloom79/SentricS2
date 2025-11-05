@@ -115,9 +115,12 @@ export function StringConfigDialog({ open, onClose, arrayId, plantId }: StringCo
   // Assign panels mutation
   const assignPanelsMutation = useMutation({
     mutationFn: async (data: { string_number: number; panel_ids: number[] }) => {
-      const response = await apiClient.post(`/assets/${arrayId}/strings/${data.string_number}/assign`, {
-        panel_ids: data.panel_ids,
-      });
+      const response = await apiClient.post(
+        `/assets/${arrayId}/strings/${data.string_number}/assign`,
+        {
+          panel_ids: data.panel_ids,
+        }
+      );
       return response.data;
     },
     onSuccess: () => {
@@ -145,9 +148,17 @@ export function StringConfigDialog({ open, onClose, arrayId, plantId }: StringCo
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'full':
-        return <Badge variant="default" className="bg-green-500">Full</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-500">
+            Full
+          </Badge>
+        );
       case 'partial':
-        return <Badge variant="secondary" className="bg-yellow-500">Partial</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-yellow-500">
+            Partial
+          </Badge>
+        );
       case 'empty':
         return <Badge variant="outline">Empty</Badge>;
       default:
@@ -155,9 +166,8 @@ export function StringConfigDialog({ open, onClose, arrayId, plantId }: StringCo
     }
   };
 
-  const canAddMore = selectedString && stringDetails
-    ? stringDetails.panels_count < stringDetails.max_panels
-    : false;
+  const canAddMore =
+    selectedString && stringDetails ? stringDetails.panels_count < stringDetails.max_panels : false;
 
   if (configLoading || stringsLoading) {
     return (
@@ -225,7 +235,8 @@ export function StringConfigDialog({ open, onClose, arrayId, plantId }: StringCo
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-muted-foreground">
-                  {config?.number_of_strings || 0} strings × {config?.panels_per_string || 0} panels/string
+                  {config?.number_of_strings || 0} strings × {config?.panels_per_string || 0}{' '}
+                  panels/string
                 </p>
               </div>
               <Button variant="outline" size="sm" onClick={() => setConfigMode('config')}>
@@ -283,15 +294,21 @@ export function StringConfigDialog({ open, onClose, arrayId, plantId }: StringCo
                 {/* Metrics */}
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center p-4 border rounded">
-                    <div className="text-2xl font-bold">{stringDetails.total_voltage.toFixed(1)}</div>
+                    <div className="text-2xl font-bold">
+                      {stringDetails.total_voltage.toFixed(1)}
+                    </div>
                     <div className="text-sm text-muted-foreground">Voltage (V)</div>
                   </div>
                   <div className="text-center p-4 border rounded">
-                    <div className="text-2xl font-bold">{stringDetails.nominal_current.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">
+                      {stringDetails.nominal_current.toFixed(2)}
+                    </div>
                     <div className="text-sm text-muted-foreground">Current (A)</div>
                   </div>
                   <div className="text-center p-4 border rounded">
-                    <div className="text-2xl font-bold">{(stringDetails.total_power / 1000).toFixed(2)}</div>
+                    <div className="text-2xl font-bold">
+                      {(stringDetails.total_power / 1000).toFixed(2)}
+                    </div>
                     <div className="text-sm text-muted-foreground">Power (kW)</div>
                   </div>
                 </div>
@@ -299,7 +316,9 @@ export function StringConfigDialog({ open, onClose, arrayId, plantId }: StringCo
                 {/* Panels List */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">Assigned Panels ({stringDetails.panels.length})</h4>
+                    <h4 className="font-semibold">
+                      Assigned Panels ({stringDetails.panels.length})
+                    </h4>
                     <Button
                       variant="outline"
                       size="sm"
@@ -316,14 +335,19 @@ export function StringConfigDialog({ open, onClose, arrayId, plantId }: StringCo
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {stringDetails.panels.length > 0 ? (
                       stringDetails.panels.map((panel) => (
-                        <div key={panel.id} className="flex items-center justify-between p-2 border rounded">
+                        <div
+                          key={panel.id}
+                          className="flex items-center justify-between p-2 border rounded"
+                        >
                           <div>
                             <p className="font-medium">{panel.name}</p>
                             <p className="text-sm text-muted-foreground">{panel.model}</p>
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="text-right text-sm">
-                              <p>{panel.voltage}V × {panel.current}A</p>
+                              <p>
+                                {panel.voltage}V × {panel.current}A
+                              </p>
                               <p className="text-muted-foreground">{panel.power}W</p>
                             </div>
                             <Button
@@ -332,8 +356,12 @@ export function StringConfigDialog({ open, onClose, arrayId, plantId }: StringCo
                               onClick={async () => {
                                 try {
                                   await apiClient.delete(`/assets/${arrayId}/strings/${panel.id}`);
-                                  queryClient.invalidateQueries({ queryKey: ['string-details', arrayId, selectedString] });
-                                  queryClient.invalidateQueries({ queryKey: ['array-strings', arrayId] });
+                                  queryClient.invalidateQueries({
+                                    queryKey: ['string-details', arrayId, selectedString],
+                                  });
+                                  queryClient.invalidateQueries({
+                                    queryKey: ['array-strings', arrayId],
+                                  });
                                 } catch (error) {
                                   console.error('Failed to remove panel:', error);
                                 }
@@ -370,4 +398,3 @@ export function StringConfigDialog({ open, onClose, arrayId, plantId }: StringCo
     </Dialog>
   );
 }
-

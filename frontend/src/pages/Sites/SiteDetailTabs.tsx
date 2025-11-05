@@ -214,9 +214,7 @@ export function StorageTab({ siteId }: StorageTabProps) {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="text-base">{unit.name}</CardTitle>
-                    {unit.code && (
-                      <p className="text-sm text-muted-foreground">{unit.code}</p>
-                    )}
+                    {unit.code && <p className="text-sm text-muted-foreground">{unit.code}</p>}
                   </div>
                   <Badge variant={unit.status === 'operational' ? 'default' : 'secondary'}>
                     {unit.status}
@@ -324,4 +322,3 @@ export function EnergyFlowTab({ siteId }: EnergyFlowTabProps) {
     </div>
   );
 }
-

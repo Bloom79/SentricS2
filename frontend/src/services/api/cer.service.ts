@@ -139,9 +139,16 @@ export const cerService = {
     }
   },
 
-  async updateMember(cerId: number, memberId: number, memberData: Partial<CERMember>): Promise<CERMember> {
+  async updateMember(
+    cerId: number,
+    memberId: number,
+    memberData: Partial<CERMember>
+  ): Promise<CERMember> {
     try {
-      const response = await apiClient.put(`/cer/communities/${cerId}/members/${memberId}`, memberData);
+      const response = await apiClient.put(
+        `/cer/communities/${cerId}/members/${memberId}`,
+        memberData
+      );
       return response.data;
     } catch (error) {
       throw handleError(error);
@@ -346,18 +353,26 @@ export const cerService = {
   async getCERComplianceRequirements(cerId: number, includePlants: boolean = true): Promise<any[]> {
     try {
       const params = includePlants ? { include_plants: true } : {};
-      const response = await apiClient.get(`/cer/communities/${cerId}/compliance/requirements`, { params });
+      const response = await apiClient.get(`/cer/communities/${cerId}/compliance/requirements`, {
+        params,
+      });
       return response.data;
     } catch (error) {
       throw handleError(error);
     }
   },
 
-  async getCERComplianceRecords(cerId: number, status?: string, includePlants: boolean = true): Promise<any[]> {
+  async getCERComplianceRecords(
+    cerId: number,
+    status?: string,
+    includePlants: boolean = true
+  ): Promise<any[]> {
     try {
       const params: any = { include_plants: includePlants };
       if (status) params.status = status;
-      const response = await apiClient.get(`/cer/communities/${cerId}/compliance/records`, { params });
+      const response = await apiClient.get(`/cer/communities/${cerId}/compliance/records`, {
+        params,
+      });
       return response.data;
     } catch (error) {
       throw handleError(error);
@@ -378,4 +393,3 @@ export interface CERParticipationRequest {
   user_email?: string;
   cer_name?: string;
 }
-

@@ -8,7 +8,16 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle2, XCircle, Loader2, Calendar, Factory, Building2, FileText } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Calendar,
+  Factory,
+  Building2,
+  FileText,
+} from 'lucide-react';
 import { apiClient } from '@/services/api/apiClient';
 import { cerService } from '@/services/api/cer.service';
 import {
@@ -70,7 +79,7 @@ export default function Compliance() {
     queryFn: async () => {
       // Fetch records from all CERs
       if (!cers || cers.length === 0) return [];
-      
+
       const allRecords: any[] = [];
       for (const cer of cers) {
         try {
@@ -132,7 +141,9 @@ export default function Compliance() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Compliance Management</h1>
-          <p className="text-muted-foreground">Track and manage compliance requirements across all CERs and Plants</p>
+          <p className="text-muted-foreground">
+            Track and manage compliance requirements across all CERs and Plants
+          </p>
         </div>
       </div>
 
@@ -157,12 +168,20 @@ export default function Compliance() {
         <Card className={overdue && overdue.length > 0 ? 'border-destructive' : ''}>
           <CardHeader>
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertCircle className={overdue && overdue.length > 0 ? 'h-5 w-5 text-destructive' : 'h-5 w-5 text-muted-foreground'} />
+              <AlertCircle
+                className={
+                  overdue && overdue.length > 0
+                    ? 'h-5 w-5 text-destructive'
+                    : 'h-5 w-5 text-muted-foreground'
+                }
+              />
               Overdue Items
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${overdue && overdue.length > 0 ? 'text-destructive' : ''}`}>
+            <div
+              className={`text-2xl font-bold ${overdue && overdue.length > 0 ? 'text-destructive' : ''}`}
+            >
               {overdue?.length || 0}
             </div>
           </CardContent>
@@ -181,16 +200,21 @@ export default function Compliance() {
           <CardContent>
             <div className="space-y-2">
               {overdue.map((record: any) => (
-                <div key={record.id} className="flex justify-between items-center p-3 border border-destructive rounded">
+                <div
+                  key={record.id}
+                  className="flex justify-between items-center p-3 border border-destructive rounded"
+                >
                   <div>
                     <p className="font-medium">
                       {record.requirement?.name || `Requirement #${record.requirement_id}`}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Due: {record.due_date ? new Date(record.due_date).toLocaleDateString() : 'N/A'}
+                      Due:{' '}
+                      {record.due_date ? new Date(record.due_date).toLocaleDateString() : 'N/A'}
                       {record.entity_type && (
                         <span className="ml-2">
-                          • {record.entity_type === 'plant' ? 'Plant' : 'CER'}: {record.entity_name || 'Unknown'}
+                          • {record.entity_type === 'plant' ? 'Plant' : 'CER'}:{' '}
+                          {record.entity_name || 'Unknown'}
                         </span>
                       )}
                     </p>
@@ -250,7 +274,9 @@ export default function Compliance() {
                           </Badge>
                         </TableCell>
                         <TableCell className="capitalize">
-                          {req.frequency_days ? `Every ${req.frequency_days} days` : req.type || 'one-time'}
+                          {req.frequency_days
+                            ? `Every ${req.frequency_days} days`
+                            : req.type || 'one-time'}
                         </TableCell>
                         <TableCell>
                           {req.cer_id ? (
@@ -398,5 +424,3 @@ export default function Compliance() {
     </div>
   );
 }
-
-

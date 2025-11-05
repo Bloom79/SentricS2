@@ -31,10 +31,10 @@ interface Site {
 export default function Sites() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState<{ 
-    status?: string; 
-    site_type?: string; 
-    region?: string 
+  const [filters, setFilters] = useState<{
+    status?: string;
+    site_type?: string;
+    region?: string;
   }>({});
 
   const { data: sites, isLoading } = useQuery<Site[]>({
@@ -50,11 +50,13 @@ export default function Sites() {
     },
   });
 
-  const filteredSites = sites?.filter((site) =>
-    site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    site.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    site.location?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredSites =
+    sites?.filter(
+      (site) =>
+        site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        site.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        site.location?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
   if (isLoading) {
     return (
@@ -69,7 +71,9 @@ export default function Sites() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Sites</h1>
-          <p className="text-muted-foreground">Manage physical locations containing multiple plants</p>
+          <p className="text-muted-foreground">
+            Manage physical locations containing multiple plants
+          </p>
         </div>
         <Button onClick={() => navigate('/sites/new')}>
           <Plus className="mr-2 h-4 w-4" />
@@ -133,9 +137,7 @@ export default function Sites() {
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-lg">{site.name}</CardTitle>
-                  {site.code && (
-                    <p className="text-sm text-muted-foreground">{site.code}</p>
-                  )}
+                  {site.code && <p className="text-sm text-muted-foreground">{site.code}</p>}
                 </div>
                 <Badge variant={site.status === 'active' ? 'default' : 'secondary'}>
                   {site.status}
@@ -150,7 +152,7 @@ export default function Sites() {
                     <span>{site.location}</span>
                   </div>
                 )}
-                
+
                 {site.total_capacity_kw && site.total_capacity_kw > 0 && (
                   <div className="flex items-center gap-2 text-sm">
                     <Zap className="h-4 w-4 text-yellow-500" />
@@ -197,4 +199,3 @@ export default function Sites() {
     </div>
   );
 }
-

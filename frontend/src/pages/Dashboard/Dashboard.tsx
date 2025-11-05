@@ -6,7 +6,14 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { apiClient } from '@/services/api/apiClient';
@@ -163,7 +170,9 @@ const formatDate = (value?: string) => {
   return parsed.toLocaleDateString();
 };
 
-const getWorkflowStatusVariant = (status?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+const getWorkflowStatusVariant = (
+  status?: string
+): 'default' | 'secondary' | 'destructive' | 'outline' => {
   if (!status) {
     return 'outline';
   }
@@ -200,7 +209,11 @@ const Dashboard: React.FC = () => {
     retry: false,
   });
 
-  const { data: activity, isError: activityError, isLoading: activityLoading } = useQuery({
+  const {
+    data: activity,
+    isError: activityError,
+    isLoading: activityLoading,
+  } = useQuery({
     queryKey: ['dashboard', 'activity'],
     queryFn: async () => {
       const response = await apiClient.get('/dashboard/activity?limit=10');
@@ -295,14 +308,18 @@ const Dashboard: React.FC = () => {
           computedDaysUntilExpiry: computed,
         };
       })
-      .filter((doc) => doc.computedDaysUntilExpiry !== undefined && doc.computedDaysUntilExpiry <= 45)
+      .filter(
+        (doc) => doc.computedDaysUntilExpiry !== undefined && doc.computedDaysUntilExpiry <= 45
+      )
       .sort((a, b) => (a.computedDaysUntilExpiry ?? 999) - (b.computedDaysUntilExpiry ?? 999))
       .slice(0, 5);
   }, [documentData]);
 
   const totalWorkflows = stats?.workflows.total ?? 0;
   const activeWorkflows = stats?.workflows.active ?? 0;
-  const workflowActiveRatio = totalWorkflows ? Math.round((activeWorkflows / totalWorkflows) * 100) : 0;
+  const workflowActiveRatio = totalWorkflows
+    ? Math.round((activeWorkflows / totalWorkflows) * 100)
+    : 0;
 
   const totalAssets = stats?.assets.total ?? 0;
   const operationalAssets = stats?.assets.operational ?? 0;
@@ -395,10 +412,9 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'Workflow Pipeline',
-      description:
-        totalWorkflows
-          ? `${activeWorkflows} workflows are in progress and ${totalWorkflows - activeWorkflows} are waiting to start.`
-          : 'Create workflows to orchestrate activation, compliance, and fiscal processes.',
+      description: totalWorkflows
+        ? `${activeWorkflows} workflows are in progress and ${totalWorkflows - activeWorkflows} are waiting to start.`
+        : 'Create workflows to orchestrate activation, compliance, and fiscal processes.',
       href: '/workflows',
       icon: Activity,
       stat: totalWorkflows ? `${workflowActiveRatio}% active` : undefined,
@@ -415,10 +431,9 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'CER Communities',
-      description:
-        stats?.cer.total
-          ? `${stats.cer.active} active communities out of ${stats.cer.total}.`
-          : 'Set up CER communities to track shared energy initiatives.',
+      description: stats?.cer.total
+        ? `${stats.cer.active} active communities out of ${stats.cer.total}.`
+        : 'Set up CER communities to track shared energy initiatives.',
       href: '/cer',
       icon: CheckCircle2,
       stat: stats?.cer.total ? `${stats.cer.active}/${stats.cer.total} active` : undefined,
@@ -429,7 +444,9 @@ const Dashboard: React.FC = () => {
     <div className="space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-responsive-xl font-bold">Dashboard</h1>
-        <p className="text-xs sm:text-sm text-muted-foreground">Cross-module overview of operations, compliance, documents, and assets</p>
+        <p className="text-xs sm:text-sm text-muted-foreground">
+          Cross-module overview of operations, compliance, documents, and assets
+        </p>
       </div>
 
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
@@ -441,7 +458,8 @@ const Dashboard: React.FC = () => {
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold">{stats?.plants.total ?? 0}</div>
             <p className="text-[10px] sm:text-xs text-muted-foreground">
-              {stats?.plants.active ?? 0} active • {(stats?.plants.total_capacity_kw ?? 0).toFixed(1)} kW
+              {stats?.plants.active ?? 0} active •{' '}
+              {(stats?.plants.total_capacity_kw ?? 0).toFixed(1)} kW
             </p>
           </CardContent>
         </Card>
@@ -453,7 +471,9 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold">{stats?.cer.total ?? 0}</div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">{stats?.cer.active ?? 0} active</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
+              {stats?.cer.active ?? 0} active
+            </p>
           </CardContent>
         </Card>
 
@@ -464,7 +484,9 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold">{stats?.assets.total ?? 0}</div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">{stats?.assets.operational ?? 0} operational</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
+              {stats?.assets.operational ?? 0} operational
+            </p>
           </CardContent>
         </Card>
 
@@ -492,7 +514,9 @@ const Dashboard: React.FC = () => {
                   <div className="rounded-md bg-primary/10 p-2 text-primary">
                     <card.icon className="h-4 w-4" />
                   </div>
-                  {card.badgeLabel ? <Badge variant={card.badgeVariant ?? 'outline'}>{card.badgeLabel}</Badge> : null}
+                  {card.badgeLabel ? (
+                    <Badge variant={card.badgeVariant ?? 'outline'}>{card.badgeLabel}</Badge>
+                  ) : null}
                 </div>
                 <div className="mt-4 text-2xl font-semibold">{card.value}</div>
                 <p className="text-sm text-muted-foreground">{card.helper}</p>
@@ -512,16 +536,18 @@ const Dashboard: React.FC = () => {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-              <CardHeader>
+          <CardHeader>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <CardTitle className="text-lg font-semibold">Workflows in Progress</CardTitle>
-                <p className="text-sm text-muted-foreground">Monitor execution across plants and programs</p>
+                <p className="text-sm text-muted-foreground">
+                  Monitor execution across plants and programs
+                </p>
               </div>
               <Badge variant="outline">{activeWorkflows} active</Badge>
             </div>
-              </CardHeader>
-              <CardContent>
+          </CardHeader>
+          <CardContent>
             {workflowsLoading ? (
               <div className="flex h-32 items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
@@ -543,16 +569,24 @@ const Dashboard: React.FC = () => {
                             {workflow.plant_name ?? 'Unassigned'} • {workflow.type ?? 'Workflow'}
                           </p>
                         </div>
-                        <Badge variant={getWorkflowStatusVariant(workflow.status)} className="shrink-0 text-xs">
+                        <Badge
+                          variant={getWorkflowStatusVariant(workflow.status)}
+                          className="shrink-0 text-xs"
+                        >
                           {workflow.status ?? 'Unknown'}
                         </Badge>
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-muted-foreground">Progress</span>
-                          <span className="font-medium">{Math.round(workflow.progress_percentage ?? 0)}%</span>
+                          <span className="font-medium">
+                            {Math.round(workflow.progress_percentage ?? 0)}%
+                          </span>
                         </div>
-                        <Progress value={clampProgress(workflow.progress_percentage)} className="h-2" />
+                        <Progress
+                          value={clampProgress(workflow.progress_percentage)}
+                          className="h-2"
+                        />
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">Due Date</span>
@@ -589,7 +623,8 @@ const Dashboard: React.FC = () => {
                               <div className="flex flex-col">
                                 <span className="font-medium">{workflow.name}</span>
                                 <span className="text-xs text-muted-foreground">
-                                  {workflow.plant_name ?? 'Unassigned'} • {workflow.type ?? 'Workflow'}
+                                  {workflow.plant_name ?? 'Unassigned'} •{' '}
+                                  {workflow.type ?? 'Workflow'}
                                 </span>
                               </div>
                             </TableCell>
@@ -600,7 +635,10 @@ const Dashboard: React.FC = () => {
                             </TableCell>
                             <TableCell>
                               <div className="space-y-1">
-                                <Progress value={clampProgress(workflow.progress_percentage)} className="h-2 w-24" />
+                                <Progress
+                                  value={clampProgress(workflow.progress_percentage)}
+                                  className="h-2 w-24"
+                                />
                                 <span className="text-xs text-muted-foreground">
                                   {Math.round(workflow.progress_percentage ?? 0)}%
                                 </span>
@@ -610,14 +648,17 @@ const Dashboard: React.FC = () => {
                               <div className="flex flex-col items-end">
                                 <span
                                   className={`text-xs ${
-                                    workflow.daysRemaining !== undefined && workflow.daysRemaining < 0
+                                    workflow.daysRemaining !== undefined &&
+                                    workflow.daysRemaining < 0
                                       ? 'text-destructive'
                                       : 'text-muted-foreground'
                                   }`}
                                 >
                                   {formatRelativeLabel(workflow.daysRemaining)}
                                 </span>
-                                <span className="text-xs text-muted-foreground">{formatDate(workflow.due_date)}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatDate(workflow.due_date)}
+                                </span>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -632,22 +673,24 @@ const Dashboard: React.FC = () => {
                 No workflows are currently in progress. Launch a new workflow to get started.
               </p>
             )}
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
         <Card>
-              <CardHeader>
+          <CardHeader>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <CardTitle className="text-lg font-semibold">Compliance Alerts</CardTitle>
-                <p className="text-sm text-muted-foreground">Overdue obligations requiring attention</p>
+                <p className="text-sm text-muted-foreground">
+                  Overdue obligations requiring attention
+                </p>
               </div>
               <Badge variant={overdueCount > 0 ? 'destructive' : 'secondary'}>
                 {overdueCount > 0 ? `${overdueCount} overdue` : 'On track'}
               </Badge>
             </div>
-              </CardHeader>
-              <CardContent>
+          </CardHeader>
+          <CardContent>
             {complianceLoading ? (
               <div className="flex h-32 items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
@@ -666,7 +709,8 @@ const Dashboard: React.FC = () => {
                           {alert.requirement_name ?? 'Compliance obligation'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {alert.plant_name ?? alert.cer_name ?? 'General'} • {formatDate(alert.due_date)}
+                          {alert.plant_name ?? alert.cer_name ?? 'General'} •{' '}
+                          {formatDate(alert.due_date)}
                         </p>
                         {alert.requirement?.authority ? (
                           <p className="text-xs text-muted-foreground">
@@ -675,7 +719,9 @@ const Dashboard: React.FC = () => {
                         ) : null}
                       </div>
                       <Badge variant="destructive">
-                        {alert.daysOverdue !== undefined ? `Overdue ${alert.daysOverdue}d` : 'Overdue'}
+                        {alert.daysOverdue !== undefined
+                          ? `Overdue ${alert.daysOverdue}d`
+                          : 'Overdue'}
                       </Badge>
                     </div>
                   </div>
@@ -686,24 +732,26 @@ const Dashboard: React.FC = () => {
                 All compliance obligations are currently on track.
               </p>
             )}
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-              <CardHeader>
+          <CardHeader>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <CardTitle className="text-lg font-semibold">Document Watchlist</CardTitle>
-                <p className="text-sm text-muted-foreground">Expiring documents within the next 45 days</p>
+                <p className="text-sm text-muted-foreground">
+                  Expiring documents within the next 45 days
+                </p>
               </div>
               <Badge variant={expiringSoonCount > 0 ? 'destructive' : 'secondary'}>
                 {expiringSoonCount > 0 ? `${expiringSoonCount} to review` : 'All clear'}
               </Badge>
             </div>
-              </CardHeader>
-              <CardContent>
+          </CardHeader>
+          <CardContent>
             {documentsLoading ? (
               <div className="flex h-32 items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
@@ -723,17 +771,22 @@ const Dashboard: React.FC = () => {
                           <h4 className="font-medium text-sm truncate">{doc.name}</h4>
                           <p className="text-xs text-muted-foreground">{doc.type ?? 'Document'}</p>
                         </div>
-                        <Badge variant="outline" className="shrink-0 text-xs">{doc.status ?? 'Draft'}</Badge>
+                        <Badge variant="outline" className="shrink-0 text-xs">
+                          {doc.status ?? 'Draft'}
+                        </Badge>
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">Linked to</span>
-                        <span className="font-medium">{doc.plant_name ?? doc.cer_name ?? 'General'}</span>
+                        <span className="font-medium">
+                          {doc.plant_name ?? doc.cer_name ?? 'General'}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">Expires</span>
                         <span
                           className={
-                            doc.computedDaysUntilExpiry !== undefined && doc.computedDaysUntilExpiry < 0
+                            doc.computedDaysUntilExpiry !== undefined &&
+                            doc.computedDaysUntilExpiry < 0
                               ? 'text-destructive font-medium'
                               : 'text-muted-foreground'
                           }
@@ -763,7 +816,9 @@ const Dashboard: React.FC = () => {
                             <TableCell>
                               <div className="flex flex-col">
                                 <span className="font-medium">{doc.name}</span>
-                                <span className="text-xs text-muted-foreground">{doc.type ?? 'Document'}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {doc.type ?? 'Document'}
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell>
@@ -775,14 +830,17 @@ const Dashboard: React.FC = () => {
                               <div className="flex flex-col">
                                 <span
                                   className={`text-xs ${
-                                    doc.computedDaysUntilExpiry !== undefined && doc.computedDaysUntilExpiry < 0
+                                    doc.computedDaysUntilExpiry !== undefined &&
+                                    doc.computedDaysUntilExpiry < 0
                                       ? 'text-destructive'
                                       : 'text-muted-foreground'
                                   }`}
                                 >
                                   {formatRelativeLabel(doc.computedDaysUntilExpiry)}
                                 </span>
-                                <span className="text-xs text-muted-foreground">{formatDate(doc.expiry_date)}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatDate(doc.expiry_date)}
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
@@ -800,8 +858,8 @@ const Dashboard: React.FC = () => {
                 No documents are approaching expiration. Great job keeping documentation current!
               </p>
             )}
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
@@ -832,9 +890,9 @@ const Dashboard: React.FC = () => {
                   </Button>
                 </div>
               ))}
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -856,9 +914,9 @@ const Dashboard: React.FC = () => {
                     <Badge variant="outline" className="capitalize">
                       {item.type}
                     </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {item.date ? new Date(item.date).toLocaleDateString() : ''}
-                  </span>
+                    <span className="text-sm text-muted-foreground">
+                      {item.date ? new Date(item.date).toLocaleDateString() : ''}
+                    </span>
                   </div>
                 </div>
               ))}

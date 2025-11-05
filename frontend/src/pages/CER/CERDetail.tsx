@@ -6,13 +6,37 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Edit, Users, FileText, ClipboardCheck, Activity, Settings, Factory, Link2, Unlink } from 'lucide-react';
+import {
+  ArrowLeft,
+  Edit,
+  Users,
+  FileText,
+  ClipboardCheck,
+  Activity,
+  Settings,
+  Factory,
+  Link2,
+  Unlink,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { cerService, CERMember } from '@/services/api/cer.service';
 import { AddMemberDialog } from '@/components/cer/members/AddMemberDialog';
 import { AddAssetDialog } from '@/components/cer/members/AddAssetDialog';
@@ -27,7 +51,7 @@ import { toast } from 'sonner';
 export default function CERDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   // Parse ID safely, return null if invalid
   const cerId = id && !isNaN(parseInt(id)) ? parseInt(id) : null;
 
@@ -91,9 +115,9 @@ export default function CERDetail() {
   const memberStats = React.useMemo(() => {
     if (!members) return { producers: 0, consumers: 0, prosumers: 0 };
     return {
-      producers: members.filter(m => m.member_type === 'producer').length,
-      consumers: members.filter(m => m.member_type === 'consumer').length,
-      prosumers: members.filter(m => m.member_type === 'prosumer').length,
+      producers: members.filter((m) => m.member_type === 'producer').length,
+      consumers: members.filter((m) => m.member_type === 'consumer').length,
+      prosumers: members.filter((m) => m.member_type === 'prosumer').length,
     };
   }, [members]);
 
@@ -129,7 +153,9 @@ export default function CERDetail() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold">{cer.name}</h1>
-            <p className="text-muted-foreground">{cer.description || 'Renewable Energy Community'}</p>
+            <p className="text-muted-foreground">
+              {cer.description || 'Renewable Energy Community'}
+            </p>
             <div className="flex gap-2 mt-2">
               <Badge variant={cer.status === 'active' ? 'default' : 'secondary'}>
                 {cer.status}
@@ -158,7 +184,8 @@ export default function CERDetail() {
           <CardContent>
             <div className="text-2xl font-bold">{members?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
-              {memberStats.producers} producers, {memberStats.consumers} consumers, {memberStats.prosumers} prosumers
+              {memberStats.producers} producers, {memberStats.consumers} consumers,{' '}
+              {memberStats.prosumers} prosumers
             </p>
           </CardContent>
         </Card>
@@ -283,13 +310,15 @@ export default function CERDetail() {
                             ) : (
                               <span className="text-xs text-muted-foreground">No assets</span>
                             )}
-                            {(member.member_type === 'producer' || member.member_type === 'prosumer') && cerId && (
-                              <AddAssetDialog member={member} cerId={cerId}>
-                                <Button size="sm" variant="ghost" className="h-6 px-2">
-                                  <Plus className="h-3 w-3" />
-                                </Button>
-                              </AddAssetDialog>
-                            )}
+                            {(member.member_type === 'producer' ||
+                              member.member_type === 'prosumer') &&
+                              cerId && (
+                                <AddAssetDialog member={member} cerId={cerId}>
+                                  <Button size="sm" variant="ghost" className="h-6 px-2">
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </AddAssetDialog>
+                              )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -382,19 +411,27 @@ export default function CERDetail() {
                   <>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Energy Produced:</span>
-                      <span className="font-medium">{stats.total_energy_produced?.toFixed(2) || 0} kWh</span>
+                      <span className="font-medium">
+                        {stats.total_energy_produced?.toFixed(2) || 0} kWh
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Energy Consumed:</span>
-                      <span className="font-medium">{stats.total_energy_consumed?.toFixed(2) || 0} kWh</span>
+                      <span className="font-medium">
+                        {stats.total_energy_consumed?.toFixed(2) || 0} kWh
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Energy Shared:</span>
-                      <span className="font-medium">{stats.total_energy_shared?.toFixed(2) || 0} kWh</span>
+                      <span className="font-medium">
+                        {stats.total_energy_shared?.toFixed(2) || 0} kWh
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Capacity:</span>
-                      <span className="font-medium">{stats.total_capacity?.toFixed(2) || 0} kW</span>
+                      <span className="font-medium">
+                        {stats.total_capacity?.toFixed(2) || 0} kW
+                      </span>
                     </div>
                   </>
                 ) : (
@@ -447,7 +484,12 @@ export default function CERDetail() {
         {/* Plants Tab */}
         <TabsContent value="plants" className="space-y-4">
           {cerId ? (
-            <PlantsTab cerId={cerId} cerPlants={cerPlants || []} allPlants={allPlants || []} loadingPlants={loadingPlants || false} />
+            <PlantsTab
+              cerId={cerId}
+              cerPlants={cerPlants || []}
+              allPlants={allPlants || []}
+              loadingPlants={loadingPlants || false}
+            />
           ) : (
             <Card>
               <CardContent className="py-12 text-center">
@@ -462,7 +504,17 @@ export default function CERDetail() {
 }
 
 // Plants Tab Component
-function PlantsTab({ cerId, cerPlants, allPlants, loadingPlants }: { cerId: number; cerPlants: any[]; allPlants: any[]; loadingPlants: boolean }) {
+function PlantsTab({
+  cerId,
+  cerPlants,
+  allPlants,
+  loadingPlants,
+}: {
+  cerId: number;
+  cerPlants: any[];
+  allPlants: any[];
+  loadingPlants: boolean;
+}) {
   const queryClient = useQueryClient();
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [selectedPlantId, setSelectedPlantId] = useState<number | null>(null);
@@ -590,7 +642,10 @@ function PlantsTab({ cerId, cerPlants, allPlants, loadingPlants }: { cerId: numb
           <CardContent>
             {availablePlants.length > 0 ? (
               <div className="space-y-2">
-                <Select value={selectedPlantId?.toString()} onValueChange={(value) => setSelectedPlantId(parseInt(value))}>
+                <Select
+                  value={selectedPlantId?.toString()}
+                  onValueChange={(value) => setSelectedPlantId(parseInt(value))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a plant to link" />
                   </SelectTrigger>
@@ -611,16 +666,21 @@ function PlantsTab({ cerId, cerPlants, allPlants, loadingPlants }: { cerId: numb
                   >
                     {isLinking ? 'Linking...' : 'Link Plant'}
                   </Button>
-                  <Button variant="outline" onClick={() => {
-                    setShowLinkDialog(false);
-                    setSelectedPlantId(null);
-                  }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowLinkDialog(false);
+                      setSelectedPlantId(null);
+                    }}
+                  >
                     Cancel
                   </Button>
                 </div>
               </div>
             ) : (
-              <p className="text-muted-foreground">No available plants to link. All plants are already linked to communities.</p>
+              <p className="text-muted-foreground">
+                No available plants to link. All plants are already linked to communities.
+              </p>
             )}
           </CardContent>
         </Card>

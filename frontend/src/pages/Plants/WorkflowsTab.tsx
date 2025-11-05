@@ -72,8 +72,10 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
     if (statusLower === 'completed') return 'bg-green-100 text-green-800 border-green-300';
-    if (statusLower === 'in_progress' || statusLower === 'in progress') return 'bg-blue-100 text-blue-800 border-blue-300';
-    if (statusLower === 'on_hold' || statusLower === 'on hold') return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+    if (statusLower === 'in_progress' || statusLower === 'in progress')
+      return 'bg-blue-100 text-blue-800 border-blue-300';
+    if (statusLower === 'on_hold' || statusLower === 'on hold')
+      return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     if (statusLower === 'draft') return 'bg-gray-100 text-gray-800 border-gray-300';
     return 'bg-gray-100 text-gray-800 border-gray-300';
   };
@@ -81,8 +83,10 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
   const getStatusIcon = (status: string) => {
     const statusLower = status.toLowerCase();
     if (statusLower === 'completed') return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-    if (statusLower === 'in_progress' || statusLower === 'in progress') return <Activity className="h-4 w-4 text-blue-600 animate-pulse" />;
-    if (statusLower === 'on_hold' || statusLower === 'on hold') return <Clock className="h-4 w-4 text-yellow-600" />;
+    if (statusLower === 'in_progress' || statusLower === 'in progress')
+      return <Activity className="h-4 w-4 text-blue-600 animate-pulse" />;
+    if (statusLower === 'on_hold' || statusLower === 'on hold')
+      return <Clock className="h-4 w-4 text-yellow-600" />;
     return <AlertCircle className="h-4 w-4 text-gray-400" />;
   };
 
@@ -123,7 +127,8 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
   const completedWorkflows = workflows.filter((w) => w.status?.toLowerCase() === 'completed');
   const totalDocuments = workflows.reduce((sum, w) => sum + getDocumentCount(w), 0);
   const overdueWorkflows = workflows.filter(
-    (w) => w.due_date && new Date(w.due_date) < new Date() && w.status?.toLowerCase() !== 'completed'
+    (w) =>
+      w.due_date && new Date(w.due_date) < new Date() && w.status?.toLowerCase() !== 'completed'
   );
 
   return (
@@ -132,13 +137,13 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Workflows</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Workflows
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{workflows.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {activeWorkflows.length} active
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">{activeWorkflows.length} active</p>
           </CardContent>
         </Card>
 
@@ -149,7 +154,10 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{completedWorkflows.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {workflows.length > 0 ? Math.round((completedWorkflows.length / workflows.length) * 100) : 0}% completion rate
+              {workflows.length > 0
+                ? Math.round((completedWorkflows.length / workflows.length) * 100)
+                : 0}
+              % completion rate
             </p>
           </CardContent>
         </Card>
@@ -160,9 +168,7 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalDocuments}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Total uploaded
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Total uploaded</p>
           </CardContent>
         </Card>
 
@@ -171,12 +177,12 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
             <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${overdueWorkflows.length > 0 ? 'text-red-600' : ''}`}>
+            <div
+              className={`text-2xl font-bold ${overdueWorkflows.length > 0 ? 'text-red-600' : ''}`}
+            >
               {overdueWorkflows.length}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Requiring attention
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Requiring attention</p>
           </CardContent>
         </Card>
       </div>
@@ -205,7 +211,10 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
             </TableHeader>
             <TableBody>
               {workflows.map((workflow) => {
-                const isOverdue = workflow.due_date && new Date(workflow.due_date) < new Date() && workflow.status?.toLowerCase() !== 'completed';
+                const isOverdue =
+                  workflow.due_date &&
+                  new Date(workflow.due_date) < new Date() &&
+                  workflow.status?.toLowerCase() !== 'completed';
                 const documentCount = getDocumentCount(workflow);
                 const completedPhases = getCompletedPhases(workflow);
                 const totalPhases = workflow.phases?.length || 0;
@@ -245,7 +254,9 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
                     </TableCell>
                     <TableCell>
                       {workflow.due_date ? (
-                        <div className={`flex items-center gap-1 text-sm ${isOverdue ? 'text-red-600 font-medium' : ''}`}>
+                        <div
+                          className={`flex items-center gap-1 text-sm ${isOverdue ? 'text-red-600 font-medium' : ''}`}
+                        >
                           <Calendar className="h-3.5 w-3.5" />
                           {new Date(workflow.due_date).toLocaleDateString()}
                           {isOverdue && ' (Overdue)'}
@@ -293,4 +304,3 @@ export function WorkflowsTab({ plantId }: WorkflowsTabProps) {
     </div>
   );
 }
-

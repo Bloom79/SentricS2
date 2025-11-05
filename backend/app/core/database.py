@@ -26,19 +26,19 @@ _tenant_sessions: Dict[str, sessionmaker] = {}
 
 class TenantAwareQuery(Query):
     """Custom query class that automatically filters by tenant_id"""
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._tenant_id = None
-    
+
     def set_tenant(self, tenant_id: str):
         """Set the tenant for this query"""
         self._tenant_id = tenant_id
         return self
-    
+
     def filter_by_tenant(self):
         """Apply tenant filter if the model has tenant_id column"""
-        if self._tenant_id and hasattr(self.column_descriptions[0]['type'], 'tenant_id'):
+        if self._tenant_id and hasattr(self.column_descriptions[0]["type"], "tenant_id"):
             return self.filter_by(tenant_id=self._tenant_id)
         return self
 
@@ -50,15 +50,15 @@ def get_engine(tenant_id: Optional[str] = None, **kwargs) -> Engine:
     """
     max_retries = 30
     retry_delay = 1
-    
+
     for attempt in range(max_retries):
         try:
             # Use tenant-specific engine if provided, otherwise use default
             if tenant_id and tenant_id in _tenant_engines:
                 return _tenant_engines[tenant_id]
-            
+
             # Default engine (shared for now, can be tenant-specific)
-            if 'default' not in _tenant_engines:
+            if "default" not in _tenant_engines:
                 engine = create_engine(
                     str(settings.DATABASE_URL),
                     poolclass=QueuePool,
@@ -66,9 +66,9 @@ def get_engine(tenant_id: Optional[str] = None, **kwargs) -> Engine:
                     max_overflow=settings.DB_MAX_OVERFLOW,
                     pool_pre_ping=settings.DB_POOL_PRE_PING,
                     echo=settings.DEBUG,
-                    **kwargs
+                    **kwargs,
                 )
-                
+
                 # Enable PostGIS extension on first connection
                 @event.listens_for(engine, "connect")
                 def enable_postgis(dbapi_conn, connection_record):
@@ -80,14 +80,16 @@ def get_engine(tenant_id: Optional[str] = None, **kwargs) -> Engine:
                             dbapi_conn.commit()
                     except Exception as e:
                         logger.warning(f"Could not enable PostGIS: {e}")
-                
-                _tenant_engines['default'] = engine
-            
-            return _tenant_engines['default']
-            
+
+                _tenant_engines["default"] = engine
+
+            return _tenant_engines["default"]
+
         except Exception as e:
             if attempt < max_retries - 1:
-                logger.warning(f"Database connection attempt {attempt + 1} failed: {e}. Retrying...")
+                logger.warning(
+                    f"Database connection attempt {attempt + 1} failed: {e}. Retrying..."
+                )
                 time.sleep(retry_delay)
             else:
                 logger.error(f"Failed to connect to database after {max_retries} attempts")
@@ -97,25 +99,22 @@ def get_engine(tenant_id: Optional[str] = None, **kwargs) -> Engine:
 def get_session(tenant_id: Optional[str] = None) -> Session:
     """Get database session with tenant context"""
     engine = get_engine(tenant_id)
-    
+
     if tenant_id and tenant_id in _tenant_sessions:
         SessionLocal = _tenant_sessions[tenant_id]
     else:
         SessionLocal = sessionmaker(
-            autocommit=False,
-            autoflush=False,
-            bind=engine,
-            query_cls=TenantAwareQuery
+            autocommit=False, autoflush=False, bind=engine, query_cls=TenantAwareQuery
         )
         if tenant_id:
             _tenant_sessions[tenant_id] = SessionLocal
-    
+
     session = SessionLocal()
-    
+
     # Set tenant context
     if tenant_id:
         session.tenant_id = tenant_id
-    
+
     return session
 
 
@@ -147,14 +146,13 @@ def get_db_context(tenant_id: Optional[str] = None):
 def init_db() -> None:
     """Initialize database - create tables and enable PostGIS"""
     engine = get_engine()
-    
+
     # Enable PostGIS extensions
     with engine.connect() as conn:
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis_topology;"))
         conn.commit()
-    
+
     # Create all tables
     Base.metadata.create_all(bind=engine)
     logger.info("Database initialized with PostGIS support")
-

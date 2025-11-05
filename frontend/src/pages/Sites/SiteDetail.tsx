@@ -11,12 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { apiClient } from '@/services/api/apiClient';
-import {
-  PlantsTab,
-  ConsumersTab,
-  StorageTab,
-  EnergyFlowTab,
-} from './SiteDetailTabs';
+import { PlantsTab, ConsumersTab, StorageTab, EnergyFlowTab } from './SiteDetailTabs';
 
 export default function SiteDetail() {
   const { id } = useParams<{ id: string }>();
@@ -77,9 +72,7 @@ export default function SiteDetail() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold">{site.name}</h1>
-            {site.code && (
-              <p className="text-muted-foreground">Code: {site.code}</p>
-            )}
+            {site.code && <p className="text-muted-foreground">Code: {site.code}</p>}
           </div>
         </div>
         <Button variant="outline">
@@ -90,12 +83,8 @@ export default function SiteDetail() {
 
       {/* Status Badge */}
       <div className="flex items-center gap-2">
-        <Badge variant={site.status === 'active' ? 'default' : 'secondary'}>
-          {site.status}
-        </Badge>
-        {site.site_type && (
-          <Badge variant="outline">{site.site_type}</Badge>
-        )}
+        <Badge variant={site.status === 'active' ? 'default' : 'secondary'}>{site.status}</Badge>
+        {site.site_type && <Badge variant="outline">{site.site_type}</Badge>}
       </div>
 
       {/* Stats Cards */}
@@ -107,9 +96,9 @@ export default function SiteDetail() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.total_capacity_kw 
+              {stats?.total_capacity_kw
                 ? `${(stats.total_capacity_kw / 1000).toFixed(2)} MW`
-                : site.capacity 
+                : site.capacity
                   ? `${(site.capacity / 1000).toFixed(2)} MW`
                   : 'N/A'}
             </div>
@@ -209,14 +198,12 @@ export default function SiteDetail() {
                   <p className="text-muted-foreground">{site.description}</p>
                 </div>
               )}
-              
+
               <div className="grid gap-4 md:grid-cols-2">
                 {site.capacity && (
                   <div>
                     <h3 className="font-semibold mb-2">Capacity</h3>
-                    <p className="text-muted-foreground">
-                      {(site.capacity / 1000).toFixed(2)} MW
-                    </p>
+                    <p className="text-muted-foreground">{(site.capacity / 1000).toFixed(2)} MW</p>
                   </div>
                 )}
                 {site.efficiency && (
@@ -257,4 +244,3 @@ export default function SiteDetail() {
     </div>
   );
 }
-

@@ -35,13 +35,12 @@ class Logger {
   }
 
   apiError(endpoint: string, method: string, status: number, error: any): void {
-    this.error(
-      `API Error: ${method} ${endpoint} - Status ${status}`,
-      error,
-      { endpoint, method, status }
-    );
+    this.error(`API Error: ${method} ${endpoint} - Status ${status}`, error, {
+      endpoint,
+      method,
+      status,
+    });
   }
 }
 
 export const logger = new Logger();
-

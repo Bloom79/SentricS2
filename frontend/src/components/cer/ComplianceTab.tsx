@@ -5,7 +5,17 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ClipboardCheck, AlertCircle, CheckCircle2, XCircle, Loader2, Calendar, Factory, Building2, Plus } from 'lucide-react';
+import {
+  ClipboardCheck,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Calendar,
+  Factory,
+  Building2,
+  Plus,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -49,7 +59,11 @@ export function ComplianceTab({ cerId }: ComplianceTabProps) {
   const { data: records, isLoading: loadingRecords } = useQuery({
     queryKey: ['cer-compliance-records', cerId, statusFilter],
     queryFn: () =>
-      cerService.getCERComplianceRecords(cerId, statusFilter === 'all' ? undefined : statusFilter, true), // Include plants
+      cerService.getCERComplianceRecords(
+        cerId,
+        statusFilter === 'all' ? undefined : statusFilter,
+        true
+      ), // Include plants
   });
 
   if (loadingCompliance || loadingRequirements || loadingRecords) {
@@ -118,7 +132,7 @@ export function ComplianceTab({ cerId }: ComplianceTabProps) {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Overall Compliance Status</CardTitle>
@@ -221,7 +235,9 @@ export function ComplianceTab({ cerId }: ComplianceTabProps) {
                             <div>
                               <div>{req.name || req.title || `Requirement #${req.id}`}</div>
                               <div className="text-xs text-muted-foreground">
-                                {req.entity_type === 'plant' ? `Plant: ${req.entity_name}` : `CER: ${req.entity_name}`}
+                                {req.entity_type === 'plant'
+                                  ? `Plant: ${req.entity_name}`
+                                  : `CER: ${req.entity_name}`}
                               </div>
                             </div>
                           </div>
@@ -269,7 +285,7 @@ export function ComplianceTab({ cerId }: ComplianceTabProps) {
               onCancel={() => setShowNewRecord(false)}
             />
           )}
-          
+
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -374,4 +390,3 @@ export function ComplianceTab({ cerId }: ComplianceTabProps) {
     </div>
   );
 }
-

@@ -21,14 +21,17 @@ export default function CERManagement() {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: cerList, isLoading, error } = useQuery<CER[]>({
+  const {
+    data: cerList,
+    isLoading,
+    error,
+  } = useQuery<CER[]>({
     queryKey: ['cer', 'list'],
     queryFn: () => cerService.getCERs(),
   });
 
-  const filteredCER = cerList?.filter((cer) =>
-    cer.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredCER =
+    cerList?.filter((cer) => cer.name.toLowerCase().includes(searchTerm.toLowerCase())) || [];
 
   if (isLoading) {
     return (
@@ -53,7 +56,9 @@ export default function CERManagement() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-responsive-xl font-bold">CER Communities</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">Manage Renewable Energy Communities</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Manage Renewable Energy Communities
+          </p>
         </div>
         <Button onClick={() => navigate('/cer/new')} className="w-full sm:w-auto touch-target">
           <Plus className="mr-2 h-4 w-4" />
@@ -89,8 +94,13 @@ export default function CERManagement() {
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-2">
-                <CardTitle className="text-base sm:text-lg flex-1 min-w-0 truncate">{cer.name}</CardTitle>
-                <Badge variant={cer.status === 'active' ? 'default' : 'secondary'} className="shrink-0 text-xs">
+                <CardTitle className="text-base sm:text-lg flex-1 min-w-0 truncate">
+                  {cer.name}
+                </CardTitle>
+                <Badge
+                  variant={cer.status === 'active' ? 'default' : 'secondary'}
+                  className="shrink-0 text-xs"
+                >
                   {cer.status}
                 </Badge>
               </div>
@@ -110,7 +120,9 @@ export default function CERManagement() {
                   <span className="font-medium">{cer.total_capacity} kW</span>
                 </div>
                 {cer.pnrr_funding_applied && (
-                  <Badge variant="outline" className="mt-2 text-xs">PNRR Funding Applied</Badge>
+                  <Badge variant="outline" className="mt-2 text-xs">
+                    PNRR Funding Applied
+                  </Badge>
                 )}
               </div>
             </CardContent>
@@ -128,4 +140,3 @@ export default function CERManagement() {
     </div>
   );
 }
-

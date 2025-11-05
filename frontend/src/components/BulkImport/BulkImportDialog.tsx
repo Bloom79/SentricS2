@@ -52,7 +52,7 @@ export function BulkImportDialog({ open, onClose, plantId, arrayId }: BulkImport
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['plant-assets', plantId] });
       queryClient.invalidateQueries({ queryKey: ['array-strings', arrayId] });
-      
+
       toast({
         title: 'Import Completed',
         description: `Successfully imported ${result.success} panels. ${result.failed} failed.`,
@@ -97,10 +97,13 @@ export function BulkImportDialog({ open, onClose, plantId, arrayId }: BulkImport
 
   const handleDownloadTemplate = async () => {
     try {
-      const response = await apiClient.get(`/assets/plants/${plantId}/assets/bulk-import/template`, {
-        responseType: 'blob',
-      });
-      
+      const response = await apiClient.get(
+        `/assets/plants/${plantId}/assets/bulk-import/template`,
+        {
+          responseType: 'blob',
+        }
+      );
+
       const blob = new Blob([response.data], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -183,12 +186,7 @@ export function BulkImportDialog({ open, onClose, plantId, arrayId }: BulkImport
                   Upload CSV File
                 </span>
               </Button>
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
+              <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
             </label>
           </div>
 
@@ -284,7 +282,9 @@ export function BulkImportDialog({ open, onClose, plantId, arrayId }: BulkImport
                     <p className="font-semibold mb-1">Errors:</p>
                     <ul className="list-disc list-inside space-y-1">
                       {importMutation.data.errors.slice(0, 10).map((error, idx) => (
-                        <li key={idx} className="text-red-700">{error}</li>
+                        <li key={idx} className="text-red-700">
+                          {error}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -307,4 +307,3 @@ export function BulkImportDialog({ open, onClose, plantId, arrayId }: BulkImport
     </Dialog>
   );
 }
-

@@ -126,7 +126,9 @@ export function ComponentsPalette({ onDragStart, isEditMode }: ComponentsPalette
           {/* Generation */}
           {categories.generation.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">Generation</h4>
+              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
+                Generation
+              </h4>
               <div className="space-y-2">
                 {categories.generation.map((component) => (
                   <div
@@ -149,7 +151,9 @@ export function ComponentsPalette({ onDragStart, isEditMode }: ComponentsPalette
           {/* Conversion */}
           {categories.conversion.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">Conversion</h4>
+              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
+                Conversion
+              </h4>
               <div className="space-y-2">
                 {categories.conversion.map((component) => (
                   <div
@@ -172,7 +176,9 @@ export function ComponentsPalette({ onDragStart, isEditMode }: ComponentsPalette
           {/* Storage */}
           {categories.storage.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">Storage</h4>
+              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
+                Storage
+              </h4>
               <div className="space-y-2">
                 {categories.storage.map((component) => (
                   <div
@@ -195,7 +201,9 @@ export function ComponentsPalette({ onDragStart, isEditMode }: ComponentsPalette
           {/* Consumption */}
           {categories.consumption.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">Consumption</h4>
+              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
+                Consumption
+              </h4>
               <div className="space-y-2">
                 {categories.consumption.map((component) => (
                   <div
@@ -241,7 +249,9 @@ export function ComponentsPalette({ onDragStart, isEditMode }: ComponentsPalette
           {/* Monitoring */}
           {categories.monitoring.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">Monitoring</h4>
+              <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
+                Monitoring
+              </h4>
               <div className="space-y-2">
                 {categories.monitoring.map((component) => (
                   <div
@@ -265,4 +275,3 @@ export function ComponentsPalette({ onDragStart, isEditMode }: ComponentsPalette
     </Card>
   );
 }
-

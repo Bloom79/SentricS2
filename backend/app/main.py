@@ -21,14 +21,16 @@ from app.api.v1.api import api_router
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
 # Rate limiter
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=[f"{settings.RATE_LIMIT_PER_MINUTE}/minute"] if settings.RATE_LIMIT_ENABLED else [],
+    default_limits=(
+        [f"{settings.RATE_LIMIT_PER_MINUTE}/minute"] if settings.RATE_LIMIT_ENABLED else []
+    ),
     storage_uri=str(settings.REDIS_URL) if not settings.DISABLE_REDIS else "memory://",
     enabled=settings.RATE_LIMIT_ENABLED,
 )
@@ -39,7 +41,9 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="Enterprise Asset Management for Italian Renewable Energy",
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    docs_url="/docs" if settings.ENVIRONMENT != "production" else None,  # Disable docs in production
+    docs_url=(
+        "/docs" if settings.ENVIRONMENT != "production" else None
+    ),  # Disable docs in production
     redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
 )
 
@@ -70,12 +74,14 @@ elif settings.CORS_ORIGINS:
 
 # Add development origins
 if settings.ENVIRONMENT == "development":
-    cors_origins.extend([
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-    ])
+    cors_origins.extend(
+        [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+        ]
+    )
 
 # Add production origins
 if settings.FRONTEND_URL and settings.FRONTEND_URL not in cors_origins:
@@ -83,11 +89,17 @@ if settings.FRONTEND_URL and settings.FRONTEND_URL not in cors_origins:
 
 # Add GCP-specific origins
 if settings.GCP_PROJECT_ID:
-    cors_origins.extend([
-        f"https://{settings.GCP_PROJECT_ID}.web.app",
-        f"https://{settings.GCP_PROJECT_ID}.firebaseapp.com",
-        f"https://{settings.GCP_SERVICE_NAME}-{settings.GCP_PROJECT_ID}.a.run.app" if settings.GCP_SERVICE_NAME else "",
-    ])
+    cors_origins.extend(
+        [
+            f"https://{settings.GCP_PROJECT_ID}.web.app",
+            f"https://{settings.GCP_PROJECT_ID}.firebaseapp.com",
+            (
+                f"https://{settings.GCP_SERVICE_NAME}-{settings.GCP_PROJECT_ID}.a.run.app"
+                if settings.GCP_SERVICE_NAME
+                else ""
+            ),
+        ]
+    )
 
 # Remove empty strings and duplicates
 cors_origins = list(set(filter(None, cors_origins)))
@@ -113,7 +125,7 @@ async def startup_event():
     """Initialize on startup"""
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
     logger.info(f"Environment: {settings.ENVIRONMENT}")
-    
+
     # Initialize database
     try:
         init_db()
@@ -130,7 +142,7 @@ async def root():
         "version": settings.APP_VERSION,
         "status": "operational",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
     }
 
 
@@ -144,18 +156,15 @@ async def health():
 async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler"""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error"}
-    )
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=8000,
         reload=settings.DEBUG,
     )
-

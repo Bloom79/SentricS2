@@ -5,14 +5,13 @@ Billing Pydantic schemas for CER financial management
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 from datetime import datetime
-from app.models.billing import (
-    BillingStatus, PaymentStatus, TransactionType, SettlementStatus
-)
+from app.models.billing import BillingStatus, PaymentStatus, TransactionType, SettlementStatus
 
 
 # Billing Statement Schemas
 class BillingStatementBase(BaseModel):
     """Base billing statement schema"""
+
     period_start: datetime
     period_end: datetime
     due_date: datetime
@@ -21,6 +20,7 @@ class BillingStatementBase(BaseModel):
 
 class BillingStatementCreate(BillingStatementBase):
     """Schema for creating billing statement"""
+
     cer_id: int
     member_id: int
     extra_metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -28,6 +28,7 @@ class BillingStatementCreate(BillingStatementBase):
 
 class BillingStatementUpdate(BaseModel):
     """Schema for updating billing statement"""
+
     status: Optional[BillingStatus] = None
     amount_paid: Optional[float] = None
     notes: Optional[str] = None
@@ -36,6 +37,7 @@ class BillingStatementUpdate(BaseModel):
 
 class BillingStatementResponse(BillingStatementBase):
     """Schema for billing statement response"""
+
     id: int
     cer_id: int
     member_id: int
@@ -55,7 +57,7 @@ class BillingStatementResponse(BillingStatementBase):
     settlement_id: Optional[int] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -63,6 +65,7 @@ class BillingStatementResponse(BillingStatementBase):
 # Invoice Schemas
 class InvoiceBase(BaseModel):
     """Base invoice schema"""
+
     invoice_date: datetime
     due_date: datetime
     subtotal: float
@@ -74,6 +77,7 @@ class InvoiceBase(BaseModel):
 
 class InvoiceCreate(InvoiceBase):
     """Schema for creating invoice"""
+
     statement_id: int
     cer_id: int
     member_id: int
@@ -82,6 +86,7 @@ class InvoiceCreate(InvoiceBase):
 
 class InvoiceUpdate(BaseModel):
     """Schema for updating invoice"""
+
     status: Optional[BillingStatus] = None
     amount_paid: Optional[float] = None
     payment_method: Optional[str] = None
@@ -92,6 +97,7 @@ class InvoiceUpdate(BaseModel):
 
 class InvoiceResponse(InvoiceBase):
     """Schema for invoice response"""
+
     id: int
     invoice_number: str
     statement_id: int
@@ -106,7 +112,7 @@ class InvoiceResponse(InvoiceBase):
     payment_reference: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -114,6 +120,7 @@ class InvoiceResponse(InvoiceBase):
 # Billing Transaction Schemas
 class BillingTransactionCreate(BaseModel):
     """Schema for creating billing transaction"""
+
     cer_id: int
     member_id: int
     transaction_type: TransactionType
@@ -131,6 +138,7 @@ class BillingTransactionCreate(BaseModel):
 
 class BillingTransactionUpdate(BaseModel):
     """Schema for updating billing transaction"""
+
     status: Optional[PaymentStatus] = None
     payment_date: Optional[datetime] = None
     notes: Optional[str] = None
@@ -138,6 +146,7 @@ class BillingTransactionUpdate(BaseModel):
 
 class BillingTransactionResponse(BaseModel):
     """Schema for billing transaction response"""
+
     id: int
     cer_id: int
     member_id: int
@@ -153,7 +162,7 @@ class BillingTransactionResponse(BaseModel):
     invoice_id: Optional[int] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -161,6 +170,7 @@ class BillingTransactionResponse(BaseModel):
 # Settlement Schemas
 class SettlementCreate(BaseModel):
     """Schema for creating settlement"""
+
     cer_id: int
     period_start: datetime
     period_end: datetime
@@ -170,12 +180,14 @@ class SettlementCreate(BaseModel):
 
 class SettlementUpdate(BaseModel):
     """Schema for updating settlement"""
+
     status: Optional[SettlementStatus] = None
     notes: Optional[str] = None
 
 
 class SettlementResponse(BaseModel):
     """Schema for settlement response"""
+
     id: int
     cer_id: int
     period_start: datetime
@@ -201,7 +213,7 @@ class SettlementResponse(BaseModel):
     validated_at: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -209,6 +221,7 @@ class SettlementResponse(BaseModel):
 # Billing Overview Schemas
 class BillingOverviewResponse(BaseModel):
     """Schema for billing overview"""
+
     cer_id: int
     period_start: datetime
     period_end: datetime
@@ -224,6 +237,7 @@ class BillingOverviewResponse(BaseModel):
 
 class MemberBalanceResponse(BaseModel):
     """Schema for member balance"""
+
     member_id: int
     pod_id: str
     member_type: str
@@ -236,6 +250,7 @@ class MemberBalanceResponse(BaseModel):
 
 class CalculateSettlementRequest(BaseModel):
     """Schema for settlement calculation request"""
+
     cer_id: int
     period_start: datetime
     period_end: datetime
@@ -247,8 +262,8 @@ class CalculateSettlementRequest(BaseModel):
 
 class SettlementCalculationResponse(BaseModel):
     """Schema for settlement calculation response"""
+
     settlement_id: Optional[int] = None
     calculation: Dict[str, Any]
     statements_generated: int = 0
     invoices_generated: int = 0
-

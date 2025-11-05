@@ -32,14 +32,10 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 // Main dashboard
-const mainNavigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-];
+const mainNavigation = [{ name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }];
 
 // CER Management Module
-const cerManagementNavigation = [
-  { name: 'CER Communities', href: '/cer', icon: Sparkles },
-];
+const cerManagementNavigation = [{ name: 'CER Communities', href: '/cer', icon: Sparkles }];
 
 // Plant Management Module
 const plantManagementNavigation = [
@@ -86,7 +82,9 @@ export default function MainLayout() {
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm">
             <Factory className="h-5 w-5 text-white" />
           </div>
-          <span className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Kronos EAM</span>
+          <span className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            Kronos EAM
+          </span>
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -110,18 +108,22 @@ export default function MainLayout() {
       )}
 
       {/* Sidebar */}
-      <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-white to-gray-50/50 border-r border-gray-200/60 shadow-lg lg:shadow-sm transition-transform duration-300 ease-in-out",
-        "lg:translate-x-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <div
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-white to-gray-50/50 border-r border-gray-200/60 shadow-lg lg:shadow-sm transition-transform duration-300 ease-in-out',
+          'lg:translate-x-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center gap-2 p-6 border-b border-gray-200/60 bg-gradient-to-r from-primary/5 to-transparent">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm">
               <Factory className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Kronos EAM</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Kronos EAM
+            </span>
           </div>
 
           {/* Navigation */}
@@ -140,15 +142,19 @@ export default function MainLayout() {
                       : 'text-gray-700 hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary hover:shadow-sm'
                   )}
                 >
-                  <item.icon className={cn(
-                    'h-5 w-5 transition-transform',
-                    isActive ? 'text-white' : 'text-gray-500 group-hover:text-primary'
-                  )} />
-                  <span className={cn('font-medium', isActive && 'font-semibold')}>{item.name}</span>
+                  <item.icon
+                    className={cn(
+                      'h-5 w-5 transition-transform',
+                      isActive ? 'text-white' : 'text-gray-500 group-hover:text-primary'
+                    )}
+                  />
+                  <span className={cn('font-medium', isActive && 'font-semibold')}>
+                    {item.name}
+                  </span>
                 </Link>
               );
             })}
-            
+
             {/* CER Management Module */}
             <div className="pt-4 mt-4 border-t border-gray-200/60">
               <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -168,16 +174,22 @@ export default function MainLayout() {
                       : 'text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100/50 hover:text-purple-700 hover:shadow-sm'
                   )}
                 >
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />}
-                  <item.icon className={cn(
-                    'h-5 w-5 transition-transform',
-                    isActive ? 'text-white' : 'text-gray-500 group-hover:text-purple-600'
-                  )} />
-                  <span className={cn('font-medium', isActive && 'font-semibold')}>{item.name}</span>
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
+                  )}
+                  <item.icon
+                    className={cn(
+                      'h-5 w-5 transition-transform',
+                      isActive ? 'text-white' : 'text-gray-500 group-hover:text-purple-600'
+                    )}
+                  />
+                  <span className={cn('font-medium', isActive && 'font-semibold')}>
+                    {item.name}
+                  </span>
                 </Link>
               );
             })}
-            
+
             {/* Plant Management Module */}
             <div className="pt-4 mt-4 border-t border-gray-200/60">
               <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -197,16 +209,22 @@ export default function MainLayout() {
                       : 'text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-teal-100/50 hover:text-teal-700 hover:shadow-sm'
                   )}
                 >
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />}
-                  <item.icon className={cn(
-                    'h-5 w-5 transition-transform',
-                    isActive ? 'text-white' : 'text-gray-500 group-hover:text-teal-600'
-                  )} />
-                  <span className={cn('font-medium', isActive && 'font-semibold')}>{item.name}</span>
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
+                  )}
+                  <item.icon
+                    className={cn(
+                      'h-5 w-5 transition-transform',
+                      isActive ? 'text-white' : 'text-gray-500 group-hover:text-teal-600'
+                    )}
+                  />
+                  <span className={cn('font-medium', isActive && 'font-semibold')}>
+                    {item.name}
+                  </span>
                 </Link>
               );
             })}
-            
+
             {/* Compliance Management Module */}
             <div className="pt-4 mt-4 border-t border-gray-200/60">
               <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -226,16 +244,22 @@ export default function MainLayout() {
                       : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100/50 hover:text-blue-700 hover:shadow-sm'
                   )}
                 >
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />}
-                  <item.icon className={cn(
-                    'h-5 w-5 transition-transform',
-                    isActive ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'
-                  )} />
-                  <span className={cn('font-medium', isActive && 'font-semibold')}>{item.name}</span>
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
+                  )}
+                  <item.icon
+                    className={cn(
+                      'h-5 w-5 transition-transform',
+                      isActive ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'
+                    )}
+                  />
+                  <span className={cn('font-medium', isActive && 'font-semibold')}>
+                    {item.name}
+                  </span>
                 </Link>
               );
             })}
-            
+
             {/* General Tools */}
             <div className="pt-4 mt-4 border-t border-gray-200/60">
               <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -255,16 +279,22 @@ export default function MainLayout() {
                       : 'text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100/50 hover:text-orange-700 hover:shadow-sm'
                   )}
                 >
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />}
-                  <item.icon className={cn(
-                    'h-5 w-5 transition-transform',
-                    isActive ? 'text-white' : 'text-gray-500 group-hover:text-orange-600'
-                  )} />
-                  <span className={cn('font-medium', isActive && 'font-semibold')}>{item.name}</span>
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
+                  )}
+                  <item.icon
+                    className={cn(
+                      'h-5 w-5 transition-transform',
+                      isActive ? 'text-white' : 'text-gray-500 group-hover:text-orange-600'
+                    )}
+                  />
+                  <span className={cn('font-medium', isActive && 'font-semibold')}>
+                    {item.name}
+                  </span>
                 </Link>
               );
             })}
-            
+
             {/* Admin Navigation */}
             {user?.role === 'Admin' && (
               <>
@@ -286,18 +316,24 @@ export default function MainLayout() {
                           : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100/50 hover:text-gray-900 hover:shadow-sm'
                       )}
                     >
-                      {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />}
-                      <item.icon className={cn(
-                        'h-5 w-5 transition-transform',
-                        isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-900'
-                      )} />
-                      <span className={cn('font-medium', isActive && 'font-semibold')}>{item.name}</span>
+                      {isActive && (
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
+                      )}
+                      <item.icon
+                        className={cn(
+                          'h-5 w-5 transition-transform',
+                          isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-900'
+                        )}
+                      />
+                      <span className={cn('font-medium', isActive && 'font-semibold')}>
+                        {item.name}
+                      </span>
                     </Link>
                   );
                 })}
               </>
             )}
-            
+
             {/* User Quick Links */}
             <div className="pt-4 mt-4 border-t border-gray-200/60">
               <Link
@@ -309,12 +345,25 @@ export default function MainLayout() {
                     : 'text-gray-700 hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary hover:shadow-sm'
                 )}
               >
-                {location.pathname === '/my-tasks' && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />}
-                <CheckSquare className={cn(
-                  'h-5 w-5 transition-transform',
-                  location.pathname === '/my-tasks' ? 'text-white' : 'text-gray-500 group-hover:text-primary'
-                )} />
-                <span className={cn('font-medium', location.pathname === '/my-tasks' && 'font-semibold')}>My Tasks</span>
+                {location.pathname === '/my-tasks' && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
+                )}
+                <CheckSquare
+                  className={cn(
+                    'h-5 w-5 transition-transform',
+                    location.pathname === '/my-tasks'
+                      ? 'text-white'
+                      : 'text-gray-500 group-hover:text-primary'
+                  )}
+                />
+                <span
+                  className={cn(
+                    'font-medium',
+                    location.pathname === '/my-tasks' && 'font-semibold'
+                  )}
+                >
+                  My Tasks
+                </span>
               </Link>
               <Link
                 to="/notifications"
@@ -325,12 +374,25 @@ export default function MainLayout() {
                     : 'text-gray-700 hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary hover:shadow-sm'
                 )}
               >
-                {location.pathname === '/notifications' && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />}
-                <Bell className={cn(
-                  'h-5 w-5 transition-transform',
-                  location.pathname === '/notifications' ? 'text-white' : 'text-gray-500 group-hover:text-primary'
-                )} />
-                <span className={cn('font-medium', location.pathname === '/notifications' && 'font-semibold')}>Notifications</span>
+                {location.pathname === '/notifications' && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
+                )}
+                <Bell
+                  className={cn(
+                    'h-5 w-5 transition-transform',
+                    location.pathname === '/notifications'
+                      ? 'text-white'
+                      : 'text-gray-500 group-hover:text-primary'
+                  )}
+                />
+                <span
+                  className={cn(
+                    'font-medium',
+                    location.pathname === '/notifications' && 'font-semibold'
+                  )}
+                >
+                  Notifications
+                </span>
               </Link>
               <Link
                 to="/profile"
@@ -341,12 +403,22 @@ export default function MainLayout() {
                     : 'text-gray-700 hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary hover:shadow-sm'
                 )}
               >
-                {location.pathname === '/profile' && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />}
-                <User className={cn(
-                  'h-5 w-5 transition-transform',
-                  location.pathname === '/profile' ? 'text-white' : 'text-gray-500 group-hover:text-primary'
-                )} />
-                <span className={cn('font-medium', location.pathname === '/profile' && 'font-semibold')}>Profile</span>
+                {location.pathname === '/profile' && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
+                )}
+                <User
+                  className={cn(
+                    'h-5 w-5 transition-transform',
+                    location.pathname === '/profile'
+                      ? 'text-white'
+                      : 'text-gray-500 group-hover:text-primary'
+                  )}
+                />
+                <span
+                  className={cn('font-medium', location.pathname === '/profile' && 'font-semibold')}
+                >
+                  Profile
+                </span>
               </Link>
             </div>
           </nav>
@@ -360,7 +432,9 @@ export default function MainLayout() {
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">{user?.name || 'User'}</p>
+                <p className="text-sm font-semibold text-gray-900 truncate">
+                  {user?.name || 'User'}
+                </p>
                 <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
@@ -385,4 +459,3 @@ export default function MainLayout() {
     </div>
   );
 }
-

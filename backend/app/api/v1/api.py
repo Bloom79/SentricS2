@@ -29,6 +29,7 @@ api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
 # Always register the router, but endpoints check ENVIRONMENT at runtime
 try:
     from app.api.v1.endpoints import dev
+
     api_router.include_router(dev.router, prefix="/dev", tags=["development"])
 except ImportError:
     pass  # Dev module might not exist
@@ -63,4 +64,3 @@ api_router.include_router(compliance.router, prefix="/compliance", tags=["compli
 
 # Dashboard
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
-

@@ -124,7 +124,12 @@ export default function Documents() {
   const [uploadExpiryDate, setUploadExpiryDate] = useState('');
 
   // Fetch documents
-  const { data: documents, isLoading, isError: documentsError, refetch } = useQuery<Document[]>({
+  const {
+    data: documents,
+    isLoading,
+    isError: documentsError,
+    refetch,
+  } = useQuery<Document[]>({
     queryKey: ['documents', filterType, filterStatus, filterPlant, filterExpiry],
     queryFn: async () => {
       const params: any = {};
@@ -231,7 +236,7 @@ export default function Documents() {
 
     const formData = new FormData();
     formData.append('file', uploadFile);
-    
+
     // Use URLSearchParams for query params since we can't send them in FormData with POST
     const params = new URLSearchParams();
     params.append('name', uploadName);
@@ -241,7 +246,7 @@ export default function Documents() {
     if (uploadCerId) params.append('cer_id', uploadCerId);
     if (uploadIssueDate) params.append('issue_date', uploadIssueDate);
     if (uploadExpiryDate) params.append('expiry_date', uploadExpiryDate);
-    
+
     uploadMutation.mutate({ formData, params: params.toString() });
   };
 
@@ -296,27 +301,33 @@ export default function Documents() {
 
   const getExpiryStatus = (doc: Document) => {
     if (!doc.expiry_date) return null;
-    const daysUntilExpiry = doc.days_until_expiry ?? differenceInDays(new Date(doc.expiry_date), new Date());
+    const daysUntilExpiry =
+      doc.days_until_expiry ?? differenceInDays(new Date(doc.expiry_date), new Date());
     if (daysUntilExpiry < 0) return { label: 'Expired', variant: 'destructive' as const };
-    if (daysUntilExpiry <= 30) return { label: `Expires in ${daysUntilExpiry} days`, variant: 'secondary' as const };
+    if (daysUntilExpiry <= 30)
+      return { label: `Expires in ${daysUntilExpiry} days`, variant: 'secondary' as const };
     return null;
   };
 
-  const filteredDocuments = documents?.filter((doc) => {
-    const matchesSearch =
-      doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.file_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (doc.description || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || doc.type === filterType;
-    const matchesStatus = filterStatus === 'all' || doc.status === filterStatus;
-    const matchesPlant = filterPlant === 'all' || doc.plant_id?.toString() === filterPlant;
-    const matchesExpiry =
-      filterExpiry === 'all' ||
-      (filterExpiry === 'expired' && doc.is_expired) ||
-      (filterExpiry === 'expiring_soon' && doc.days_until_expiry !== undefined && doc.days_until_expiry <= 30 && doc.days_until_expiry >= 0);
+  const filteredDocuments =
+    documents?.filter((doc) => {
+      const matchesSearch =
+        doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.file_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (doc.description || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = filterType === 'all' || doc.type === filterType;
+      const matchesStatus = filterStatus === 'all' || doc.status === filterStatus;
+      const matchesPlant = filterPlant === 'all' || doc.plant_id?.toString() === filterPlant;
+      const matchesExpiry =
+        filterExpiry === 'all' ||
+        (filterExpiry === 'expired' && doc.is_expired) ||
+        (filterExpiry === 'expiring_soon' &&
+          doc.days_until_expiry !== undefined &&
+          doc.days_until_expiry <= 30 &&
+          doc.days_until_expiry >= 0);
 
-    return matchesSearch && matchesType && matchesStatus && matchesPlant && matchesExpiry;
-  }) || [];
+      return matchesSearch && matchesType && matchesStatus && matchesPlant && matchesExpiry;
+    }) || [];
 
   // Sort documents
   const sortedDocuments = [...filteredDocuments].sort((a, b) => {
@@ -338,12 +349,20 @@ export default function Documents() {
   // Statistics
   const stats = {
     total: documents?.length || 0,
-    expiringSoon: documents?.filter((d) => d.days_until_expiry !== undefined && d.days_until_expiry <= 30 && d.days_until_expiry >= 0).length || 0,
+    expiringSoon:
+      documents?.filter(
+        (d) =>
+          d.days_until_expiry !== undefined && d.days_until_expiry <= 30 && d.days_until_expiry >= 0
+      ).length || 0,
     expired: documents?.filter((d) => d.is_expired).length || 0,
-    byType: documents?.reduce((acc, doc) => {
-      acc[doc.type] = (acc[doc.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>) || {},
+    byType:
+      documents?.reduce(
+        (acc, doc) => {
+          acc[doc.type] = (acc[doc.type] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      ) || {},
   };
 
   if (isLoading) {
@@ -425,7 +444,8 @@ export default function Documents() {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            You have {stats.expired} expired document{stats.expired > 1 ? 's' : ''} that require attention.
+            You have {stats.expired} expired document{stats.expired > 1 ? 's' : ''} that require
+            attention.
           </AlertDescription>
         </Alert>
       )}
@@ -565,10 +585,10 @@ export default function Documents() {
                             doc.status === 'Approved'
                               ? 'default'
                               : doc.status === 'Pending'
-                              ? 'secondary'
-                              : doc.status === 'Expired' || doc.status === 'Rejected'
-                              ? 'destructive'
-                              : 'outline'
+                                ? 'secondary'
+                                : doc.status === 'Expired' || doc.status === 'Rejected'
+                                  ? 'destructive'
+                                  : 'outline'
                           }
                         >
                           {doc.status}
@@ -595,7 +615,11 @@ export default function Documents() {
                       <TableCell>
                         {doc.expiry_date ? (
                           <div className="flex items-center gap-2">
-                            <span className={expiryStatus?.variant === 'destructive' ? 'text-red-500' : ''}>
+                            <span
+                              className={
+                                expiryStatus?.variant === 'destructive' ? 'text-red-500' : ''
+                              }
+                            >
                               {format(new Date(doc.expiry_date), 'PPP')}
                             </span>
                             {expiryStatus && (
@@ -697,10 +721,10 @@ export default function Documents() {
                         doc.status === 'Approved'
                           ? 'default'
                           : doc.status === 'Pending'
-                          ? 'secondary'
-                          : doc.status === 'Expired' || doc.status === 'Rejected'
-                          ? 'destructive'
-                          : 'outline'
+                            ? 'secondary'
+                            : doc.status === 'Expired' || doc.status === 'Rejected'
+                              ? 'destructive'
+                              : 'outline'
                       }
                     >
                       {doc.status}
@@ -726,14 +750,18 @@ export default function Documents() {
                     {doc.expiry_date && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Expires:</span>
-                        <span className={expiryStatus?.variant === 'destructive' ? 'text-red-500' : ''}>
+                        <span
+                          className={expiryStatus?.variant === 'destructive' ? 'text-red-500' : ''}
+                        >
                           {format(new Date(doc.expiry_date), 'MMM d, yyyy')}
                         </span>
                       </div>
                     )}
                   </div>
                   {expiryStatus && (
-                    <Alert variant={expiryStatus.variant === 'destructive' ? 'destructive' : 'default'}>
+                    <Alert
+                      variant={expiryStatus.variant === 'destructive' ? 'destructive' : 'default'}
+                    >
                       <AlertDescription className="text-xs">{expiryStatus.label}</AlertDescription>
                     </Alert>
                   )}
@@ -817,7 +845,10 @@ export default function Documents() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="plant">Link to Plant (Optional)</Label>
-                <Select value={uploadPlantId || "none"} onValueChange={(value) => setUploadPlantId(value === "none" ? "" : value)}>
+                <Select
+                  value={uploadPlantId || 'none'}
+                  onValueChange={(value) => setUploadPlantId(value === 'none' ? '' : value)}
+                >
                   <SelectTrigger id="plant">
                     <SelectValue placeholder="Select plant" />
                   </SelectTrigger>

@@ -10,7 +10,13 @@ import { Upload, FileText, Trash2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { apiClient } from '@/services/api/apiClient';
 import { toast } from 'sonner';
 
@@ -57,7 +63,11 @@ export function DocumentManager({
   const [selectedType, setSelectedType] = useState<string>('');
   const queryClient = useQueryClient();
 
-  const { data: documents, isLoading, refetch } = useQuery({
+  const {
+    data: documents,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['compliance-documents', complianceRecordId],
     queryFn: async () => {
       const response = await apiClient.get('/documents', {
@@ -131,7 +141,7 @@ export function DocumentManager({
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
   const handleDownload = async (doc: Document) => {
@@ -190,7 +200,7 @@ export function DocumentManager({
             <Upload className="w-4 h-4 mr-2" />
             {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
           </Button>
-            <input
+          <input
             ref={fileInputRef}
             type="file"
             className="hidden"
@@ -207,10 +217,7 @@ export function DocumentManager({
       ) : (
         <div className="space-y-2">
           {documents?.map((doc) => (
-            <div
-              key={doc.id}
-              className="flex items-center justify-between p-3 rounded-lg border"
-            >
+            <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg border">
               <div className="flex items-center gap-3">
                 <FileText className="w-5 h-5 text-muted-foreground" />
                 <div>
@@ -251,4 +258,3 @@ export function DocumentManager({
     </div>
   );
 }
-

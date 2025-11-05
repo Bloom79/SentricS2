@@ -18,20 +18,20 @@ class PlantLayoutService:
     """Service for plant layout management"""
 
     @staticmethod
-    def get_layout(
-        db: Session,
-        plant_id: int,
-        tenant_id: str
-    ) -> Optional[PlantLayout]:
+    def get_layout(db: Session, plant_id: int, tenant_id: str) -> Optional[PlantLayout]:
         """Get plant layout by plant ID"""
         try:
-            layout = db.query(PlantLayout).filter(
-                and_(
-                    PlantLayout.plant_id == plant_id,
-                    PlantLayout.tenant_id == tenant_id,
-                    PlantLayout.is_active == True
+            layout = (
+                db.query(PlantLayout)
+                .filter(
+                    and_(
+                        PlantLayout.plant_id == plant_id,
+                        PlantLayout.tenant_id == tenant_id,
+                        PlantLayout.is_active == True,
+                    )
                 )
-            ).first()
+                .first()
+            )
             return layout
         except Exception as e:
             logger.error(f"Error getting layout for plant {plant_id}: {e}")
@@ -44,28 +44,26 @@ class PlantLayoutService:
         nodes: List[Dict[str, Any]],
         edges: List[Dict[str, Any]],
         tenant_id: str,
-        user_id: Optional[int] = None
+        user_id: Optional[int] = None,
     ) -> PlantLayout:
         """Save or update plant layout"""
         try:
             # Verify plant exists and belongs to tenant
-            plant = db.query(Plant).filter(
-                and_(
-                    Plant.id == plant_id,
-                    Plant.tenant_id == tenant_id
-                )
-            ).first()
-            
+            plant = (
+                db.query(Plant)
+                .filter(and_(Plant.id == plant_id, Plant.tenant_id == tenant_id))
+                .first()
+            )
+
             if not plant:
                 raise ValueError(f"Plant {plant_id} not found")
 
             # Check if layout exists
-            existing_layout = db.query(PlantLayout).filter(
-                and_(
-                    PlantLayout.plant_id == plant_id,
-                    PlantLayout.tenant_id == tenant_id
-                )
-            ).first()
+            existing_layout = (
+                db.query(PlantLayout)
+                .filter(and_(PlantLayout.plant_id == plant_id, PlantLayout.tenant_id == tenant_id))
+                .first()
+            )
 
             if existing_layout:
                 # Update existing
@@ -87,7 +85,7 @@ class PlantLayoutService:
                     edges=edges,
                     version=1,
                     is_active=True,
-                    created_by=user_id
+                    created_by=user_id,
                 )
                 db.add(layout)
                 db.commit()
@@ -101,20 +99,14 @@ class PlantLayoutService:
             raise
 
     @staticmethod
-    def delete_layout(
-        db: Session,
-        plant_id: int,
-        tenant_id: str,
-        soft: bool = True
-    ) -> bool:
+    def delete_layout(db: Session, plant_id: int, tenant_id: str, soft: bool = True) -> bool:
         """Delete plant layout (soft or hard delete)"""
         try:
-            layout = db.query(PlantLayout).filter(
-                and_(
-                    PlantLayout.plant_id == plant_id,
-                    PlantLayout.tenant_id == tenant_id
-                )
-            ).first()
+            layout = (
+                db.query(PlantLayout)
+                .filter(and_(PlantLayout.plant_id == plant_id, PlantLayout.tenant_id == tenant_id))
+                .first()
+            )
 
             if not layout:
                 return False
@@ -135,22 +127,18 @@ class PlantLayoutService:
 
     @staticmethod
     def generate_layout_from_assets(
-        db: Session,
-        plant_id: int,
-        tenant_id: str,
-        user_id: Optional[int] = None
+        db: Session, plant_id: int, tenant_id: str, user_id: Optional[int] = None
     ) -> PlantLayout:
         """Generate layout from existing plant assets"""
         try:
             from app.models.asset import Asset
 
             # Get all assets for plant
-            assets = db.query(Asset).filter(
-                and_(
-                    Asset.plant_id == plant_id,
-                    Asset.tenant_id == tenant_id
-                )
-            ).all()
+            assets = (
+                db.query(Asset)
+                .filter(and_(Asset.plant_id == plant_id, Asset.tenant_id == tenant_id))
+                .all()
+            )
 
             # Generate nodes from assets
             nodes = []
@@ -166,7 +154,7 @@ class PlantLayoutService:
                     "type": asset.component_type or "default",
                     "position": {
                         "x": position_x + (idx % 5) * grid_spacing,
-                        "y": position_y + (idx // 5) * grid_spacing
+                        "y": position_y + (idx // 5) * grid_spacing,
                     },
                     "data": {
                         "id": str(asset.id),
@@ -176,10 +164,10 @@ class PlantLayoutService:
                             "power": asset.power_rating,
                             "efficiency": asset.efficiency,
                         },
-                        "status": asset.status.value if asset.status else "active"
+                        "status": asset.status.value if asset.status else "active",
                     },
                     "draggable": True,
-                    "connectable": True
+                    "connectable": True,
                 }
                 nodes.append(node)
 
@@ -190,7 +178,7 @@ class PlantLayoutService:
                 nodes=nodes,
                 edges=edges,
                 tenant_id=tenant_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
             logger.info(f"Generated layout from {len(assets)} assets for plant {plant_id}")
@@ -199,4 +187,3 @@ class PlantLayoutService:
         except Exception as e:
             logger.error(f"Error generating layout from assets for plant {plant_id}: {e}")
             raise
-

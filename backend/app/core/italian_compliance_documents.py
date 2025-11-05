@@ -9,6 +9,7 @@ from enum import Enum
 
 class ComplianceEntity(str, Enum):
     """Italian compliance entities"""
+
     GSE = "GSE"
     TERNA = "Terna"
     DSO = "DSO"
@@ -19,6 +20,7 @@ class ComplianceEntity(str, Enum):
 
 class DocumentCategory(str, Enum):
     """Document categories"""
+
     INITIAL_REGISTRATION = "initial_registration"
     ANNUAL_RECURRING = "annual_recurring"
     COMPLIANCE = "compliance"
@@ -174,19 +176,19 @@ ITALIAN_COMPLIANCE_DOCUMENTS: Dict[str, Dict[str, List[str]]] = {
 def get_required_documents(entity: str, category: str = None) -> List[str]:
     """
     Get required documents for a compliance entity
-    
+
     Args:
         entity: Compliance entity (GSE, Terna, DSO, ADM, Comune, CER)
         category: Optional document category filter
-    
+
     Returns:
         List of required document names
     """
     entity_docs = ITALIAN_COMPLIANCE_DOCUMENTS.get(entity, {})
-    
+
     if category:
         return entity_docs.get(category, [])
-    
+
     # Return all documents for the entity
     all_docs = []
     for docs in entity_docs.values():
@@ -197,34 +199,46 @@ def get_required_documents(entity: str, category: str = None) -> List[str]:
 def get_documents_by_requirement_type(requirement_type: str) -> List[str]:
     """
     Get documents based on requirement type
-    
+
     Args:
         requirement_type: Type of requirement (e.g., 'RID_ACTIVATION', 'FUEL_MIX', etc.)
-    
+
     Returns:
         List of required document names
     """
     # Map requirement types to documents
     requirement_mapping = {
-        "RID_ACTIVATION": get_required_documents(ComplianceEntity.GSE, DocumentCategory.INITIAL_REGISTRATION),
+        "RID_ACTIVATION": get_required_documents(
+            ComplianceEntity.GSE, DocumentCategory.INITIAL_REGISTRATION
+        ),
         "FUEL_MIX": ["Fuel Mix Disclosure"],
         "ANTI_MAFIA": ["Anti-Mafia Declaration"],
-        "GAUDI_REGISTRATION": get_required_documents(ComplianceEntity.TERNA, DocumentCategory.INITIAL_REGISTRATION),
-        "TICA_REQUEST": get_required_documents(ComplianceEntity.DSO, DocumentCategory.INITIAL_REGISTRATION),
-        "UTF_LICENSE": get_required_documents(ComplianceEntity.ADM, DocumentCategory.INITIAL_REGISTRATION),
+        "GAUDI_REGISTRATION": get_required_documents(
+            ComplianceEntity.TERNA, DocumentCategory.INITIAL_REGISTRATION
+        ),
+        "TICA_REQUEST": get_required_documents(
+            ComplianceEntity.DSO, DocumentCategory.INITIAL_REGISTRATION
+        ),
+        "UTF_LICENSE": get_required_documents(
+            ComplianceEntity.ADM, DocumentCategory.INITIAL_REGISTRATION
+        ),
         "CONSUMPTION_DECLARATION": ["Consumption Declaration"],
         "METER_CALIBRATION": ["Meter Calibration Certificate"],
-        "CER_REGISTRATION": get_required_documents(ComplianceEntity.CER, DocumentCategory.INITIAL_REGISTRATION),
-        "PNRR_APPLICATION": get_required_documents(ComplianceEntity.CER, DocumentCategory.FINANCIAL),
+        "CER_REGISTRATION": get_required_documents(
+            ComplianceEntity.CER, DocumentCategory.INITIAL_REGISTRATION
+        ),
+        "PNRR_APPLICATION": get_required_documents(
+            ComplianceEntity.CER, DocumentCategory.FINANCIAL
+        ),
     }
-    
+
     return requirement_mapping.get(requirement_type, [])
 
 
 def get_all_documents() -> Dict[str, List[str]]:
     """
     Get all documents organized by entity
-    
+
     Returns:
         Dictionary mapping entity names to lists of documents
     """
@@ -232,4 +246,3 @@ def get_all_documents() -> Dict[str, List[str]]:
     for entity, categories in ITALIAN_COMPLIANCE_DOCUMENTS.items():
         result[entity.value] = get_required_documents(entity.value)
     return result
-

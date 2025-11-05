@@ -47,7 +47,15 @@ export function ParticipationRequestsTab({ cerId }: ParticipationRequestsTabProp
   });
 
   const { mutate: updateRequest, isPending: isUpdating } = useMutation({
-    mutationFn: async ({ requestId, status, notes }: { requestId: number; status: string; notes?: string }) => {
+    mutationFn: async ({
+      requestId,
+      status,
+      notes,
+    }: {
+      requestId: number;
+      status: string;
+      notes?: string;
+    }) => {
       return cerService.updateParticipationRequest(requestId, {
         status,
         notes: notes,
@@ -150,7 +158,9 @@ export function ParticipationRequestsTab({ cerId }: ParticipationRequestsTabProp
                   <TableRow key={request.id}>
                     <TableCell>
                       <div className="space-y-1">
-                        <div className="font-medium">{request.user_name || `User #${request.user_id}`}</div>
+                        <div className="font-medium">
+                          {request.user_name || `User #${request.user_id}`}
+                        </div>
                         {request.user_email && (
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <Mail className="h-3 w-3" />
@@ -165,7 +175,9 @@ export function ParticipationRequestsTab({ cerId }: ParticipationRequestsTabProp
                       {new Date(request.request_date).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {request.processed_date ? new Date(request.processed_date).toLocaleDateString() : '-'}
+                      {request.processed_date
+                        ? new Date(request.processed_date).toLocaleDateString()
+                        : '-'}
                     </TableCell>
                     <TableCell className="text-sm max-w-xs truncate">
                       {request.notes || '-'}
@@ -229,7 +241,9 @@ export function ParticipationRequestsTab({ cerId }: ParticipationRequestsTabProp
             <DialogDescription>
               {selectedRequest && (
                 <>
-                  Review the request from <strong>{selectedRequest.user_name || `User #${selectedRequest.user_id}`}</strong> to join
+                  Review the request from{' '}
+                  <strong>{selectedRequest.user_name || `User #${selectedRequest.user_id}`}</strong>{' '}
+                  to join
                   <strong> {selectedRequest.cer_name || `CER #${selectedRequest.cer_id}`}</strong>.
                 </>
               )}
@@ -266,21 +280,19 @@ export function ParticipationRequestsTab({ cerId }: ParticipationRequestsTabProp
                 )}
               </div>
               <div>
-              <Label htmlFor="admin-notes">
-                Notes {actionType === 'reject' && '(required)'}
-              </Label>
-              <Textarea
-                id="admin-notes"
-                placeholder={
-                  actionType === 'approve'
-                    ? 'Optional notes about this approval...'
-                    : 'Please provide a reason for rejection...'
-                }
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-                rows={4}
-                className="mt-2"
-              />
+                <Label htmlFor="admin-notes">Notes {actionType === 'reject' && '(required)'}</Label>
+                <Textarea
+                  id="admin-notes"
+                  placeholder={
+                    actionType === 'approve'
+                      ? 'Optional notes about this approval...'
+                      : 'Please provide a reason for rejection...'
+                  }
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  rows={4}
+                  className="mt-2"
+                />
               </div>
             </div>
           )}
@@ -320,4 +332,3 @@ export function ParticipationRequestsTab({ cerId }: ParticipationRequestsTabProp
     </div>
   );
 }
-

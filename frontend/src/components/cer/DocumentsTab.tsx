@@ -81,12 +81,13 @@ export function DocumentsTab({ cerId }: DocumentsTabProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-1 text-sm">
-                {overview.by_status && Object.entries(overview.by_status).map(([status, count]: [string, any]) => (
-                  <div key={status} className="flex justify-between">
-                    <span className="capitalize text-muted-foreground">{status}:</span>
-                    <span className="font-medium">{count}</span>
-                  </div>
-                ))}
+                {overview.by_status &&
+                  Object.entries(overview.by_status).map(([status, count]: [string, any]) => (
+                    <div key={status} className="flex justify-between">
+                      <span className="capitalize text-muted-foreground">{status}:</span>
+                      <span className="font-medium">{count}</span>
+                    </div>
+                  ))}
               </div>
             </CardContent>
           </Card>
@@ -137,8 +138,8 @@ export function DocumentsTab({ cerId }: DocumentsTabProps) {
                           doc.status === 'active' || doc.status === 'approved'
                             ? 'default'
                             : doc.status === 'expired'
-                            ? 'destructive'
-                            : 'secondary'
+                              ? 'destructive'
+                              : 'secondary'
                         }
                         className="capitalize"
                       >
@@ -159,9 +160,7 @@ export function DocumentsTab({ cerId }: DocumentsTabProps) {
                       )}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {doc.created_at
-                        ? new Date(doc.created_at).toLocaleDateString()
-                        : '-'}
+                      {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : '-'}
                     </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm">
@@ -187,4 +186,3 @@ export function DocumentsTab({ cerId }: DocumentsTabProps) {
     </div>
   );
 }
-

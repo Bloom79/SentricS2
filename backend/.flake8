@@ -12,12 +12,12 @@ exclude =
     dist,
     *.egg-info
 
-# Ignore specific rules
-ignore =
-    E203,  # Whitespace before ':'
-    E501,  # Line too long (handled by Black)
-    W503,  # Line break before binary operator
-    E402,  # Module level import not at top of file
+# Ignore specific rules:
+# E203 - Whitespace before ':'
+# E501 - Line too long (handled by Black)
+# W503 - Line break before binary operator
+# E402 - Module level import not at top of file
+ignore = E203,E501,W503,E402
 
 # Per-file ignores
 per-file-ignores =
