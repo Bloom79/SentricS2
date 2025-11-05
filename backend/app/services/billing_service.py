@@ -1,9 +1,10 @@
 """
 Billing Service - Business logic for CER billing and financial management
 Handles settlements, billing statements, invoices, and transactions
+REFACTORED: Reduced complexity by extracting helper methods
 """
 
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from datetime import datetime, timedelta, timezone
@@ -20,13 +21,14 @@ from app.models.billing import (
     TransactionType,
     SettlementStatus,
 )
+from app.services.base import BaseService
 from app.services.energy_service import energy_service
 from app.schemas.billing import BillingTransactionCreate
 
 logger = logging.getLogger(__name__)
 
 
-class BillingService:
+class BillingService(BaseService):
     """Service for billing and financial management"""
 
     # Incentive rates based on plant size (€/MWh)
@@ -285,23 +287,16 @@ class BillingService:
         return statements
 
     @staticmethod
-    def create_billing_transaction(
-        db: Session, transaction_data: BillingTransactionCreate, tenant_id: str, user_id: int
-    ) -> BillingTransaction:
-        """Create a billing transaction (payment, credit, debit)"""
-        # Verify CER and member exist
-        cer = (
-            db.query(CER)
-            .filter(
-                and_(
-                    CER.id == transaction_data.cer_id,
-                    CER.tenant_id == tenant_id,
-                    CER.deleted_at.is_(None),
-                )
-            )
-            .first()
-        )
+    def _verify_cer_and_member(
+        db: Session, cer_id: int, member_id: int, tenant_id: str
+    ) -> Tuple[CER, CERMember]:
+        """
+        Verify CER and member exist
 
+        Raises:
+            ValueError if CER or member not found
+        """
+        cer = BaseService._get_by_id(db, CER, cer_id, tenant_id)
         if not cer:
             raise ValueError("CER not found")
 
@@ -309,8 +304,8 @@ class BillingService:
             db.query(CERMember)
             .filter(
                 and_(
-                    CERMember.id == transaction_data.member_id,
-                    CERMember.cer_id == transaction_data.cer_id,
+                    CERMember.id == member_id,
+                    CERMember.cer_id == cer_id,
                     CERMember.tenant_id == tenant_id,
                     CERMember.deleted_at.is_(None),
                 )
@@ -320,6 +315,129 @@ class BillingService:
 
         if not member:
             raise ValueError("Member not found")
+
+        return cer, member
+
+    @staticmethod
+    def _determine_transaction_status(transaction_type: TransactionType) -> PaymentStatus:
+        """
+        Determine initial transaction status based on type
+
+        Returns:
+            PENDING for payments, COMPLETED for credits/debits
+        """
+        if transaction_type == TransactionType.PAYMENT:
+            return PaymentStatus.PENDING
+        return PaymentStatus.COMPLETED
+
+    @staticmethod
+    def _update_statement_balance(
+        db: Session,
+        statement_id: Optional[int],
+        transaction_type: TransactionType,
+        amount: float,
+        tenant_id: str,
+    ) -> None:
+        """
+        Update statement balance based on transaction
+
+        Args:
+            db: Database session
+            statement_id: Statement ID to update
+            transaction_type: Type of transaction
+            amount: Transaction amount
+            tenant_id: Tenant ID
+        """
+        if not statement_id:
+            return
+
+        statement = (
+            db.query(BillingStatement)
+            .filter(
+                and_(
+                    BillingStatement.id == statement_id,
+                    BillingStatement.tenant_id == tenant_id,
+                    BillingStatement.deleted_at.is_(None),
+                )
+            )
+            .first()
+        )
+
+        if not statement:
+            return
+
+        if transaction_type == TransactionType.PAYMENT:
+            statement.amount_paid += abs(amount)
+            statement.balance = statement.total_amount - statement.amount_paid
+
+            if statement.balance <= 0:
+                statement.status = BillingStatus.PAID
+        elif transaction_type == TransactionType.CREDIT:
+            statement.balance -= abs(amount)
+        elif transaction_type == TransactionType.DEBIT:
+            statement.balance += abs(amount)
+
+    @staticmethod
+    def _update_invoice_balance(
+        db: Session,
+        invoice_id: Optional[int],
+        transaction_type: TransactionType,
+        amount: float,
+        tenant_id: str,
+    ) -> None:
+        """
+        Update invoice balance based on transaction
+
+        Args:
+            db: Database session
+            invoice_id: Invoice ID to update
+            transaction_type: Type of transaction
+            amount: Transaction amount
+            tenant_id: Tenant ID
+        """
+        if not invoice_id:
+            return
+
+        invoice = (
+            db.query(Invoice)
+            .filter(
+                and_(
+                    Invoice.id == invoice_id,
+                    Invoice.tenant_id == tenant_id,
+                    Invoice.deleted_at.is_(None),
+                )
+            )
+            .first()
+        )
+
+        if not invoice:
+            return
+
+        if transaction_type == TransactionType.PAYMENT:
+            invoice.amount_paid += abs(amount)
+            invoice.balance = invoice.total_amount - invoice.amount_paid
+
+            if invoice.balance <= 0:
+                invoice.status = BillingStatus.PAID
+                invoice.is_paid = True
+                invoice.paid_date = datetime.now(timezone.utc)
+
+    @staticmethod
+    def create_billing_transaction(
+        db: Session, transaction_data: BillingTransactionCreate, tenant_id: str, user_id: int
+    ) -> BillingTransaction:
+        """
+        Create a billing transaction (payment, credit, debit)
+
+        REFACTORED: Complexity reduced from 13 to ~5 by extracting helpers
+        """
+        # Verify CER and member exist
+        cer, member = BillingService._verify_cer_and_member(
+            db, transaction_data.cer_id, transaction_data.member_id, tenant_id
+        )
+
+        # Determine initial status
+        status = BillingService._determine_transaction_status(transaction_data.transaction_type)
 
         # Create transaction
         transaction = BillingTransaction(
@@ -332,11 +450,7 @@ class BillingService:
             payment_method=transaction_data.payment_method,
             payment_reference=transaction_data.payment_reference,
             payment_date=transaction_data.payment_date or datetime.now(timezone.utc),
-            status=(
-                PaymentStatus.PENDING
-                if transaction_data.transaction_type == TransactionType.PAYMENT
-                else PaymentStatus.COMPLETED
-            ),
+            status=status,
             description=transaction_data.description,
             notes=transaction_data.notes,
             statement_id=transaction_data.statement_id,
@@ -348,54 +462,22 @@ class BillingService:
         db.add(transaction)
 
         # Update statement balance if statement_id provided
-        if transaction_data.statement_id:
-            statement = (
-                db.query(BillingStatement)
-                .filter(
-                    and_(
-                        BillingStatement.id == transaction_data.statement_id,
-                        BillingStatement.tenant_id == tenant_id,
-                        BillingStatement.deleted_at.is_(None),
-                    )
-                )
-                .first()
-            )
-
-            if statement:
-                if transaction_data.transaction_type == TransactionType.PAYMENT:
-                    statement.amount_paid += abs(transaction_data.amount)
-                    statement.balance = statement.total_amount - statement.amount_paid
-
-                    if statement.balance <= 0:
-                        statement.status = BillingStatus.PAID
-                elif transaction_data.transaction_type == TransactionType.CREDIT:
-                    statement.balance -= abs(transaction_data.amount)
-                elif transaction_data.transaction_type == TransactionType.DEBIT:
-                    statement.balance += abs(transaction_data.amount)
+        BillingService._update_statement_balance(
+            db,
+            transaction_data.statement_id,
+            transaction_data.transaction_type,
+            transaction_data.amount,
+            tenant_id,
+        )
 
         # Update invoice balance if invoice_id provided
-        if transaction_data.invoice_id:
-            invoice = (
-                db.query(Invoice)
-                .filter(
-                    and_(
-                        Invoice.id == transaction_data.invoice_id,
-                        Invoice.tenant_id == tenant_id,
-                        Invoice.deleted_at.is_(None),
-                    )
-                )
-                .first()
-            )
-
-            if invoice:
-                if transaction_data.transaction_type == TransactionType.PAYMENT:
-                    invoice.amount_paid += abs(transaction_data.amount)
-                    invoice.balance = invoice.total_amount - invoice.amount_paid
-
-                    if invoice.balance <= 0:
-                        invoice.status = BillingStatus.PAID
-                        invoice.is_paid = True
-                        invoice.paid_date = datetime.now(timezone.utc)
+        BillingService._update_invoice_balance(
+            db,
+            transaction_data.invoice_id,
+            transaction_data.transaction_type,
+            transaction_data.amount,
+            tenant_id,
+        )
 
         db.commit()
         db.refresh(transaction)
