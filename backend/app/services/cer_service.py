@@ -5,7 +5,7 @@ Migrated from Sentrics with Kronos EAM patterns
 
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 from datetime import datetime, timezone
 import logging
 
@@ -14,11 +14,9 @@ from app.models.cer import (
     CERMember,
     CERParticipationRequest,
     CERStatus,
-    CERLegalType,
     ParticipationRequestStatus,
 )
 from app.models.plant import Plant
-from app.models.user import User
 from app.core.geography import create_point, create_polygon, validate_boundary
 from app.schemas.cer import (
     CERCreate,

@@ -3,7 +3,6 @@ Site model for physical locations containing multiple plants
 Part of Sites → Plants → Assets hierarchy
 """
 
-from datetime import datetime
 from sqlalchemy import (
     Column,
     String,
@@ -18,7 +17,6 @@ from sqlalchemy import (
     Numeric,
 )
 from sqlalchemy.orm import relationship
-from geoalchemy2 import Geography
 import enum
 
 from app.models.base import BaseModel

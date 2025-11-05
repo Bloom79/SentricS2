@@ -5,7 +5,7 @@ Manages automatic creation and tracking of recurring compliance obligations
 
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+
 from datetime import datetime, timedelta
 import logging
 

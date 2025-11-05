@@ -3,7 +3,7 @@ Document models
 Consolidated from Kronos EAM
 """
 
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, JSON, ForeignKey, Enum, Text
+from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey, Enum, Text
 from sqlalchemy.orm import relationship
 import enum
 

@@ -3,7 +3,7 @@ User models with multi-tenant support
 Consolidated from Kronos EAM
 """
 
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, JSON, Enum, ForeignKey
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, JSON, Enum
 from sqlalchemy.orm import relationship
 import enum
 

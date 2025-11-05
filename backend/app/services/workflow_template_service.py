@@ -4,7 +4,7 @@ Workflow Template Service - Business logic for workflow template management
 
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func
+from sqlalchemy import and_
 from datetime import datetime
 import logging
 

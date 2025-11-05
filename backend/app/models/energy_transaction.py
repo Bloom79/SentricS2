@@ -4,7 +4,6 @@ Implements energy sharing calculations and transaction tracking
 """
 
 from sqlalchemy import Column, Integer, Float, DateTime, String, ForeignKey, JSON, Enum, Index
-from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 

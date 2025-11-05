@@ -25,15 +25,12 @@ from app.schemas.cer import (
     CERParticipationRequestCreate,
     CERParticipationRequestUpdate,
     CERParticipationRequestResponse,
-    CERParticipationRequestWithDetails,
-    CERStatsResponse,
 )
 from app.schemas.cer_member_asset import (
     CERMemberAssetCreate,
     CERMemberAssetUpdate,
     CERMemberAssetResponse,
 )
-from app.services.cer_member_asset_service import CERMemberAssetService
 from app.schemas.plant import PlantResponse
 
 router = APIRouter()
@@ -666,7 +663,6 @@ async def get_cer_compliance_records(
 ):
     """Get compliance records for a CER, optionally including linked plants"""
     try:
-        from app.services.compliance_service import compliance_service
         from app.models.compliance import ComplianceRecord, ComplianceStatusEnum
         from app.models.plant import Plant
 
@@ -840,7 +836,6 @@ async def get_cer_documents_overview(
     """Get document overview for a CER (counts by type, expired, etc.)"""
     try:
         from app.models.document import Document, DocumentTypeEnum, DocumentStatusEnum
-        from datetime import datetime
 
         # Verify CER exists
         cer = cer_service.get_cer(db, cer_id, current_user.tenant_id)

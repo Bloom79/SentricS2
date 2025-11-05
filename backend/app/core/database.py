@@ -3,11 +3,11 @@ Database configuration with multi-tenant support and PostGIS
 Consolidated from Kronos EAM with PostGIS support from Sentrics
 """
 
-from typing import Generator, Optional, Dict, Any
+from typing import Generator, Optional, Dict
 from sqlalchemy import create_engine, event, Engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, Query
-from sqlalchemy.pool import NullPool, QueuePool
+from sqlalchemy.pool import QueuePool
 from contextlib import contextmanager
 import logging
 import time

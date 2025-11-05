@@ -3,7 +3,6 @@ Power Plant models with multi-tenant support
 Enhanced with CER and Asset relationships
 """
 
-from datetime import datetime
 from sqlalchemy import (
     Column,
     String,
@@ -16,7 +15,7 @@ from sqlalchemy import (
     Enum,
     Text,
 )
-from sqlalchemy.orm import relationship, foreign
+from sqlalchemy.orm import relationship
 import enum
 
 from app.models.base import BaseModel

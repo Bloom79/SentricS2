@@ -3,7 +3,7 @@ Workflow Template models
 Templates for creating workflows for plant bureaucracy processes
 """
 
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, JSON, Text, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, JSON, Text, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 import enum
 

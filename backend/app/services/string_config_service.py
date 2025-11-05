@@ -3,7 +3,7 @@ String Configuration Service for Solar Arrays
 Manages string assignments and configuration for solar arrays
 """
 
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 import logging

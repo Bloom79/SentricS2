@@ -5,7 +5,7 @@ Multi-tenant aware configuration with environment variable support
 
 from typing import List, Optional, Dict, Any
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl, field_validator, model_validator, PostgresDsn, RedisDsn, AnyUrl
+from pydantic import field_validator, model_validator, RedisDsn
 import secrets
 import logging
 import os

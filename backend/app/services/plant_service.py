@@ -5,11 +5,11 @@ Enhanced with CER and Asset relationships
 
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, func
+from sqlalchemy import and_, func
 from datetime import datetime
 import logging
 
-from app.models.plant import Plant, PlantStatusEnum, PlantTypeEnum
+from app.models.plant import Plant
 from app.models.cer import CER
 from app.models.asset import Asset
 from app.schemas.plant import PlantCreate, PlantUpdate

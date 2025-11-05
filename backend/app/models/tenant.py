@@ -3,7 +3,7 @@ Tenant models
 Consolidated from Kronos EAM
 """
 
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, JSON, Enum
+from sqlalchemy import Column, String, DateTime, JSON, Enum
 from sqlalchemy.orm import relationship
 import enum
 

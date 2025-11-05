@@ -3,7 +3,7 @@ Plant Layout model for visual plant designer
 Stores React Flow nodes and edges as JSON
 """
 
-from sqlalchemy import Column, Integer, Boolean, JSON, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, Boolean, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.models.base import BaseModel

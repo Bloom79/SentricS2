@@ -9,7 +9,7 @@ from sqlalchemy import and_
 from datetime import datetime
 import logging
 
-from app.models.asset import Asset, AssetType, AssetMaintenance
+from app.models.asset import Asset, AssetType
 from app.models.plant import Plant
 from app.schemas.asset import AssetCreate, AssetUpdate, AssetTypeCreate
 

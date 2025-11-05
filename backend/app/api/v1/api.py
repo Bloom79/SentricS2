@@ -18,7 +18,7 @@ from app.api.v1.endpoints import (
     billing,
 )
 from app.api.v1 import sites
-from app.core.config import settings
+
 
 api_router = APIRouter()
 

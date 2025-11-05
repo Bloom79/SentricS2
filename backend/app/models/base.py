@@ -5,7 +5,7 @@ Consolidated from Kronos EAM
 
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import Column, String, DateTime, Boolean, Integer, event, func
+from sqlalchemy import Column, String, DateTime, Integer, event, func
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import Session
 

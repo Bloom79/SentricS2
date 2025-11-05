@@ -5,11 +5,11 @@ Consolidated from Kronos EAM
 
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import and_, func
+from sqlalchemy import and_
 from datetime import datetime
 import logging
 
-from app.models.workflow import Workflow, WorkflowPhase, WorkflowStatusEnum, WorkflowTypeEnum
+from app.models.workflow import Workflow, WorkflowStatusEnum, WorkflowTypeEnum
 from app.models.plant import Plant
 
 logger = logging.getLogger(__name__)

@@ -3,14 +3,13 @@ Energy Service - Business logic for CER energy sharing calculations
 Implements the autoconsumo diffuso (diffuse self-consumption) model
 """
 
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func, extract
+from sqlalchemy import and_, func
 from datetime import datetime, timedelta, timezone
 import logging
 
 from app.models.cer import CER, CERMember
-from app.models.plant import Plant
 from app.models.energy_transaction import (
     EnergyTransaction,
     EnergySharingCalculation,

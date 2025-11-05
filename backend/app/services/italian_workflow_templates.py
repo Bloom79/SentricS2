@@ -4,8 +4,8 @@ Comprehensive templates based on Italian bureaucratic processes for renewable en
 """
 
 from typing import Dict, List, Any
-from datetime import datetime, timedelta
-from app.core.italian_compliance_documents import ComplianceEntity, get_required_documents
+
+from app.core.italian_compliance_documents import ComplianceEntity
 
 
 def get_gse_rid_activation_phases() -> List[Dict[str, Any]]:

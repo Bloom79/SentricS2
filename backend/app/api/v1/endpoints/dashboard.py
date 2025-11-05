@@ -3,7 +3,6 @@ Dashboard endpoints
 Consolidated from Kronos EAM
 """
 
-from typing import List
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 

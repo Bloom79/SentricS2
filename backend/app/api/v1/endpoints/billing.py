@@ -16,7 +16,6 @@ from app.schemas.billing import (
     BillingStatementResponse,
     BillingTransactionCreate,
     BillingTransactionResponse,
-    SettlementCreate,
     SettlementResponse,
     BillingOverviewResponse,
     MemberBalanceResponse,

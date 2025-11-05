@@ -4,9 +4,6 @@ Migrated from Sentrics
 """
 
 from typing import List, Tuple, Optional
-from geoalchemy2 import Geography
-from geoalchemy2.functions import ST_GeomFromText, ST_AsText, ST_Distance, ST_Within, ST_Intersects
-from sqlalchemy import func, text
 from shapely.geometry import Point, Polygon
 from shapely import wkt
 import logging

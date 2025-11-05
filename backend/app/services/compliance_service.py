@@ -5,8 +5,8 @@ Consolidated from Kronos EAM
 
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func
-from datetime import datetime, timedelta
+from sqlalchemy import and_
+from datetime import datetime
 import logging
 
 from app.models.compliance import (

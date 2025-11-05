@@ -4,7 +4,7 @@ Site schemas for API requests/responses
 
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 
 class SiteBase(BaseModel):

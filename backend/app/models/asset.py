@@ -3,7 +3,7 @@ Asset models for equipment management
 Migrated from Sentrics with multi-tenant support
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, JSON, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, JSON, ForeignKey, Text
 from sqlalchemy.orm import relationship
 import enum
 

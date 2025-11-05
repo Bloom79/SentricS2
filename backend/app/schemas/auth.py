@@ -4,7 +4,6 @@ Authentication schemas
 
 from typing import Optional, Dict, Any
 from pydantic import BaseModel
-from datetime import datetime
 
 
 class Token(BaseModel):

@@ -2,7 +2,7 @@
 Asset Pydantic schemas
 """
 
-from typing import Optional, Dict, Any, List, Union
+from typing import Optional, Dict, Any, Union
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 import json

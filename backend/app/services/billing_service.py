@@ -5,7 +5,7 @@ Handles settlements, billing statements, invoices, and transactions
 
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func
+from sqlalchemy import and_
 from datetime import datetime, timedelta, timezone
 import logging
 
@@ -21,16 +21,7 @@ from app.models.billing import (
     SettlementStatus,
 )
 from app.services.energy_service import energy_service
-from app.schemas.billing import (
-    BillingStatementCreate,
-    BillingStatementUpdate,
-    InvoiceCreate,
-    InvoiceUpdate,
-    BillingTransactionCreate,
-    BillingTransactionUpdate,
-    SettlementCreate,
-    SettlementUpdate,
-)
+from app.schemas.billing import BillingTransactionCreate
 
 logger = logging.getLogger(__name__)
 

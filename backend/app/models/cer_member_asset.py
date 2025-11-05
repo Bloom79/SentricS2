@@ -3,7 +3,7 @@ CER Member Asset models
 Links production assets (solar panels, wind turbines, etc.) to CER members
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, JSON, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, Float, JSON, ForeignKey, Date
 from sqlalchemy.orm import relationship
 import enum
 

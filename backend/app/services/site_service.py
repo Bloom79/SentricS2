@@ -7,10 +7,9 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from sqlalchemy.orm import selectinload
-from datetime import datetime
 import logging
 
-from app.models.site import Site, SiteStatusEnum, SiteTypeEnum, StorageUnit, Consumer, EnergyFlow
+from app.models.site import Site, SiteTypeEnum, EnergyFlow
 from app.models.plant import Plant
 
 logger = logging.getLogger(__name__)
