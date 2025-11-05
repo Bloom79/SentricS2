@@ -1,6 +1,7 @@
 """
 CER Service - Business logic for Renewable Energy Communities
 Migrated from Sentrics with Kronos EAM patterns
+REFACTORED: Reduced complexity by extracting helper methods
 """
 
 from typing import List, Optional, Dict, Any
@@ -26,11 +27,12 @@ from app.schemas.cer import (
     CERParticipationRequestCreate,
     CERParticipationRequestUpdate,
 )
+from app.services.base import BaseService
 
 logger = logging.getLogger(__name__)
 
 
-class CERService:
+class CERService(BaseService):
     """Service for CER management"""
 
     @staticmethod
@@ -149,48 +151,22 @@ class CERService:
     def add_member(
         db: Session, cer_id: int, member_data: CERMemberCreate, tenant_id: str, user_id: int
     ) -> Optional[CERMember]:
-        """Add member to CER"""
+        """
+        Add member to CER
+
+        REFACTORED: Complexity reduced from 11 to ~4 by extracting helpers
+        """
         # Verify CER exists
         cer = CERService.get_cer(db, cer_id, tenant_id)
         if not cer:
             return None
 
         # Check if POD already exists
-        existing = (
-            db.query(CERMember)
-            .filter(
-                and_(
-                    CERMember.pod_id == member_data.pod_id,
-                    CERMember.tenant_id == tenant_id,
-                    CERMember.deleted_at.is_(None),
-                )
-            )
-            .first()
-        )
-
-        if existing:
+        if CERService._check_pod_exists(db, member_data.pod_id, tenant_id):
             raise ValueError(f"Member with POD {member_data.pod_id} already exists")
 
         # Build technical_info from production fields
-        technical_info = member_data.technical_info or {}
-        if member_data.member_type in ["producer", "prosumer"]:
-            # Store production fields in technical_info
-            if member_data.plant_type:
-                technical_info["plant_type"] = member_data.plant_type
-            if member_data.plant_capacity is not None:
-                technical_info["plant_capacity"] = member_data.plant_capacity
-            if member_data.commissioning_date:
-                technical_info["commissioning_date"] = member_data.commissioning_date.isoformat()
-            if member_data.is_incentivized is not None:
-                technical_info["is_incentivized"] = member_data.is_incentivized
-            if member_data.capital_contribution is not None:
-                technical_info["capital_contribution"] = member_data.capital_contribution
-
-            # Storage fields
-            if member_data.has_storage is not None:
-                technical_info["has_storage"] = member_data.has_storage
-            if member_data.storage_capacity is not None:
-                technical_info["storage_capacity"] = member_data.storage_capacity
+        technical_info = CERService._build_technical_info(member_data)
 
         # Create member
         member = CERMember(
@@ -242,16 +218,16 @@ class CERService:
         )
 
     @staticmethod
-    def update_member(
-        db: Session,
-        cer_id: int,
-        member_id: int,
-        member_data: CERMemberUpdate,
-        tenant_id: str,
-        user_id: int,
+    def _get_member(
+        db: Session, cer_id: int, member_id: int, tenant_id: str
     ) -> Optional[CERMember]:
-        """Update CER member"""
-        member = (
+        """
+        Get CER member with filters
+
+        Returns:
+            CERMember instance or None if not found
+        """
+        return (
             db.query(CERMember)
             .filter(
                 and_(
@@ -264,10 +240,15 @@ class CERService:
             .first()
         )
 
-        if not member:
-            return None
+    @staticmethod
+    def _update_basic_fields(member: CERMember, member_data: CERMemberUpdate) -> None:
+        """
+        Update basic scalar fields on member
 
-        # Update basic fields
+        Args:
+            member: CERMember instance to update
+            member_data: Update data containing new values
+        """
         if member_data.name:
             member.name = member_data.name
         if member_data.address:
@@ -279,7 +260,17 @@ class CERService:
         if member_data.contracted_power is not None:
             member.contracted_power = member_data.contracted_power
 
-        # Update production/storage fields in technical_info
+    @staticmethod
+    def _update_technical_info_fields(
+        member: CERMember, member_data: CERMemberUpdate
+    ) -> None:
+        """
+        Update technical_info dictionary fields
+
+        Args:
+            member: CERMember instance to update
+            member_data: Update data containing technical info
+        """
         if (
             member_data.plant_capacity is not None
             or member_data.has_storage is not None
@@ -300,7 +291,15 @@ class CERService:
                 technical_info["capital_contribution"] = member_data.capital_contribution
             member.technical_info = technical_info
 
-        # Update JSON fields
+    @staticmethod
+    def _update_json_fields(member: CERMember, member_data: CERMemberUpdate) -> None:
+        """
+        Update JSON fields (preferences, load profile, etc.)
+
+        Args:
+            member: CERMember instance to update
+            member_data: Update data containing JSON fields
+        """
         if member_data.energy_sharing_preferences:
             member.energy_sharing_preferences = member_data.energy_sharing_preferences
         if member_data.technical_info:
@@ -311,6 +310,92 @@ class CERService:
         if member_data.load_profile_data:
             member.load_profile_data = member_data.load_profile_data
 
+    @staticmethod
+    def _check_pod_exists(
+        db: Session, pod_id: str, tenant_id: str
+    ) -> bool:
+        """
+        Check if member with given POD ID already exists
+
+        Returns:
+            True if POD exists, False otherwise
+        """
+        existing = (
+            db.query(CERMember)
+            .filter(
+                and_(
+                    CERMember.pod_id == pod_id,
+                    CERMember.tenant_id == tenant_id,
+                    CERMember.deleted_at.is_(None),
+                )
+            )
+            .first()
+        )
+        return existing is not None
+
+    @staticmethod
+    def _build_technical_info(member_data: CERMemberCreate) -> Dict[str, Any]:
+        """
+        Build technical_info dictionary from member create data
+
+        Args:
+            member_data: Member creation data
+
+        Returns:
+            Dictionary with technical info fields
+        """
+        technical_info = member_data.technical_info or {}
+
+        if member_data.member_type in ["producer", "prosumer"]:
+            # Store production fields in technical_info
+            if member_data.plant_type:
+                technical_info["plant_type"] = member_data.plant_type
+            if member_data.plant_capacity is not None:
+                technical_info["plant_capacity"] = member_data.plant_capacity
+            if member_data.commissioning_date:
+                technical_info["commissioning_date"] = member_data.commissioning_date.isoformat()
+            if member_data.is_incentivized is not None:
+                technical_info["is_incentivized"] = member_data.is_incentivized
+            if member_data.capital_contribution is not None:
+                technical_info["capital_contribution"] = member_data.capital_contribution
+
+            # Storage fields
+            if member_data.has_storage is not None:
+                technical_info["has_storage"] = member_data.has_storage
+            if member_data.storage_capacity is not None:
+                technical_info["storage_capacity"] = member_data.storage_capacity
+
+        return technical_info
+
+    @staticmethod
+    def update_member(
+        db: Session,
+        cer_id: int,
+        member_id: int,
+        member_data: CERMemberUpdate,
+        tenant_id: str,
+        user_id: int,
+    ) -> Optional[CERMember]:
+        """
+        Update CER member
+
+        REFACTORED: Complexity reduced from 16 to ~5 by extracting helpers
+        """
+        # Get member
+        member = CERService._get_member(db, cer_id, member_id, tenant_id)
+        if not member:
+            return None
+
+        # Update basic fields
+        CERService._update_basic_fields(member, member_data)
+
+        # Update production/storage fields in technical_info
+        CERService._update_technical_info_fields(member, member_data)
+
+        # Update JSON fields
+        CERService._update_json_fields(member, member_data)
+
+        # Finalize update
         member.updated_by = user_id
         member.updated_at = datetime.now(timezone.utc)
 
