@@ -1,6 +1,7 @@
 """
 String Configuration Service for Solar Arrays
 Manages string assignments and configuration for solar arrays
+REFACTORED: Reduced complexity by extracting helper methods
 """
 
 from typing import List, Dict, Any
@@ -9,11 +10,12 @@ from sqlalchemy import and_
 import logging
 
 from app.models.asset import Asset
+from app.services.base import BaseService
 
 logger = logging.getLogger(__name__)
 
 
-class StringConfigService:
+class StringConfigService(BaseService):
     """Service for managing string configurations"""
 
     @staticmethod
@@ -92,64 +94,141 @@ class StringConfigService:
             raise
 
     @staticmethod
+    def _get_array(db: Session, array_id: int, tenant_id: str) -> Asset:
+        """
+        Get solar array by ID with validation
+
+        Raises:
+            ValueError if array not found
+        """
+        array = (
+            db.query(Asset)
+            .filter(
+                and_(
+                    Asset.id == array_id,
+                    Asset.tenant_id == tenant_id,
+                    Asset.component_type == "solar_array",
+                )
+            )
+            .first()
+        )
+
+        if not array:
+            raise ValueError(f"Solar array {array_id} not found")
+
+        return array
+
+    @staticmethod
+    def _validate_string_number(string_number: int, number_of_strings: int) -> None:
+        """
+        Validate string number is within range
+
+        Raises:
+            ValueError if string number is invalid
+        """
+        if string_number < 1 or string_number > number_of_strings:
+            raise ValueError(f"String number must be between 1 and {number_of_strings}")
+
+    @staticmethod
+    def _validate_panel_count(panel_ids: List[int], panels_per_string: int) -> None:
+        """
+        Validate panel count doesn't exceed maximum
+
+        Raises:
+            ValueError if too many panels
+        """
+        if len(panel_ids) > panels_per_string:
+            raise ValueError(f"Maximum {panels_per_string} panels per string")
+
+    @staticmethod
+    def _verify_panels_exist(
+        db: Session, panel_ids: List[int], tenant_id: str, plant_id: int
+    ) -> List[Asset]:
+        """
+        Verify all panels exist and belong to the same plant
+
+        Raises:
+            ValueError if panels not found or don't belong to plant
+        """
+        panels = (
+            db.query(Asset)
+            .filter(
+                and_(
+                    Asset.id.in_(panel_ids),
+                    Asset.tenant_id == tenant_id,
+                    Asset.component_type == "panel",
+                    Asset.plant_id == plant_id,
+                )
+            )
+            .all()
+        )
+
+        if len(panels) != len(panel_ids):
+            raise ValueError("Some panels not found or do not belong to this plant")
+
+        return panels
+
+    @staticmethod
+    def _remove_panels_from_other_strings(
+        string_assignments: Dict[str, int], string_number: int, panel_ids: List[int]
+    ) -> None:
+        """
+        Remove panels from the current string if they're not in the new panel list
+
+        Modifies string_assignments in place
+        """
+        panel_id_strs = [str(p) for p in panel_ids]
+        for panel_id_str, assigned_string in list(string_assignments.items()):
+            if assigned_string == string_number and panel_id_str not in panel_id_strs:
+                del string_assignments[panel_id_str]
+
+    @staticmethod
+    def _update_attached_panels(
+        attached_panels: List[str], panel_ids: List[int]
+    ) -> List[str]:
+        """
+        Add panels to attached_panels list if not already present
+
+        Returns:
+            Updated attached_panels list
+        """
+        for panel_id in panel_ids:
+            if str(panel_id) not in attached_panels:
+                attached_panels.append(str(panel_id))
+        return attached_panels
+
+    @staticmethod
     def assign_panels_to_string(
         db: Session, array_id: int, string_number: int, panel_ids: List[int], tenant_id: str
     ) -> Asset:
-        """Assign panels to a specific string"""
+        """
+        Assign panels to a specific string
+
+        REFACTORED: Complexity reduced from 12 to ~5 by extracting helpers
+        """
         try:
-            array = (
-                db.query(Asset)
-                .filter(
-                    and_(
-                        Asset.id == array_id,
-                        Asset.tenant_id == tenant_id,
-                        Asset.component_type == "solar_array",
-                    )
-                )
-                .first()
-            )
+            # Get array
+            array = StringConfigService._get_array(db, array_id, tenant_id)
 
-            if not array:
-                raise ValueError(f"Solar array {array_id} not found")
-
+            # Load configuration
             dynamic_attrs = array.dynamic_attributes or {}
             panels_per_string = dynamic_attrs.get("panels_per_string", 0)
             number_of_strings = dynamic_attrs.get("number_of_strings", 0)
 
-            # Validate string number
-            if string_number < 1 or string_number > number_of_strings:
-                raise ValueError(f"String number must be between 1 and {number_of_strings}")
+            # Validate inputs
+            StringConfigService._validate_string_number(string_number, number_of_strings)
+            StringConfigService._validate_panel_count(panel_ids, panels_per_string)
 
-            # Validate panel count
-            if len(panel_ids) > panels_per_string:
-                raise ValueError(f"Maximum {panels_per_string} panels per string")
-
-            # Verify panels exist and belong to the same plant
-            panels = (
-                db.query(Asset)
-                .filter(
-                    and_(
-                        Asset.id.in_(panel_ids),
-                        Asset.tenant_id == tenant_id,
-                        Asset.component_type == "panel",
-                        Asset.plant_id == array.plant_id,
-                    )
-                )
-                .all()
-            )
-
-            if len(panels) != len(panel_ids):
-                raise ValueError("Some panels not found or do not belong to this plant")
+            # Verify panels exist and belong to plant
+            StringConfigService._verify_panels_exist(db, panel_ids, tenant_id, array.plant_id)
 
             # Get current string assignments
             string_assignments = dynamic_attrs.get("string_assignments", {})
 
-            # Remove panels from other strings
-            for panel_id_str, assigned_string in list(string_assignments.items()):
-                if assigned_string == string_number and str(panel_id_str) not in [
-                    str(p) for p in panel_ids
-                ]:
-                    del string_assignments[panel_id_str]
+            # Remove panels from this string if not in new list
+            StringConfigService._remove_panels_from_other_strings(
+                string_assignments, string_number, panel_ids
+            )
 
             # Assign panels to string
             for panel_id in panel_ids:
@@ -159,11 +238,11 @@ class StringConfigService:
 
             # Update attached_panels list
             attached_panels = dynamic_attrs.get("attached_panels", [])
-            for panel_id in panel_ids:
-                if str(panel_id) not in attached_panels:
-                    attached_panels.append(str(panel_id))
-            dynamic_attrs["attached_panels"] = attached_panels
+            dynamic_attrs["attached_panels"] = StringConfigService._update_attached_panels(
+                attached_panels, panel_ids
+            )
 
+            # Save changes
             array.dynamic_attributes = dynamic_attrs
             db.commit()
             db.refresh(array)
