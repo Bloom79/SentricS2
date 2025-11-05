@@ -13,7 +13,7 @@ Modules:
 
 from fastapi import APIRouter
 
-from . import crud, members
+from . import crud, members, participation, compliance, documents, plants
 
 # Create main CER router
 router = APIRouter()
@@ -21,8 +21,9 @@ router = APIRouter()
 # Include sub-module routers
 router.include_router(crud.router, tags=["cer-crud"])
 router.include_router(members.router, tags=["cer-members"])
-
-# Note: Remaining modules (participation, compliance, documents, plants)
-# will be added as they are created
+router.include_router(participation.router, tags=["cer-participation"])
+router.include_router(compliance.router, tags=["cer-compliance"])
+router.include_router(documents.router, tags=["cer-documents"])
+router.include_router(plants.router, tags=["cer-plants"])
 
 __all__ = ["router"]
