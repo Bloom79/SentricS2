@@ -1,21 +1,23 @@
 """
 Workflow Service - Business logic for workflow management
 Consolidated from Kronos EAM
+REFACTORED: Reduced complexity by extracting helper methods
 """
 
 from typing import List, Optional, Dict, Any
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, Query
 from sqlalchemy import and_
 from datetime import datetime
 import logging
 
 from app.models.workflow import Workflow, WorkflowStatusEnum, WorkflowTypeEnum
 from app.models.plant import Plant
+from app.services.base import BaseService
 
 logger = logging.getLogger(__name__)
 
 
-class WorkflowService:
+class WorkflowService(BaseService):
     """Service for workflow management"""
 
     @staticmethod
@@ -84,6 +86,107 @@ class WorkflowService:
         )
 
     @staticmethod
+    def _parse_status_enum(status: str) -> Optional[WorkflowStatusEnum]:
+        """
+        Parse status string to enum value
+
+        Returns:
+            WorkflowStatusEnum if valid, None if invalid
+        """
+        status_map = {
+            "draft": WorkflowStatusEnum.DRAFT,
+            "in_progress": WorkflowStatusEnum.IN_PROGRESS,
+            "in progress": WorkflowStatusEnum.IN_PROGRESS,
+            "completed": WorkflowStatusEnum.COMPLETED,
+            "cancelled": WorkflowStatusEnum.CANCELLED,
+            "on_hold": WorkflowStatusEnum.ON_HOLD,
+            "on hold": WorkflowStatusEnum.ON_HOLD,
+        }
+
+        status_lower = status.lower()
+
+        # Try mapped values first
+        if status_lower in status_map:
+            return status_map[status_lower]
+
+        # Try direct enum value match
+        for enum_status in WorkflowStatusEnum:
+            if enum_status.value.lower() == status_lower:
+                return enum_status
+
+        return None
+
+    @staticmethod
+    def _parse_type_enum(type_str: str) -> Optional[WorkflowTypeEnum]:
+        """
+        Parse type string to enum value
+
+        Returns:
+            WorkflowTypeEnum if valid, None if invalid
+        """
+        type_map = {
+            "activation": WorkflowTypeEnum.ACTIVATION,
+            "compliance": WorkflowTypeEnum.COMPLIANCE,
+            "fiscal": WorkflowTypeEnum.FISCAL,
+            "maintenance": WorkflowTypeEnum.MAINTENANCE,
+            "document_submission": WorkflowTypeEnum.DOCUMENT_SUBMISSION,
+            "document submission": WorkflowTypeEnum.DOCUMENT_SUBMISSION,
+        }
+
+        type_lower = type_str.lower()
+
+        # Try mapped values first
+        if type_lower in type_map:
+            return type_map[type_lower]
+
+        # Try direct enum value match
+        for enum_type in WorkflowTypeEnum:
+            if enum_type.value.lower() == type_lower:
+                return enum_type
+
+        return None
+
+    @staticmethod
+    def _filter_by_status(query: Query, status: Optional[str]) -> Query:
+        """
+        Apply status filter to query
+
+        Returns:
+            Filtered query (or original if status is None or invalid)
+        """
+        if not status:
+            return query
+
+        try:
+            status_enum = WorkflowService._parse_status_enum(status)
+            if status_enum:
+                return query.filter(Workflow.status == status_enum)
+        except Exception as e:
+            logger.warning(f"Error filtering by status '{status}': {e}")
+
+        return query
+
+    @staticmethod
+    def _filter_by_type(query: Query, type_str: Optional[str]) -> Query:
+        """
+        Apply type filter to query
+
+        Returns:
+            Filtered query (or original if type is None or invalid)
+        """
+        if not type_str:
+            return query
+
+        try:
+            type_enum = WorkflowService._parse_type_enum(type_str)
+            if type_enum:
+                return query.filter(Workflow.type == type_enum)
+        except Exception as e:
+            logger.warning(f"Error filtering by type '{type_str}': {e}")
+
+        return query
+
+    @staticmethod
     def list_workflows(
         db: Session,
         tenant_id: str,
@@ -93,67 +196,26 @@ class WorkflowService:
         status: Optional[str] = None,
         type: Optional[str] = None,
     ) -> List[Workflow]:
-        """List workflows"""
+        """
+        List workflows with optional filtering
+
+        REFACTORED: Complexity reduced from 14 to ~5 by extracting helpers
+        """
+        # Build base query
         query = (
             db.query(Workflow)
             .options(joinedload(Workflow.plant))
             .filter(and_(Workflow.tenant_id == tenant_id, Workflow.deleted_at.is_(None)))
         )
 
+        # Apply filters
         if plant_id:
             query = query.filter(Workflow.plant_id == plant_id)
 
-        if status:
-            # Handle status filtering - convert string to enum if needed
-            try:
-                status_map = {
-                    "draft": WorkflowStatusEnum.DRAFT,
-                    "in_progress": WorkflowStatusEnum.IN_PROGRESS,
-                    "in progress": WorkflowStatusEnum.IN_PROGRESS,
-                    "completed": WorkflowStatusEnum.COMPLETED,
-                    "cancelled": WorkflowStatusEnum.CANCELLED,
-                    "on_hold": WorkflowStatusEnum.ON_HOLD,
-                    "on hold": WorkflowStatusEnum.ON_HOLD,
-                }
-                status_lower = status.lower()
-                if status_lower in status_map:
-                    query = query.filter(Workflow.status == status_map[status_lower])
-                else:
-                    # Try direct enum value match
-                    for enum_status in WorkflowStatusEnum:
-                        if enum_status.value.lower() == status_lower:
-                            query = query.filter(Workflow.status == enum_status)
-                            break
-            except Exception as e:
-                logger.warning(f"Error filtering by status '{status}': {e}")
-                # Fallback: don't filter by status if there's an error
-                pass
+        query = WorkflowService._filter_by_status(query, status)
+        query = WorkflowService._filter_by_type(query, type)
 
-        if type:
-            # Handle type filtering - convert string to enum if needed
-            try:
-                type_map = {
-                    "activation": WorkflowTypeEnum.ACTIVATION,
-                    "compliance": WorkflowTypeEnum.COMPLIANCE,
-                    "fiscal": WorkflowTypeEnum.FISCAL,
-                    "maintenance": WorkflowTypeEnum.MAINTENANCE,
-                    "document_submission": WorkflowTypeEnum.DOCUMENT_SUBMISSION,
-                    "document submission": WorkflowTypeEnum.DOCUMENT_SUBMISSION,
-                }
-                type_lower = type.lower()
-                if type_lower in type_map:
-                    query = query.filter(Workflow.type == type_map[type_lower])
-                else:
-                    # Try direct enum value match
-                    for enum_type in WorkflowTypeEnum:
-                        if enum_type.value.lower() == type_lower:
-                            query = query.filter(Workflow.type == enum_type)
-                            break
-            except Exception as e:
-                logger.warning(f"Error filtering by type '{type}': {e}")
-                # Fallback: don't filter by type if there's an error
-                pass
-
+        # Return results
         return query.order_by(Workflow.created_at.desc()).offset(skip).limit(limit).all()
 
     @staticmethod
