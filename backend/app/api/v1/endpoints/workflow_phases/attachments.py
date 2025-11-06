@@ -14,12 +14,13 @@ from app.core.security import get_current_active_user, TokenData
 from app.models.workflow import WorkflowPhase
 from app.models.document import Document
 from app.services.workflow_service import workflow_service
+from app.schemas.workflow import DocumentUploadResponse, CommentAddResponse, CommentData
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/{workflow_id}/phases/{phase_id}/documents", response_model=dict)
+@router.post("/{workflow_id}/phases/{phase_id}/documents", response_model=DocumentUploadResponse)
 async def upload_phase_document(
     workflow_id: int,
     phase_id: int,
@@ -29,7 +30,11 @@ async def upload_phase_document(
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Upload document to workflow phase"""
+    """
+    Upload document to workflow phase
+
+    Now uses proper Pydantic schema for type-safe response
+    """
     try:
         # Get workflow and verify ownership
         workflow = workflow_service.get_workflow(db, workflow_id, current_user.tenant_id)
@@ -98,13 +103,14 @@ async def upload_phase_document(
 
         db.commit()
 
-        return {
-            "document_id": document.id,
-            "name": document.name,
-            "type": document_type,
-            "phase_id": phase_id,
-            "message": "Document uploaded successfully",
-        }
+        # Return Pydantic schema response
+        return DocumentUploadResponse(
+            document_id=document.id,
+            name=document.name,
+            type=document_type,
+            phase_id=phase_id,
+            message="Document uploaded successfully",
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -113,7 +119,7 @@ async def upload_phase_document(
         raise HTTPException(status_code=500, detail=f"Failed to upload document: {str(e)}")
 
 
-@router.post("/{workflow_id}/phases/{phase_id}/comments", response_model=dict)
+@router.post("/{workflow_id}/phases/{phase_id}/comments", response_model=CommentAddResponse)
 async def add_phase_comment(
     workflow_id: int,
     phase_id: int,
@@ -121,7 +127,11 @@ async def add_phase_comment(
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Add comment/note to workflow phase"""
+    """
+    Add comment/note to workflow phase
+
+    Now uses proper Pydantic schema for type-safe response
+    """
     try:
         # Get workflow and verify ownership
         workflow = workflow_service.get_workflow(db, workflow_id, current_user.tenant_id)
@@ -165,11 +175,20 @@ async def add_phase_comment(
         db.commit()
         db.refresh(phase)
 
-        return {
-            "comment": comment,
-            "phase_id": phase_id,
-            "message": "Comment added successfully",
-        }
+        # Return Pydantic schema response
+        comment_obj = CommentData(
+            id=comment["id"],
+            text=comment["text"],
+            author=comment["author"],
+            author_name=comment["author_name"],
+            timestamp=comment["timestamp"],
+            type=comment["type"],
+        )
+        return CommentAddResponse(
+            comment=comment_obj,
+            phase_id=phase_id,
+            message="Comment added successfully",
+        )
     except HTTPException:
         raise
     except Exception as e:

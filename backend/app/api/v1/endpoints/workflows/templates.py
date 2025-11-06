@@ -11,12 +11,17 @@ import logging
 from app.core.database import get_db
 from app.core.security import get_current_active_user, TokenData
 from app.services.workflow_template_service import workflow_template_service
+from app.schemas.workflow import (
+    WorkflowTemplateResponse,
+    WorkflowTemplateSummaryResponse,
+    WorkflowResponse,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/templates", response_model=List[dict])
+@router.get("/templates", response_model=List[WorkflowTemplateResponse])
 async def list_workflow_templates(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -25,7 +30,11 @@ async def list_workflow_templates(
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """List workflow templates"""
+    """
+    List workflow templates
+
+    Now uses proper Pydantic schema - automatic serialization via from_orm
+    """
     try:
         templates = workflow_template_service.list_templates(
             db=db,
@@ -36,102 +45,44 @@ async def list_workflow_templates(
             active_only=active_only,
         )
 
-        result = []
-        for template in templates:
-            # Serialize template with phases
-            template_dict = {
-                "id": template.id,
-                "name": template.name,
-                "description": template.description,
-                "category": (
-                    template.category.value
-                    if hasattr(template.category, "value")
-                    else str(template.category)
-                ),
-                "recurrence": (
-                    template.recurrence.value
-                    if hasattr(template.recurrence, "value")
-                    else str(template.recurrence)
-                ),
-                "workflow_purpose": template.workflow_purpose,
-                "workflow_type": template.workflow_type,
-                "is_active": template.is_active,
-                "is_system_template": template.is_system_template,
-                "estimated_duration_days": template.estimated_duration_days,
-                "phases": [
-                    {
-                        "id": phase.id,
-                        "name": phase.name,
-                        "description": phase.description,
-                        "order": phase.order,
-                        "required_documents": phase.required_documents or [],
-                        "estimated_days": phase.estimated_days,
-                        "auto_advance": phase.auto_advance,
-                    }
-                    for phase in sorted(template.phases, key=lambda p: p.order)
-                ],
-                "created_at": template.created_at.isoformat() if template.created_at else None,
-            }
-            result.append(template_dict)
+        # Pydantic handles all serialization automatically
+        return templates
 
-        return result
     except Exception as e:
         logger.exception(f"Error getting templates: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get templates: {str(e)}")
 
 
-@router.get("/templates/{template_id}", response_model=dict)
+@router.get("/templates/{template_id}", response_model=WorkflowTemplateResponse)
 async def get_workflow_template(
     template_id: int,
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Get workflow template by ID"""
+    """
+    Get workflow template by ID
+
+    Now uses proper Pydantic schema - automatic serialization via from_orm
+    """
     template = workflow_template_service.get_template(db, template_id, current_user.tenant_id)
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
 
-    return {
-        "id": template.id,
-        "name": template.name,
-        "description": template.description,
-        "category": (
-            template.category.value
-            if hasattr(template.category, "value")
-            else str(template.category)
-        ),
-        "recurrence": (
-            template.recurrence.value
-            if hasattr(template.recurrence, "value")
-            else str(template.recurrence)
-        ),
-        "workflow_purpose": template.workflow_purpose,
-        "workflow_type": template.workflow_type,
-        "is_active": template.is_active,
-        "is_system_template": template.is_system_template,
-        "estimated_duration_days": template.estimated_duration_days,
-        "phases": [
-            {
-                "id": phase.id,
-                "name": phase.name,
-                "description": phase.description,
-                "order": phase.order,
-                "required_documents": phase.required_documents or [],
-                "estimated_days": phase.estimated_days,
-                "auto_advance": phase.auto_advance,
-            }
-            for phase in sorted(template.phases, key=lambda p: p.order)
-        ],
-    }
+    # Pydantic handles all serialization automatically
+    return template
 
 
-@router.post("/templates", response_model=dict, status_code=status.HTTP_201_CREATED)
+@router.post("/templates", response_model=WorkflowTemplateSummaryResponse, status_code=status.HTTP_201_CREATED)
 async def create_workflow_template(
     template_data: dict,
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Create workflow template"""
+    """
+    Create workflow template
+
+    Now uses proper Pydantic schema for response
+    """
     try:
         template = workflow_template_service.create_template(
             db=db,
@@ -139,16 +90,8 @@ async def create_workflow_template(
             tenant_id=current_user.tenant_id,
             user_id=int(current_user.sub),
         )
-        return {
-            "id": template.id,
-            "name": template.name,
-            "description": template.description,
-            "category": (
-                template.category.value
-                if hasattr(template.category, "value")
-                else str(template.category)
-            ),
-        }
+        # Return summary response
+        return WorkflowTemplateSummaryResponse.from_orm(template)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -156,14 +99,18 @@ async def create_workflow_template(
         raise HTTPException(status_code=500, detail=f"Failed to create template: {str(e)}")
 
 
-@router.put("/templates/{template_id}", response_model=dict)
+@router.put("/templates/{template_id}", response_model=WorkflowTemplateSummaryResponse)
 async def update_workflow_template(
     template_id: int,
     update_data: dict,
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Update workflow template"""
+    """
+    Update workflow template
+
+    Now uses proper Pydantic schema for response
+    """
     try:
         template = workflow_template_service.update_template(
             db=db,
@@ -174,11 +121,8 @@ async def update_workflow_template(
         )
         if not template:
             raise HTTPException(status_code=404, detail="Template not found")
-        return {
-            "id": template.id,
-            "name": template.name,
-            "description": template.description,
-        }
+        # Return summary response
+        return WorkflowTemplateSummaryResponse.from_orm(template)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -211,7 +155,7 @@ async def delete_workflow_template(
 
 @router.post(
     "/templates/{template_id}/create-workflow",
-    response_model=dict,
+    response_model=WorkflowResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_workflow_from_template(
@@ -220,7 +164,11 @@ async def create_workflow_from_template(
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Create a workflow instance from a template"""
+    """
+    Create a workflow instance from a template
+
+    Now uses proper Pydantic schema for type-safe response
+    """
     try:
         workflow = workflow_template_service.create_workflow_from_template(
             db=db,
@@ -229,11 +177,8 @@ async def create_workflow_from_template(
             tenant_id=current_user.tenant_id,
             user_id=int(current_user.sub),
         )
-        return {
-            "id": workflow.id,
-            "name": workflow.name,
-            "template_id": workflow.template_id,
-        }
+        # Return full workflow response using Pydantic schema
+        return workflow
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

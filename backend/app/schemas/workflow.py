@@ -149,3 +149,132 @@ class WorkflowResponse(WorkflowBase):
 
     class Config:
         from_attributes = True
+
+
+class WorkflowDetailResponse(WorkflowResponse):
+    """Schema for detailed workflow response with nested phases"""
+
+    phases: List[WorkflowPhaseResponse] = []
+    plant_name: Optional[str] = None
+
+
+class WorkflowSummary(BaseModel):
+    """Minimal workflow info for nested responses"""
+
+    id: int
+    name: str
+    plant_id: Optional[int] = None
+    plant_name: Optional[str] = None
+
+
+class DocumentSummary(BaseModel):
+    """Document summary for phase detail response"""
+
+    id: int
+    name: str
+    type: str
+    file_type: str
+    file_size: int
+    description: Optional[str] = None
+    uploaded_at: Optional[datetime] = None
+    uploaded_by: int
+
+
+class WorkflowPhaseDetailResponse(WorkflowPhaseResponse):
+    """Schema for detailed phase response with documents and workflow info"""
+
+    documents: List[DocumentSummary] = []
+    workflow: WorkflowSummary
+
+
+class PhaseStatusUpdateResponse(BaseModel):
+    """Schema for phase status update response"""
+
+    id: int
+    status: str
+    completed_date: Optional[datetime] = None
+    workflow_progress: int
+    workflow_status: str
+
+
+class PhaseAssignmentResponse(BaseModel):
+    """Schema for phase assignment response"""
+
+    phase_id: int
+    assigned_to: int
+    message: str
+
+
+class DocumentUploadResponse(BaseModel):
+    """Schema for document upload response"""
+
+    document_id: int
+    name: str
+    type: str
+    phase_id: int
+    message: str
+
+
+class CommentData(BaseModel):
+    """Comment data structure"""
+
+    id: int
+    text: str
+    author: str
+    author_name: str
+    timestamp: str
+    type: str = "comment"
+
+
+class CommentAddResponse(BaseModel):
+    """Schema for comment add response"""
+
+    comment: CommentData
+    phase_id: int
+    message: str
+
+
+class WorkflowTemplatePhase(BaseModel):
+    """Template phase summary"""
+
+    id: int
+    name: str
+    description: Optional[str] = None
+    order: int
+    required_documents: List[str] = []
+    estimated_days: Optional[int] = None
+    auto_advance: bool = False
+
+
+class WorkflowTemplateBase(BaseModel):
+    """Base workflow template schema"""
+
+    name: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    category: str
+    recurrence: str
+    workflow_purpose: Optional[str] = None
+    workflow_type: Optional[str] = None
+    is_active: bool = True
+    estimated_duration_days: Optional[int] = None
+
+
+class WorkflowTemplateResponse(WorkflowTemplateBase):
+    """Schema for workflow template response with phases"""
+
+    id: int
+    is_system_template: bool = False
+    phases: List[WorkflowTemplatePhase] = []
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class WorkflowTemplateSummaryResponse(BaseModel):
+    """Schema for template summary (after create/update)"""
+
+    id: int
+    name: str
+    description: Optional[str] = None
+    category: str

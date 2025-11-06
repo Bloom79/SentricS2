@@ -12,12 +12,13 @@ from app.core.database import get_db
 from app.core.security import get_current_active_user, TokenData
 from app.models.workflow import WorkflowPhase, WorkflowStatusEnum
 from app.services.workflow_service import workflow_service
+from app.schemas.workflow import PhaseStatusUpdateResponse, PhaseAssignmentResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.put("/{workflow_id}/phases/{phase_id}/status", response_model=dict)
+@router.put("/{workflow_id}/phases/{phase_id}/status", response_model=PhaseStatusUpdateResponse)
 async def update_phase_status(
     workflow_id: int,
     phase_id: int,
@@ -25,7 +26,11 @@ async def update_phase_status(
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Update workflow phase status"""
+    """
+    Update workflow phase status
+
+    Now uses proper Pydantic schema for type-safe response
+    """
     try:
         # Get workflow and verify ownership
         workflow = workflow_service.get_workflow(db, workflow_id, current_user.tenant_id)
@@ -105,15 +110,16 @@ async def update_phase_status(
         db.commit()
         db.refresh(workflow)
 
-        return {
-            "id": phase.id,
-            "status": phase.status,
-            "completed_date": phase.completed_date.isoformat() if phase.completed_date else None,
-            "workflow_progress": workflow.progress_percentage,
-            "workflow_status": (
+        # Return Pydantic schema response
+        return PhaseStatusUpdateResponse(
+            id=phase.id,
+            status=phase.status,
+            completed_date=phase.completed_date,
+            workflow_progress=workflow.progress_percentage,
+            workflow_status=(
                 workflow.status.value if hasattr(workflow.status, "value") else str(workflow.status)
             ),
-        }
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -122,7 +128,7 @@ async def update_phase_status(
         raise HTTPException(status_code=500, detail=f"Failed to update phase status: {str(e)}")
 
 
-@router.put("/{workflow_id}/phases/{phase_id}/assign", response_model=dict)
+@router.put("/{workflow_id}/phases/{phase_id}/assign", response_model=PhaseAssignmentResponse)
 async def assign_phase(
     workflow_id: int,
     phase_id: int,
@@ -130,7 +136,11 @@ async def assign_phase(
     current_user: TokenData = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Assign workflow phase to a user"""
+    """
+    Assign workflow phase to a user
+
+    Now uses proper Pydantic schema for type-safe response
+    """
     try:
         # Get workflow and verify ownership
         workflow = workflow_service.get_workflow(db, workflow_id, current_user.tenant_id)
@@ -180,11 +190,12 @@ async def assign_phase(
         db.commit()
         db.refresh(phase)
 
-        return {
-            "phase_id": phase_id,
-            "assigned_to": assignee_id,
-            "message": "Phase assigned successfully",
-        }
+        # Return Pydantic schema response
+        return PhaseAssignmentResponse(
+            phase_id=phase_id,
+            assigned_to=assignee_id,
+            message="Phase assigned successfully",
+        )
     except HTTPException:
         raise
     except Exception as e:
