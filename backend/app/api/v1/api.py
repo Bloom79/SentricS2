@@ -18,6 +18,7 @@ from app.api.v1.endpoints import (
     billing,
     search,
     maintenance,
+    plant_performance,
 )
 from app.api.v1 import sites
 from app.core.config import settings
@@ -40,6 +41,7 @@ api_router.include_router(sites.router, tags=["sites"])
 
 # Plants
 api_router.include_router(plants.router, prefix="/plants", tags=["plants"])
+api_router.include_router(plant_performance.router, prefix="/plants", tags=["plant-performance"])
 
 # CER (Renewable Energy Communities)
 api_router.include_router(cer.router, prefix="/cer", tags=["cer"])
