@@ -16,6 +16,8 @@ from app.api.v1.endpoints import (
     dashboard,
     energy,
     billing,
+    search,
+    maintenance,
 )
 from app.api.v1 import sites
 from app.core.config import settings
@@ -63,4 +65,10 @@ api_router.include_router(compliance.router, prefix="/compliance", tags=["compli
 
 # Dashboard
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
+
+# Search (Global Search)
+api_router.include_router(search.router, prefix="/search", tags=["search"])
+
+# Maintenance
+api_router.include_router(maintenance.router, prefix="/maintenance", tags=["maintenance"])
 
