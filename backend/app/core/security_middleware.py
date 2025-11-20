@@ -27,15 +27,39 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         
         # Content Security Policy
-        csp_policy = (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-            "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data: https:; "
-            "font-src 'self' data:; "
-            "connect-src 'self' https:; "
-            "frame-ancestors 'none';"
-        )
+        # NOTE: 'unsafe-inline' and 'unsafe-eval' reduce CSP effectiveness
+        # For production, consider using nonce-based CSP or removing these directives
+        # Current policy balances security with compatibility for React/Vite apps
+
+        # Check if we should use strict CSP (configurable via environment)
+        use_strict_csp = request.app.extra.get("strict_csp", False) if hasattr(request.app, "extra") else False
+
+        if use_strict_csp:
+            # Strict CSP without unsafe directives
+            csp_policy = (
+                "default-src 'self'; "
+                "script-src 'self'; "
+                "style-src 'self'; "
+                "img-src 'self' data: https:; "
+                "font-src 'self' data:; "
+                "connect-src 'self' https:; "
+                "frame-ancestors 'none'; "
+                "base-uri 'self'; "
+                "form-action 'self';"
+            )
+        else:
+            # Relaxed CSP for development/compatibility
+            csp_policy = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                "img-src 'self' data: https: blob:; "
+                "font-src 'self' data: https://fonts.gstatic.com; "
+                "connect-src 'self' https: wss:; "
+                "frame-ancestors 'none'; "
+                "base-uri 'self';"
+            )
+
         response.headers["Content-Security-Policy"] = csp_policy
         
         # Permissions Policy

@@ -6,12 +6,15 @@ Consolidated platform with CER and Asset management
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 import logging
 
 from app.core.config import settings
 from app.core.database import init_db
 from app.core.middleware import setup_middleware
 from app.core.security_middleware import SecurityHeadersMiddleware
+from app.core.rate_limiter import limiter
 from app.api.v1.api import api_router
 
 # Configure logging
@@ -30,6 +33,12 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Add rate limiting (unless explicitly disabled)
+if not settings.DISABLE_RATE_LIMIT:
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    logger.info("Rate limiting enabled")
 
 # Setup middleware
 setup_middleware(app)

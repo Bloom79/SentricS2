@@ -73,4 +73,5 @@ structlog>=24.1.0
 # Security
 cryptography>=41.0.7
 pycryptodome>=3.19.1
+slowapi>=0.1.9
 

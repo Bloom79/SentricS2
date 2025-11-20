@@ -567,6 +567,148 @@ class BillingService:
         
         return query.order_by(BillingTransaction.created_at.desc()).offset(skip).limit(limit).all()
 
+    @staticmethod
+    def generate_invoices(
+        db: Session,
+        settlement_id: int,
+        tenant_id: str,
+        user_id: int
+    ) -> List[Invoice]:
+        """
+        Generate PDF invoices for all billing statements in a settlement
+
+        Args:
+            db: Database session
+            settlement_id: Settlement ID to generate invoices for
+            tenant_id: Tenant ID for multi-tenant isolation
+            user_id: User creating the invoices
+
+        Returns:
+            List of created Invoice records
+        """
+        from app.services.invoice_generator import invoice_generator
+        from app.core.config import settings
+        import os
+
+        # Get settlement
+        settlement = db.query(Settlement).filter(
+            and_(
+                Settlement.id == settlement_id,
+                Settlement.tenant_id == tenant_id,
+                Settlement.deleted_at.is_(None)
+            )
+        ).first()
+
+        if not settlement:
+            raise ValueError("Settlement not found")
+
+        # Get CER
+        cer = db.query(CER).filter(
+            and_(
+                CER.id == settlement.cer_id,
+                CER.tenant_id == tenant_id,
+                CER.deleted_at.is_(None)
+            )
+        ).first()
+
+        if not cer:
+            raise ValueError("CER not found")
+
+        # Get all billing statements for this settlement
+        statements = db.query(BillingStatement).filter(
+            and_(
+                BillingStatement.settlement_id == settlement_id,
+                BillingStatement.tenant_id == tenant_id,
+                BillingStatement.deleted_at.is_(None)
+            )
+        ).all()
+
+        if not statements:
+            logger.warning(f"No billing statements found for settlement {settlement_id}")
+            return []
+
+        invoices = []
+
+        # Generate invoice for each statement
+        for statement in statements:
+            try:
+                # Get member
+                member = db.query(CERMember).filter(
+                    and_(
+                        CERMember.id == statement.member_id,
+                        CERMember.tenant_id == tenant_id,
+                        CERMember.deleted_at.is_(None)
+                    )
+                ).first()
+
+                if not member:
+                    logger.warning(f"Member {statement.member_id} not found, skipping invoice generation")
+                    continue
+
+                # Generate PDF
+                pdf_buffer = invoice_generator.generate_invoice_pdf(
+                    db=db,
+                    statement=statement,
+                    cer=cer,
+                    member=member,
+                    settlement=settlement
+                )
+
+                # Generate invoice number
+                invoice_count = db.query(func.count(Invoice.id)).filter(
+                    and_(
+                        Invoice.cer_id == cer.id,
+                        Invoice.tenant_id == tenant_id
+                    )
+                ).scalar() or 0
+
+                invoice_number = f"INV-{cer.id}-{datetime.now().year}-{invoice_count + 1:05d}"
+
+                # Save PDF to storage
+                upload_dir = settings.UPLOAD_DIR
+                invoice_dir = os.path.join(upload_dir, "invoices", str(cer.id))
+                os.makedirs(invoice_dir, exist_ok=True)
+
+                filename = f"{invoice_number}.pdf"
+                filepath = os.path.join(invoice_dir, filename)
+
+                with open(filepath, 'wb') as f:
+                    f.write(pdf_buffer.read())
+
+                # Create Invoice record
+                invoice = Invoice(
+                    cer_id=cer.id,
+                    statement_id=statement.id,
+                    member_id=member.id,
+                    invoice_number=invoice_number,
+                    invoice_date=datetime.now(timezone.utc),
+                    due_date=statement.due_date,
+                    amount=statement.amount,
+                    vat_amount=statement.vat_amount,
+                    total_amount=statement.total_amount,
+                    status=PaymentStatus.PENDING,
+                    file_path=filepath,
+                    tenant_id=tenant_id,
+                    created_by=user_id
+                )
+
+                db.add(invoice)
+                invoices.append(invoice)
+
+                logger.info(f"Generated invoice {invoice_number} for statement {statement.id}")
+
+            except Exception as e:
+                logger.error(f"Error generating invoice for statement {statement.id}: {e}", exc_info=True)
+                # Continue with next statement
+                continue
+
+        # Commit all invoices
+        if invoices:
+            db.commit()
+            logger.info(f"Generated {len(invoices)} invoices for settlement {settlement_id}")
+
+        return invoices
+
 
 # Export service instance
 billing_service = BillingService()

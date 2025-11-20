@@ -23,17 +23,42 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     
     # Security
-    SECRET_KEY: str = secrets.token_urlsafe(32)
-    
+    # SECRET_KEY is required and must be set via environment variable
+    # In production, this MUST be a strong, randomly generated secret
+    SECRET_KEY: str = None
+
     @model_validator(mode='before')
     @classmethod
     def set_secret_key_from_jwt_env(cls, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Map JWT_SECRET_KEY env var to SECRET_KEY for Cloud Run compatibility"""
+        """
+        Map JWT_SECRET_KEY env var to SECRET_KEY for Cloud Run compatibility.
+        Requires SECRET_KEY or JWT_SECRET_KEY to be set.
+        In development, generates a random key if not provided.
+        """
         if isinstance(data, dict):
             # If JWT_SECRET_KEY is in env but not in data, use it
             jwt_secret = os.getenv("JWT_SECRET_KEY")
-            if jwt_secret and "SECRET_KEY" not in data:
+            secret_key = data.get("SECRET_KEY") or os.getenv("SECRET_KEY")
+
+            if jwt_secret:
                 data["SECRET_KEY"] = jwt_secret
+            elif secret_key:
+                data["SECRET_KEY"] = secret_key
+            elif data.get("ENVIRONMENT", "development") == "development":
+                # Only in development: generate a random key with warning
+                generated_key = secrets.token_urlsafe(32)
+                data["SECRET_KEY"] = generated_key
+                logger.warning(
+                    "SECRET_KEY not set! Generated random key for development. "
+                    "WARNING: This will invalidate tokens on restart. "
+                    "Set SECRET_KEY or JWT_SECRET_KEY environment variable."
+                )
+            else:
+                # In production, SECRET_KEY is mandatory
+                raise ValueError(
+                    "SECRET_KEY or JWT_SECRET_KEY must be set in production! "
+                    "Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+                )
         return data
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -57,6 +82,14 @@ class Settings(BaseSettings):
     DISABLE_REDIS: bool = False
     DISABLE_QDRANT: bool = False
     DISABLE_RATE_LIMIT: bool = False
+
+    # Security Options
+    STRICT_CSP: bool = False  # Enable strict Content Security Policy (no unsafe-inline/unsafe-eval)
+    PASSWORD_MIN_LENGTH: int = 8
+    PASSWORD_REQUIRE_UPPERCASE: bool = True
+    PASSWORD_REQUIRE_LOWERCASE: bool = True
+    PASSWORD_REQUIRE_DIGITS: bool = True
+    PASSWORD_REQUIRE_SPECIAL: bool = True
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = []

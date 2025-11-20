@@ -199,10 +199,15 @@ async def calculate_settlement(
             )
             statements_generated = len(statements)
         
-        # TODO: Generate invoices if requested
-        # if request.generate_invoices:
-        #     invoices = billing_service.generate_invoices(...)
-        #     invoices_generated = len(invoices)
+        # Generate invoices if requested
+        if request.generate_invoices:
+            invoices = billing_service.generate_invoices(
+                db=db,
+                settlement_id=settlement.id,
+                tenant_id=current_user.tenant_id,
+                user_id=int(current_user.sub)
+            )
+            invoices_generated = len(invoices)
         
         return {
             "settlement_id": settlement.id,

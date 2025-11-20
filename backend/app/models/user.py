@@ -79,6 +79,14 @@ class User(BaseModel):
     
     @password.setter
     def password(self, password: str):
+        """Set password with validation"""
+        from app.core.password_validator import validate_password_strength
+
+        # Validate password strength
+        is_valid, errors = validate_password_strength(password)
+        if not is_valid:
+            raise ValueError(f"Password does not meet security requirements: {'; '.join(errors)}")
+
         self.password_hash = get_password_hash(password)
     
     def verify_password(self, password: str) -> bool:

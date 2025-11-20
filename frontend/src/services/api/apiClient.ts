@@ -6,8 +6,25 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
 import { logger } from '@/utils/logger';
 
-// Get API URL from environment or use default
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+// Get API URL from environment
+// In production, VITE_API_URL MUST be set - no fallback to localhost
+const getApiBaseUrl = (): string => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const mode = import.meta.env.MODE;
+
+  // In production/staging, API URL is required
+  if ((mode === 'production' || mode === 'staging') && !apiUrl) {
+    throw new Error(
+      'VITE_API_URL environment variable is not set! ' +
+      'API URL must be configured for production deployment.'
+    );
+  }
+
+  // In development, use localhost as fallback
+  return apiUrl || 'http://localhost:8000/api/v1';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
