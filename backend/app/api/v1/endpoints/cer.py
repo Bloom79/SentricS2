@@ -198,11 +198,48 @@ async def get_member(
     cer = cer_service.get_cer(db, cer_id, current_user.tenant_id)
     if not cer:
         raise HTTPException(status_code=404, detail="CER not found")
-    
+
     member = cer_service.get_member(db, cer_id, member_id, current_user.tenant_id)
     if not member:
         raise HTTPException(status_code=404, detail="Member not found")
     return member
+
+
+@router.get("/communities/{cer_id}/members/{member_id}/dashboard", response_model=dict)
+async def get_member_dashboard(
+    cer_id: int,
+    member_id: int,
+    current_user: TokenData = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get comprehensive dashboard data for a CER member.
+    Includes energy metrics (MTD, YTD), financial benefits, monthly history,
+    invoices, environmental impact, and community info.
+    """
+    try:
+        # Verify CER exists
+        cer = cer_service.get_cer(db, cer_id, current_user.tenant_id)
+        if not cer:
+            raise HTTPException(status_code=404, detail="CER not found")
+
+        # Get member dashboard data
+        dashboard_data = cer_service.get_member_dashboard(
+            db=db,
+            cer_id=cer_id,
+            member_id=member_id,
+            tenant_id=current_user.tenant_id
+        )
+
+        if not dashboard_data:
+            raise HTTPException(status_code=404, detail="Member not found")
+
+        return dashboard_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting member dashboard: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to get member dashboard")
 
 
 @router.get("/communities/{cer_id}/stats", response_model=dict)

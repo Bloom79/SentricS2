@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { apiClient } from '@/services/api/apiClient';
+import { memberService, type MemberDashboardData } from '@/services/api/member.service';
 import {
   AreaChart,
   Area,
@@ -38,87 +38,21 @@ import {
   Cell,
 } from 'recharts';
 
-interface MemberDashboardData {
-  member: {
-    id: number;
-    name: string;
-    member_code: string;
-    member_type: 'consumer' | 'producer' | 'prosumer';
-    join_date: string;
-    status: string;
-  };
-
-  // Energy metrics
-  energy: {
-    consumed_mtd: number; // kWh month-to-date
-    produced_mtd: number; // kWh
-    shared_mtd: number; // kWh
-    self_consumed_mtd: number; // kWh
-    consumed_ytd: number;
-    produced_ytd: number;
-    shared_ytd: number;
-  };
-
-  // Financial benefits
-  financial: {
-    savings_mtd: number; // EUR
-    incentives_mtd: number; // EUR
-    total_benefit_mtd: number; // EUR
-    savings_ytd: number;
-    incentives_ytd: number;
-    total_benefit_ytd: number;
-    pending_payments: number;
-    last_payment_date: string | null;
-    last_payment_amount: number;
-  };
-
-  // Monthly history
-  history: Array<{
-    month: string;
-    consumed: number;
-    produced: number;
-    shared: number;
-    savings: number;
-    incentives: number;
-  }>;
-
-  // Invoices
-  invoices: Array<{
-    id: number;
-    invoice_number: string;
-    date: string;
-    amount: number;
-    status: 'pending' | 'paid' | 'overdue';
-    pdf_url: string;
-  }>;
-
-  // Environmental impact
-  environmental: {
-    co2_avoided_ytd: number; // kg
-    trees_equivalent: number;
-  };
-
-  // Community info
-  community: {
-    cer_name: string;
-    total_members: number;
-    total_capacity_kw: number;
-    member_rank: number; // Ranking by shared energy
-  };
-}
-
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 
 export const MemberDashboard: React.FC = () => {
-  const { memberId } = useParams<{ memberId: string }>();
+  const { cerId, memberId } = useParams<{ cerId: string; memberId: string }>();
 
   const { data, isLoading } = useQuery<MemberDashboardData>({
-    queryKey: ['cer', 'member', 'dashboard', memberId],
+    queryKey: ['cer', 'member', 'dashboard', cerId, memberId],
     queryFn: async () => {
-      const response = await apiClient.get(`/cer/members/${memberId}/dashboard`);
-      return response.data;
+      if (!cerId || !memberId) {
+        throw new Error('CER ID and Member ID are required');
+      }
+      return memberService.getMemberDashboard(parseInt(cerId), parseInt(memberId));
     },
     refetchInterval: 300000, // 5 minutes
+    enabled: !!cerId && !!memberId,
   });
 
   if (isLoading || !data) {

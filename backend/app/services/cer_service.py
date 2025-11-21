@@ -596,23 +596,23 @@ class CERService:
         cer = CERService.get_cer(db, cer_id, tenant_id)
         if not cer:
             return {}
-        
+
         members = CERService.list_members(db, cer_id, tenant_id)
-        
+
         # Count by type
         producers = len([m for m in members if m.member_type == "producer"])
         consumers = len([m for m in members if m.member_type == "consumer"])
         prosumers = len([m for m in members if m.member_type == "prosumer"])
-        
+
         # Calculate totals
         total_capacity = sum(
-            (m.technical_info or {}).get("plant_capacity", 0) 
+            (m.technical_info or {}).get("plant_capacity", 0)
             for m in members if m.member_type in ["producer", "prosumer"]
         )
         total_energy_produced = sum((m.energy_produced or 0.0) for m in members)
         total_energy_consumed = sum((m.energy_consumed or 0.0) for m in members)
         total_energy_shared = sum((m.energy_shared or 0.0) for m in members)
-        
+
         return {
             "cer_id": cer_id,
             "total_members": len(members),
@@ -627,6 +627,249 @@ class CERService:
                 "producers": producers,
                 "consumers": consumers,
                 "prosumers": prosumers
+            }
+        }
+
+    @staticmethod
+    def get_member_dashboard(
+        db: Session,
+        cer_id: int,
+        member_id: int,
+        tenant_id: str
+    ) -> Dict[str, Any]:
+        """
+        Get comprehensive dashboard data for a CER member.
+        Includes energy metrics, financial benefits, history, and community info.
+        """
+        from datetime import datetime, timedelta
+        from sqlalchemy import func, extract
+        from app.models.energy_transaction import EnergyTransaction, TransactionType
+        from app.models.billing import BillingStatement, Invoice
+
+        # Get member
+        member = CERService.get_member(db, cer_id, member_id, tenant_id)
+        if not member:
+            return {}
+
+        # Get CER
+        cer = CERService.get_cer(db, cer_id, tenant_id)
+        if not cer:
+            return {}
+
+        # Calculate date ranges
+        now = datetime.now(timezone.utc)
+        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        year_start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        # --- Energy Metrics ---
+
+        # Month-to-date energy
+        mtd_transactions = db.query(EnergyTransaction).filter(
+            and_(
+                EnergyTransaction.member_id == member_id,
+                EnergyTransaction.timestamp >= month_start,
+                EnergyTransaction.tenant_id == tenant_id,
+                EnergyTransaction.deleted_at.is_(None)
+            )
+        ).all()
+
+        consumed_mtd = sum(
+            tx.energy_kwh for tx in mtd_transactions
+            if tx.transaction_type == TransactionType.CONSUMPTION
+        )
+        produced_mtd = sum(
+            tx.energy_kwh for tx in mtd_transactions
+            if tx.transaction_type == TransactionType.PRODUCTION
+        )
+        shared_mtd = sum(
+            tx.energy_kwh for tx in mtd_transactions
+            if tx.transaction_type == TransactionType.SHARED
+        )
+        self_consumed_mtd = sum(
+            tx.energy_kwh for tx in mtd_transactions
+            if tx.transaction_type == TransactionType.SELF_CONSUMED
+        )
+
+        # Year-to-date energy
+        ytd_transactions = db.query(EnergyTransaction).filter(
+            and_(
+                EnergyTransaction.member_id == member_id,
+                EnergyTransaction.timestamp >= year_start,
+                EnergyTransaction.tenant_id == tenant_id,
+                EnergyTransaction.deleted_at.is_(None)
+            )
+        ).all()
+
+        consumed_ytd = sum(
+            tx.energy_kwh for tx in ytd_transactions
+            if tx.transaction_type == TransactionType.CONSUMPTION
+        )
+        produced_ytd = sum(
+            tx.energy_kwh for tx in ytd_transactions
+            if tx.transaction_type == TransactionType.PRODUCTION
+        )
+        shared_ytd = sum(
+            tx.energy_kwh for tx in ytd_transactions
+            if tx.transaction_type == TransactionType.SHARED
+        )
+
+        # --- Financial Metrics ---
+
+        # Estimate savings (€0.10/kWh for shared energy)
+        ENERGY_COST_PER_KWH = 0.10
+        savings_mtd = shared_mtd * ENERGY_COST_PER_KWH
+        savings_ytd = shared_ytd * ENERGY_COST_PER_KWH
+
+        # Estimate incentives (€60-120/MWh for shared energy)
+        INCENTIVE_RATE_PER_MWH = 90  # Mid-range
+        incentives_mtd = (shared_mtd / 1000) * INCENTIVE_RATE_PER_MWH
+        incentives_ytd = (shared_ytd / 1000) * INCENTIVE_RATE_PER_MWH
+
+        # Get billing statements for pending payments
+        pending_statements = db.query(BillingStatement).filter(
+            and_(
+                BillingStatement.member_id == member_id,
+                BillingStatement.status.in_(["pending", "calculated"]),
+                BillingStatement.tenant_id == tenant_id,
+                BillingStatement.deleted_at.is_(None)
+            )
+        ).all()
+
+        pending_payments = sum(s.total_amount or 0.0 for s in pending_statements)
+
+        # Get last payment
+        last_payment = db.query(BillingStatement).filter(
+            and_(
+                BillingStatement.member_id == member_id,
+                BillingStatement.status == "paid",
+                BillingStatement.tenant_id == tenant_id,
+                BillingStatement.deleted_at.is_(None)
+            )
+        ).order_by(BillingStatement.payment_date.desc()).first()
+
+        last_payment_date = last_payment.payment_date.isoformat() if last_payment else None
+        last_payment_amount = last_payment.total_amount if last_payment else 0.0
+
+        # --- Monthly History (last 12 months) ---
+
+        history = []
+        for i in range(12):
+            period_start = (now - timedelta(days=30*i)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            period_end = (period_start + timedelta(days=32)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+            month_txs = db.query(EnergyTransaction).filter(
+                and_(
+                    EnergyTransaction.member_id == member_id,
+                    EnergyTransaction.timestamp >= period_start,
+                    EnergyTransaction.timestamp < period_end,
+                    EnergyTransaction.tenant_id == tenant_id,
+                    EnergyTransaction.deleted_at.is_(None)
+                )
+            ).all()
+
+            month_consumed = sum(tx.energy_kwh for tx in month_txs if tx.transaction_type == TransactionType.CONSUMPTION)
+            month_produced = sum(tx.energy_kwh for tx in month_txs if tx.transaction_type == TransactionType.PRODUCTION)
+            month_shared = sum(tx.energy_kwh for tx in month_txs if tx.transaction_type == TransactionType.SHARED)
+
+            month_savings = month_shared * ENERGY_COST_PER_KWH
+            month_incentives = (month_shared / 1000) * INCENTIVE_RATE_PER_MWH
+
+            history.insert(0, {
+                "month": period_start.strftime("%b %Y"),
+                "consumed": round(month_consumed, 2),
+                "produced": round(month_produced, 2),
+                "shared": round(month_shared, 2),
+                "savings": round(month_savings, 2),
+                "incentives": round(month_incentives, 2)
+            })
+
+        # --- Invoices ---
+
+        invoices = db.query(Invoice).filter(
+            and_(
+                Invoice.member_id == member_id,
+                Invoice.tenant_id == tenant_id,
+                Invoice.deleted_at.is_(None)
+            )
+        ).order_by(Invoice.invoice_date.desc()).limit(10).all()
+
+        invoice_list = [
+            {
+                "id": inv.id,
+                "invoice_number": inv.invoice_number,
+                "date": inv.invoice_date.isoformat(),
+                "amount": float(inv.total_amount),
+                "status": inv.payment_status.value if hasattr(inv.payment_status, 'value') else str(inv.payment_status),
+                "pdf_url": f"/api/v1/billing/invoices/{inv.id}/pdf"
+            }
+            for inv in invoices
+        ]
+
+        # --- Environmental Impact ---
+
+        # CO2 avoided: 0.4 kg per kWh (Italian grid average)
+        CO2_PER_KWH = 0.4
+        co2_avoided_ytd = shared_ytd * CO2_PER_KWH
+        trees_equivalent = int(co2_avoided_ytd / 21)  # 1 tree absorbs ~21 kg CO2/year
+
+        # --- Community Info ---
+
+        cer_stats = CERService.get_cer_stats(db, cer_id, tenant_id)
+
+        # Calculate member ranking by shared energy
+        all_members = CERService.list_members(db, cer_id, tenant_id)
+        member_rankings = sorted(
+            [(m.id, m.energy_shared or 0.0) for m in all_members],
+            key=lambda x: x[1],
+            reverse=True
+        )
+        member_rank = next(
+            (i + 1 for i, (mid, _) in enumerate(member_rankings) if mid == member_id),
+            len(member_rankings)
+        )
+
+        # --- Assemble Response ---
+
+        return {
+            "member": {
+                "id": member.id,
+                "name": member.name,
+                "member_code": member.pod_id or f"MEM-{member.id}",
+                "member_type": member.member_type,
+                "join_date": member.activation_date.isoformat() if member.activation_date else member.created_at.isoformat(),
+                "status": member.status
+            },
+            "energy": {
+                "consumed_mtd": round(consumed_mtd, 2),
+                "produced_mtd": round(produced_mtd, 2),
+                "shared_mtd": round(shared_mtd, 2),
+                "self_consumed_mtd": round(self_consumed_mtd, 2),
+                "consumed_ytd": round(consumed_ytd, 2),
+                "produced_ytd": round(produced_ytd, 2),
+                "shared_ytd": round(shared_ytd, 2)
+            },
+            "financial": {
+                "savings_mtd": round(savings_mtd, 2),
+                "incentives_mtd": round(incentives_mtd, 2),
+                "total_benefit_mtd": round(savings_mtd + incentives_mtd, 2),
+                "savings_ytd": round(savings_ytd, 2),
+                "incentives_ytd": round(incentives_ytd, 2),
+                "total_benefit_ytd": round(savings_ytd + incentives_ytd, 2),
+                "pending_payments": round(pending_payments, 2),
+                "last_payment_date": last_payment_date,
+                "last_payment_amount": round(last_payment_amount, 2)
+            },
+            "history": history,
+            "invoices": invoice_list,
+            "environmental": {
+                "co2_avoided_ytd": round(co2_avoided_ytd, 2),
+                "trees_equivalent": trees_equivalent
+            },
+            "community": {
+                "cer_name": cer.name,
+                "total_members": cer_stats.get("total_members", 0),
+                "total_capacity_kw": cer_stats.get("total_capacity", 0.0),
+                "member_rank": member_rank
             }
         }
 
