@@ -15,6 +15,8 @@ from app.models.billing import (
     BillingStatus, PaymentStatus, TransactionType, SettlementStatus
 )
 from app.services.energy_service import energy_service
+from app.services.italian_tax_calculator import italian_tax_calculator, TransactionCategory
+from app.services.incentive_rate_manager import incentive_rate_manager, ItalianZone
 from app.schemas.billing import (
     BillingStatementCreate, BillingStatementUpdate,
     InvoiceCreate, InvoiceUpdate,
