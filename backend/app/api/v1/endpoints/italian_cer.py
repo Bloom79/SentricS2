@@ -14,7 +14,7 @@ from app.core.database import get_db
 from app.core.security import get_current_active_user, TokenData
 
 # Import Italian services
-from app.services.gse_client import gse_client, SPIDAuthLevel, ApplicationType
+from app.services.gse_client import gse_client, SPIDAuthLevel
 from app.services.terna_gaudi_client import terna_gaudi_client
 from app.services.italian_tax_calculator import (
     italian_tax_calculator,

@@ -32,21 +32,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
-    const token = localStorage.getItem('access_token');
-    const userData = localStorage.getItem('user_data');
+    // Check for existing session by validating token with backend
+    const validateSession = async () => {
+      const token = localStorage.getItem('access_token');
+      const userData = localStorage.getItem('user_data');
 
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-      } catch (error) {
-        logger.error('Failed to parse user data', error);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('user_data');
+      if (token && userData) {
+        try {
+          // Validate token with backend
+          const response = await apiClient.get('/auth/me');
+          const validatedUser = response.data;
+          localStorage.setItem('user_data', JSON.stringify(validatedUser));
+          setUser(validatedUser);
+        } catch (error) {
+          logger.error('Session validation failed', error);
+          // Clear localStorage synchronously
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user_data');
+          localStorage.removeItem('refresh_token');
+          setUser(null);
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    validateSession();
   }, []);
 
   const login = async (email: string, password: string) => {

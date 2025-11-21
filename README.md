@@ -100,85 +100,117 @@
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.12+
 - Node.js 18+
-- PostgreSQL 15+ with PostGIS extension
-- **Container Runtime**: Docker or Podman (see [Container Setup](#container-setup))
-- Redis (optional, for caching)
-
-### Container Setup
-
-The project supports both **Docker** and **Podman**. Choose your preferred runtime:
-
-#### Option 1: Podman (Recommended for rootless containers)
-```bash
-# Install Podman and Podman Compose
-# Ubuntu/Debian:
-sudo apt-get install podman podman-compose
-
-# Fedora/RHEL:
-sudo dnf install podman podman-compose
-
-# macOS:
-brew install podman podman-compose
-```
-
-#### Option 2: Docker
-```bash
-# Install Docker and Docker Compose
-# See: https://docs.docker.com/get-docker/
-```
+- PostgreSQL 15+ with PostGIS extension (running locally on port 5432)
+- Redis (running locally on port 6379)
+- Git with GitHub authentication configured
 
 ### Installation
 
 ```bash
-# Clone repository
-git clone https://github.com/Bloom79/kronos-eam.git
-cd kronos-eam
+# 1. Clone repository
+git clone https://github.com/Bloom79/SentricS2.git
+cd SentricS2
 
-# Start PostgreSQL with PostGIS
-cd backend
-
-# Option 1: Auto-detect (uses Podman if available, otherwise Docker)
-./compose.sh up -d
-
-# Option 2: Explicitly use Podman
-./compose-podman.sh up -d
-
-# Option 3: Explicitly use Docker
-./compose-docker.sh up -d
-
-# Option 4: Traditional Docker Compose (still works)
-docker-compose up -d
-
-# Setup backend
-python -m venv venv
+# 2. Create Python virtual environment (at project root)
+python3 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-alembic upgrade head
 
-# Setup frontend
+# 3. Install backend dependencies
+cd backend
+pip install -r requirements.txt
+
+# 4. Configure environment variables
+# Create .env file in backend directory
+cat > .env << EOF
+# CORS Configuration
+BACKEND_CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000","http://0.0.0.0:3000","http://localhost:5173","http://127.0.0.1:5173","http://0.0.0.0:5173"]
+
+# Database (ensure PostgreSQL with PostGIS is running)
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kronos_eam
+
+# Redis (ensure Redis is running)
+REDIS_URL=redis://localhost:6379/0
+
+# Optional: Set a persistent SECRET_KEY to prevent token invalidation on restart
+# SECRET_KEY=your-secret-key-here
+EOF
+
+# 5. Initialize database
+# Make sure PostgreSQL with PostGIS extension is running
+alembic stamp head  # Mark database as up-to-date with migrations
+
+# 6. Seed test data
+python scripts/seed_test_data.py
+
+# 7. Install frontend dependencies
 cd ../frontend
 npm install
 
-# Start development servers
-# Terminal 1 (Backend)
+# 8. Start development servers
+
+# Terminal 1 - Backend (from backend directory)
 cd backend
+source ../venv/bin/activate
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-# Terminal 2 (Frontend)
+# Terminal 2 - Frontend (from frontend directory)
 cd frontend
 npm run dev
 ```
 
-**Access**:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+### Access Points
 
-**Default Credentials**:
-- Email: `admin@kronos-eam.local`
-- Password: `Demo2024!`
+- **Frontend**: http://localhost:5173 (Vite dev server)
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs (Swagger UI)
+- **API Documentation**: http://localhost:8000/redoc (ReDoc)
+
+### Default Credentials
+
+After running the seed script, use these credentials to log in:
+
+- **Email**: `test@example.com`
+- **Password**: `test123`
+
+### Database Setup
+
+The application requires PostgreSQL 15+ with the PostGIS extension:
+
+```sql
+-- Connect to PostgreSQL
+psql -U postgres
+
+-- Create database
+CREATE DATABASE kronos_eam;
+
+-- Connect to the database
+\c kronos_eam
+
+-- Enable PostGIS extension
+CREATE EXTENSION IF NOT EXISTS postgis;
+```
+
+### Troubleshooting
+
+**401 Unauthorized Errors**: 
+- Clear browser localStorage (F12 → Application → Local Storage → Clear)
+- Refresh the page to be redirected to login
+- If SECRET_KEY is not set in .env, tokens are invalidated on backend restart
+
+**CORS Errors**:
+- Ensure `.env` file exists in `backend/` directory
+- Verify CORS origins include your frontend URL
+
+**Database Connection Errors**:
+- Ensure PostgreSQL is running: `sudo systemctl status postgresql`
+- Check database credentials in connection string
+- Verify PostGIS extension is installed: `SELECT PostGIS_Version();`
+
+**Import Errors**:
+- Ensure virtual environment is activated
+- Reinstall dependencies: `pip install -r requirements.txt`
 
 ---
 

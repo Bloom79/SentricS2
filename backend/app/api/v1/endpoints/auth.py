@@ -4,7 +4,7 @@ Consolidated from Kronos EAM
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import logging
@@ -28,6 +28,7 @@ router = APIRouter()
 @router.post("/login", response_model=Token)
 @limiter.limit(get_rate_limit("auth"))
 async def login(
+    response: Response,
     request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)

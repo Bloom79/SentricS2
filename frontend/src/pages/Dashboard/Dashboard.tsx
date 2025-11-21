@@ -265,7 +265,7 @@ const Dashboard: React.FC = () => {
   }, [workflowsData]);
 
   const complianceAlerts: ComplianceAlertItem[] = React.useMemo(() => {
-    if (!overdueComplianceData) {
+    if (!overdueComplianceData || !Array.isArray(overdueComplianceData)) {
       return [];
     }
     return overdueComplianceData
@@ -300,12 +300,12 @@ const Dashboard: React.FC = () => {
       .slice(0, 5);
   }, [documentData]);
 
-  const totalWorkflows = stats?.workflows.total ?? 0;
-  const activeWorkflows = stats?.workflows.active ?? 0;
+  const totalWorkflows = stats?.workflows?.total ?? 0;
+  const activeWorkflows = stats?.workflows?.active ?? 0;
   const workflowActiveRatio = totalWorkflows ? Math.round((activeWorkflows / totalWorkflows) * 100) : 0;
 
-  const totalAssets = stats?.assets.total ?? 0;
-  const operationalAssets = stats?.assets.operational ?? 0;
+  const totalAssets = stats?.assets?.total ?? 0;
+  const operationalAssets = stats?.assets?.operational ?? 0;
   const assetAvailability = totalAssets ? Math.round((operationalAssets / totalAssets) * 100) : 0;
 
   const overdueCount = complianceAlerts.length;
@@ -416,12 +416,12 @@ const Dashboard: React.FC = () => {
     {
       title: 'CER Communities',
       description:
-        stats?.cer.total
+        stats?.cer?.total
           ? `${stats.cer.active} active communities out of ${stats.cer.total}.`
           : 'Set up CER communities to track shared energy initiatives.',
       href: '/cer',
       icon: CheckCircle2,
-      stat: stats?.cer.total ? `${stats.cer.active}/${stats.cer.total} active` : undefined,
+      stat: stats?.cer?.total ? `${stats.cer.active}/${stats.cer.total} active` : undefined,
     },
   ];
 
@@ -439,9 +439,9 @@ const Dashboard: React.FC = () => {
             <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{stats?.plants.total ?? 0}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats?.plants?.total ?? 0}</div>
             <p className="text-[10px] sm:text-xs text-muted-foreground">
-              {stats?.plants.active ?? 0} active • {(stats?.plants.total_capacity_kw ?? 0).toFixed(1)} kW
+              {stats?.plants?.active ?? 0} active • {(stats?.plants?.total_capacity_kw ?? 0).toFixed(1)} kW
             </p>
           </CardContent>
         </Card>
@@ -452,8 +452,8 @@ const Dashboard: React.FC = () => {
             <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{stats?.cer.total ?? 0}</div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">{stats?.cer.active ?? 0} active</p>
+            <div className="text-xl sm:text-2xl font-bold">{stats?.cer?.total ?? 0}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">{stats?.cer?.active ?? 0} active</p>
           </CardContent>
         </Card>
 
@@ -463,8 +463,8 @@ const Dashboard: React.FC = () => {
             <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{stats?.assets.total ?? 0}</div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">{stats?.assets.operational ?? 0} operational</p>
+            <div className="text-xl sm:text-2xl font-bold">{stats?.assets?.total ?? 0}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">{stats?.assets?.operational ?? 0} operational</p>
           </CardContent>
         </Card>
 
@@ -474,7 +474,7 @@ const Dashboard: React.FC = () => {
             <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{stats?.compliance.overdue ?? 0}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats?.compliance?.overdue ?? 0}</div>
             <p className="text-[10px] sm:text-xs text-muted-foreground">Overdue</p>
           </CardContent>
         </Card>
