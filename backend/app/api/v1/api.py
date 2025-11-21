@@ -8,6 +8,7 @@ from app.api.v1.endpoints import (
     auth,
     plants,
     cer,
+    cer_energy,
     assets,
     workflows,
     workflow_phases,
@@ -46,6 +47,9 @@ api_router.include_router(plant_performance.router, prefix="/plants", tags=["pla
 
 # CER (Renewable Energy Communities)
 api_router.include_router(cer.router, prefix="/cer", tags=["cer"])
+
+# CER Energy Sharing (NEW - Core CER Business Logic)
+api_router.include_router(cer_energy.router, tags=["cer-energy"])
 
 # Italian CER Regulatory Services (GSE, Terna, Tax, Compliance)
 api_router.include_router(italian_cer.router, prefix="/cer/italian", tags=["italian-cer"])
