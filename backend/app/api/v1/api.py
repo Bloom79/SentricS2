@@ -19,6 +19,7 @@ from app.api.v1.endpoints import (
     search,
     maintenance,
     plant_performance,
+    italian_cer,
 )
 from app.api.v1 import sites
 from app.core.config import settings
@@ -45,6 +46,9 @@ api_router.include_router(plant_performance.router, prefix="/plants", tags=["pla
 
 # CER (Renewable Energy Communities)
 api_router.include_router(cer.router, prefix="/cer", tags=["cer"])
+
+# Italian CER Regulatory Services (GSE, Terna, Tax, Compliance)
+api_router.include_router(italian_cer.router, prefix="/cer/italian", tags=["italian-cer"])
 
 # Energy (CER Energy Sharing)
 api_router.include_router(energy.router, tags=["energy"])
